@@ -47,7 +47,7 @@ class OrderLine(BaseModel):
 
 class OrderRequest(BaseModel):
     target: str = Field(..., max_length=40)
-    items: List[OrderLine] = Field(..., min_length=1, max_length=MAX_ITEMS_PER_ORDER)
+    items: List[OrderLine]  # 1..MAX_ITEMS_PER_ORDER, checked in place_order (works with pydantic v1 and v2)
     note: Optional[str] = Field(None, max_length=120)
 
 
@@ -146,6 +146,8 @@ def create_app(store: TelemetryStore, commands: RobotCommands, broadcast_hz: flo
     # ---------------------------------------------------------------- client
     @app.post("/api/orders")
     def place_order(req: OrderRequest):
+        if not 1 <= len(req.items) <= MAX_ITEMS_PER_ORDER:
+            raise HTTPException(status_code=422, detail=f"An order needs between 1 and {MAX_ITEMS_PER_ORDER} items.")
         target = _require_target(req.target)
         if not target.lower().startswith("table"):
             raise HTTPException(status_code=400, detail="Orders can only be delivered to a table.")
@@ -154,7 +156,7 @@ def create_app(store: TelemetryStore, commands: RobotCommands, broadcast_hz: flo
             raise HTTPException(status_code=503, detail=avail["message"])
         order_ref = uuid.uuid4().hex[:10]
         label = _order_label(req.items, req.note)
-        store.register_order(order_ref, target, [i.model_dump() for i in req.items], label)
+        store.register_order(order_ref, target, [{"id": i.id, "name": i.name, "qty": i.qty} for i in req.items], label)
         commands.send_delivery(target, label, order_ref)
         return {"success": True, "order": store.get_order(order_ref), "availability": avail}
 
