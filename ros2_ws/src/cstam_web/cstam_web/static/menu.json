@@ -2,41 +2,60 @@
   "resto_arbi": {
     "title": "Dar Tunibot",
     "subtitle": "Mediterranean heritage restaurant",
+    "subtitle_fr": "Restaurant du patrimoine méditerranéen",
     "categories": [
-      {"name": "Drinks", "items": [
-        {"id": "cafe-direct", "name": "Café Direct", "emoji": "☕", "desc": "Tunisian coffee with milk"},
-        {"id": "the-menthe", "name": "Thé à la menthe", "emoji": "🍵", "desc": "Mint tea with pine nuts"},
-        {"id": "citronnade", "name": "Citronnade aux amandes", "emoji": "🥤", "desc": "Fresh lemon & almond drink"}
+      {"name": "Drinks", "name_fr": "Boissons", "items": [
+        {"id": "cafe-direct", "name": "Café Direct", "emoji": "☕", "desc": "Tunisian coffee with milk", "desc_fr": "Café tunisien au lait",
+         "aliases": ["café", "cafe", "coffee", "kahwa", "9ahwa", "direct", "café au lait"]},
+        {"id": "the-menthe", "name": "Thé à la menthe", "emoji": "🍵", "desc": "Mint tea with pine nuts", "desc_fr": "Thé à la menthe aux pignons",
+         "aliases": ["thé", "the", "tea", "mint tea", "atay", "tay", "thé menthe"]},
+        {"id": "citronnade", "name": "Citronnade aux amandes", "emoji": "🥤", "desc": "Fresh lemon & almond drink", "desc_fr": "Boisson fraîche citron et amandes",
+         "aliases": ["citronnade", "lemonade", "citron", "lemon", "jus de citron"]}
       ]},
-      {"name": "Dishes", "items": [
-        {"id": "brik", "name": "Brik à l'oeuf", "emoji": "🥟", "desc": "Crispy pastry, egg, tuna, parsley"},
-        {"id": "salade-tunisienne", "name": "Salade tunisienne", "emoji": "🥗", "desc": "Tomato, cucumber, onion, tuna"},
-        {"id": "couscous", "name": "Couscous royal", "emoji": "🥘", "desc": "Lamb, vegetables, chickpeas"},
-        {"id": "ojja", "name": "Ojja merguez", "emoji": "🍳", "desc": "Spicy tomato & egg skillet"}
+      {"name": "Dishes", "name_fr": "Plats", "items": [
+        {"id": "brik", "name": "Brik à l'oeuf", "emoji": "🥟", "desc": "Crispy pastry, egg, tuna, parsley", "desc_fr": "Feuille croustillante, œuf, thon, persil",
+         "aliases": ["brik", "brick", "breek"]},
+        {"id": "salade-tunisienne", "name": "Salade tunisienne", "emoji": "🥗", "desc": "Tomato, cucumber, onion, tuna", "desc_fr": "Tomate, concombre, oignon, thon",
+         "aliases": ["salade", "salad", "tunisian salad", "slata"]},
+        {"id": "couscous", "name": "Couscous royal", "emoji": "🥘", "desc": "Lamb, vegetables, chickpeas", "desc_fr": "Agneau, légumes, pois chiches",
+         "aliases": ["couscous", "kousksi", "kosksi", "cous cous"]},
+        {"id": "ojja", "name": "Ojja merguez", "emoji": "🍳", "desc": "Spicy tomato & egg skillet", "desc_fr": "Poêlée épicée tomate et œufs",
+         "aliases": ["ojja", "oja", "merguez", "chakchouka"]}
       ]},
-      {"name": "Desserts", "items": [
-        {"id": "bambalouni", "name": "Bambalouni", "emoji": "🍩", "desc": "Sidi Bou Said doughnut"},
-        {"id": "makroudh", "name": "Makroudh au miel", "emoji": "🍯", "desc": "Semolina & date pastry"}
+      {"name": "Desserts", "name_fr": "Desserts", "items": [
+        {"id": "bambalouni", "name": "Bambalouni", "emoji": "🍩", "desc": "Sidi Bou Said doughnut", "desc_fr": "Beignet de Sidi Bou Saïd",
+         "aliases": ["bambalouni", "bambaloni", "beignet", "doughnut", "donut"]},
+        {"id": "makroudh", "name": "Makroudh au miel", "emoji": "🍯", "desc": "Semolina & date pastry", "desc_fr": "Pâtisserie semoule et dattes",
+         "aliases": ["makroudh", "makroud", "makrouth", "ma9routh"]}
       ]}
     ]
   },
   "restaurant": {
     "title": "Restaurant Lounge",
     "subtitle": "Modern restaurant & grand promenade",
+    "subtitle_fr": "Restaurant moderne et grande promenade",
     "categories": [
-      {"name": "Drinks", "items": [
-        {"id": "espresso", "name": "Espresso", "emoji": "☕", "desc": "Double shot"},
-        {"id": "lemonade", "name": "Sparkling lemonade", "emoji": "🥤", "desc": "House-made"},
-        {"id": "water", "name": "Mineral water", "emoji": "💧", "desc": "50 cl"}
+      {"name": "Drinks", "name_fr": "Boissons", "items": [
+        {"id": "espresso", "name": "Espresso", "emoji": "☕", "desc": "Double shot", "desc_fr": "Double serré",
+         "aliases": ["espresso", "expresso", "café", "cafe", "coffee", "kahwa"]},
+        {"id": "lemonade", "name": "Sparkling lemonade", "emoji": "🥤", "desc": "House-made", "desc_fr": "Fait maison",
+         "aliases": ["lemonade", "limonade", "citronnade"]},
+        {"id": "water", "name": "Mineral water", "emoji": "💧", "desc": "50 cl", "desc_fr": "50 cl",
+         "aliases": ["water", "eau", "eau minerale", "bouteille d'eau"]}
       ]},
-      {"name": "Dishes", "items": [
-        {"id": "burger", "name": "Burger & fries", "emoji": "🍔", "desc": "Beef, cheddar, fries"},
-        {"id": "pasta", "name": "Pasta carbonara", "emoji": "🍝", "desc": "Chef's recipe"},
-        {"id": "salad", "name": "Mediterranean salad", "emoji": "🥗", "desc": "Feta, olives, tomato"}
+      {"name": "Dishes", "name_fr": "Plats", "items": [
+        {"id": "burger", "name": "Burger & fries", "emoji": "🍔", "desc": "Beef, cheddar, fries", "desc_fr": "Bœuf, cheddar, frites",
+         "aliases": ["burger", "hamburger", "frites"]},
+        {"id": "pasta", "name": "Pasta carbonara", "emoji": "🍝", "desc": "Chef's recipe", "desc_fr": "Recette du chef",
+         "aliases": ["pasta", "pates", "carbonara", "spaghetti"]},
+        {"id": "salad", "name": "Mediterranean salad", "emoji": "🥗", "desc": "Feta, olives, tomato", "desc_fr": "Feta, olives, tomate",
+         "aliases": ["salad", "salade", "salade mediterraneenne"]}
       ]},
-      {"name": "Desserts", "items": [
-        {"id": "croissant", "name": "Croissant", "emoji": "🥐", "desc": "Butter croissant & jam"},
-        {"id": "tiramisu", "name": "Tiramisu", "emoji": "🍰", "desc": "Classic"}
+      {"name": "Desserts", "name_fr": "Desserts", "items": [
+        {"id": "croissant", "name": "Croissant", "emoji": "🥐", "desc": "Butter croissant & jam", "desc_fr": "Croissant au beurre et confiture",
+         "aliases": ["croissant"]},
+        {"id": "tiramisu", "name": "Tiramisu", "emoji": "🍰", "desc": "Classic", "desc_fr": "Classique",
+         "aliases": ["tiramisu"]}
       ]}
     ]
   }

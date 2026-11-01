@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -17,9 +17,12 @@
         <div class="brand-sub" id="venue-sub">Order from your table</div>
       </div>
     </div>
-    <span class="pill" id="availability-pill"><span class="dot"></span><span id="availability-text">Connecting…</span></span>
+    <div class="top-actions">
+      <button class="btn small lang-btn" id="lang-btn" type="button" aria-label="Change language">EN</button>
+      <span class="pill" id="availability-pill"><span class="dot"></span><span id="availability-text">…</span></span>
+    </div>
   </header>
-  <div class="banner demo hidden" id="demo-banner">Demo mode: simulated robot (ROS 2 not connected)</div>
+  <div class="banner demo hidden" id="demo-banner" data-i18n="demo_banner"></div>
   <div class="banner offline hidden" id="offline-banner"></div>
 
   <main class="client">
@@ -27,18 +30,34 @@
     <section id="order-screen">
       <div class="card step">
         <div class="card-head">
-          <h2><span class="step-num">1</span> Your table</h2>
-          <button class="btn small hidden" id="change-table-btn" type="button">Change</button>
+          <h2><span class="step-num">1</span> <span data-i18n="your_table"></span></h2>
+          <button class="btn small hidden" id="change-table-btn" type="button" data-i18n="change"></button>
         </div>
         <div id="table-selected" class="table-selected hidden"></div>
-        <div id="table-grid" class="table-grid" role="radiogroup" aria-label="Choose your table"></div>
+        <div id="table-grid" class="table-grid" role="radiogroup" data-i18n-aria="choose_table"></div>
       </div>
 
       <div class="card step">
-        <div class="card-head"><h2><span class="step-num">2</span> Choose your order</h2></div>
+        <div class="card-head">
+          <h2><span class="step-num">2</span> <span data-i18n="choose_order"></span></h2>
+          <button class="btn small voice-btn" id="voice-btn" type="button" aria-controls="voice-panel" aria-expanded="false">🎤 <span data-i18n="voice_btn"></span></button>
+        </div>
+        <div class="voice-panel hidden" id="voice-panel" aria-live="polite">
+          <div class="voice-status">
+            <span class="mic-dot" id="mic-dot" aria-hidden="true"></span>
+            <span id="voice-status"></span>
+          </div>
+          <div class="voice-heard hidden" id="voice-heard"></div>
+          <form class="voice-form" id="voice-form">
+            <input id="voice-input" class="note-input" type="text" maxlength="300" autocomplete="off" data-i18n-ph="voice_ph">
+            <button class="btn primary" type="submit" data-i18n="voice_go"></button>
+          </form>
+          <div class="voice-result hidden" id="voice-result"></div>
+          <div class="muted small voice-tip" data-i18n="voice_tip"></div>
+        </div>
         <div id="menu"></div>
-        <label class="note-label" for="note-input">Note for the kitchen (optional)</label>
-        <input id="note-input" class="note-input" type="text" maxlength="120" placeholder="e.g. no onions, extra sugar">
+        <label class="note-label" for="note-input" data-i18n="note_label"></label>
+        <input id="note-input" class="note-input" type="text" maxlength="120" data-i18n-ph="note_ph">
       </div>
       <div class="spacer"></div>
     </section>
@@ -47,18 +66,19 @@
     <section id="track-screen" class="hidden" aria-live="polite">
       <div class="card track-card">
         <div class="track-emoji" id="track-emoji">🧾</div>
-        <h1 class="track-title" id="track-title">Order received</h1>
-        <p class="track-sub muted" id="track-sub">Sending your order to the robot…</p>
+        <h1 class="track-title" id="track-title"></h1>
+        <p class="track-sub muted" id="track-sub"></p>
+        <div class="eta hidden" id="eta"></div>
         <ol class="stepper" id="stepper">
-          <li data-step="received"><span class="bullet"></span>Order received</li>
-          <li data-step="queued"><span class="bullet"></span>Waiting for the robot</li>
-          <li data-step="en_route"><span class="bullet"></span>On the way</li>
-          <li data-step="arrived"><span class="bullet"></span>At your table</li>
+          <li data-step="received"><span class="bullet"></span><span data-i18n="step_received"></span></li>
+          <li data-step="queued"><span class="bullet"></span><span data-i18n="step_queued"></span></li>
+          <li data-step="en_route"><span class="bullet"></span><span data-i18n="step_en_route"></span></li>
+          <li data-step="arrived"><span class="bullet"></span><span data-i18n="step_arrived"></span></li>
         </ol>
         <div class="track-items" id="track-items"></div>
         <div class="track-actions">
-          <button class="btn danger block hidden" id="cancel-btn" type="button">Cancel order</button>
-          <button class="btn primary block big hidden" id="new-order-btn" type="button">New order</button>
+          <button class="btn danger block hidden" id="cancel-btn" type="button" data-i18n="cancel_order"></button>
+          <button class="btn primary block big hidden" id="new-order-btn" type="button" data-i18n="new_order"></button>
         </div>
       </div>
     </section>
@@ -67,13 +87,14 @@
   <!-- Sticky checkout bar -->
   <div class="checkout" id="checkout">
     <div class="checkout-info">
-      <div id="checkout-count">No items yet</div>
-      <div class="muted small" id="checkout-hint">Choose a table and at least one item</div>
+      <div id="checkout-count"></div>
+      <div class="muted small" id="checkout-hint"></div>
     </div>
-    <button class="btn primary big" id="order-btn" type="button" disabled>Order</button>
+    <button class="btn primary big" id="order-btn" type="button" disabled></button>
   </div>
 
   <script src="/static/common.js"></script>
+  <script src="/static/i18n.js"></script>
   <script src="/static/client.js"></script>
 </body>
 </html>

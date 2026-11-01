@@ -163,7 +163,9 @@ def api():
 
 def test_pages_served(api):
     client, _, _ = api
-    assert "Your table" in client.get("/").text
+    page = client.get("/").text
+    assert 'id="table-grid"' in page and 'id="voice-btn"' in page
+    assert client.get("/static/i18n.js").status_code == 200
     assert "Delivery queue" in client.get("/admin").text
     assert client.get("/static/client.js").status_code == 200
 

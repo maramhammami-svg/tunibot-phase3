@@ -24,6 +24,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .store import TelemetryStore
+from .voice import parse_order
 from .world import STATIC_DIR, WORLD_TITLES, load_layout, load_menu, normalize_world
 
 OBSTACLE_MODES = {"patrol", "cross", "block", "clear"}
@@ -57,6 +58,11 @@ class BatteryRequest(BaseModel):
 
 class ObstacleRequest(BaseModel):
     mode: str
+
+
+class VoiceRequest(BaseModel):
+    text: str = Field(..., max_length=300)
+    lang: str = Field("fr", max_length=10)
 
 
 class DispatchRequest(BaseModel):
@@ -159,6 +165,16 @@ def create_app(store: TelemetryStore, commands: RobotCommands, broadcast_hz: flo
         store.register_order(order_ref, target, [{"id": i.id, "name": i.name, "qty": i.qty} for i in req.items], label)
         commands.send_delivery(target, label, order_ref)
         return {"success": True, "order": store.get_order(order_ref), "availability": avail}
+
+    @app.post("/api/voice/parse")
+    def voice_parse(req: VoiceRequest):
+        """Voice ordering: the browser sends the speech transcript, we return table + cart."""
+        tables = [n for n in store.waypoints if n.lower().startswith("table")]
+        result = parse_order(req.text, load_menu(store.world), tables, req.lang)
+        if result["items"]:
+            label = ", ".join(f"{i['qty']}x {i['name']}" for i in result["items"])
+            store.add_event("info", f"Voice order understood: {label}" + (f" for {result['table']}" if result["table"] else ""))
+        return result
 
     @app.get("/api/orders/{order_ref}")
     def get_order(order_ref: str):
