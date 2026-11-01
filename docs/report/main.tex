@@ -110,7 +110,8 @@ tuned for narrow doorways with a multi-stage recovery, and a physical
 \textbf{Phase~3} adds the user layer: a web Client page where guests pick
 their table on the floor plan and order by tapping or by voice (French,
 English and Tunisian Darija), and an Admin control room where staff watch
-the robot, its battery and its queue live. The web layer is a separate
+the robot, its battery and its queue live. Voice command integration for
+placing orders is our bonus functionality. The web layer is a separate
 ROS~2 package that only uses existing topics.
 
 The system is covered by 65 automated tests (9 Phase~1 unit tests,
@@ -503,19 +504,7 @@ shown as not accepted. Each order is tracked on its own, so a guest can
 follow several at once, and they are kept in the browser so tracking
 resumes after a reload.
 
-\paragraph{Voice ordering (bonus).} A guest taps the microphone and says
-the order in one sentence, for example \emph{``deux thés à la menthe et un
-brik pour la table 4''} or, in Darija, \emph{``zouz kahwa w brik, tawla
-tletha''}. The browser turns speech into text (Web Speech API) in the
-chosen language (French, English or Darija, \texttt{ar-TN}) and sends up to
-five guesses to \texttt{POST /api/voice/parse}. The parser matches each
-guess against the world's menu and tables and keeps the best fit. It
-understands quantities in the three languages, table phrases, dish
-aliases and common speech-to-text misspellings; Darija returned in Arabic
-script is mapped or transliterated first. It uses accent folding, plural
-removal, a phonetic key and fuzzy matching, and reports an unknown dish
-instead of guessing. The cart is filled and read back aloud; nothing is
-sent to the robot until the guest confirms.
+\paragraph{Voice ordering.} The client page can also take a spoken order; this bonus feature is described in Section~\ref{sec:bonus}.
 
 \subsection{ROS 2 interface}
 
@@ -608,7 +597,7 @@ order, when will it arrive.
   \includegraphics[width=\linewidth]{figures/client_orders.png}
   \caption{Several orders tracked at once.}
 \end{subfigure}
-\caption{Client page on a phone.}
+\caption{Client page on a phone.}\label{fig:client}
 \end{figure}
 
 \begin{figure}[H]
@@ -672,6 +661,130 @@ Demo mode & -- & Battery 100\,\%, 24\,\% or 14\,\%; pedestrian patrol, cross, bl
 \end{table}
 
 % =====================================================================
+\section{Bonus Functionalities}
+\label{sec:bonus}
+
+The bonus functionality we implemented is \textbf{voice command integration
+for placing orders}. A guest can order by speaking, in French, English or
+Tunisian Darija, instead of tapping through the menu. We also added several
+extras beyond the required interface; they are listed in
+Section~\ref{sec:extras}.
+
+\subsection{Voice command integration for placing orders}
+
+\paragraph{What the guest does.} On the Client page the guest taps the
+microphone button, picks the spoken language (Français, English or Darija)
+and says the whole order in one sentence, for example:
+\begin{itemize}
+  \item French: \emph{``deux thés à la menthe et un brik pour la table 4''}
+  \item English: \emph{``two coffees and a couscous, table seven''}
+  \item Darija: \emph{``zouz kahwa w brik, tawla tletha''} (two coffees and a brik, table three), also understood when the browser returns it in Arabic script.
+\end{itemize}
+The cart and the table fill in, the menu book opens on the page of the
+first dish, and the page reads the order back aloud. The guest then
+confirms with the Order button: nothing is sent to the robot before that
+tap, so a misheard word can never send the robot to the wrong table.
+
+\begin{figure}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  box/.style={draw=manganese,rounded corners=3pt,align=center,font=\small,
+              minimum height=1.35cm,text width=2.9cm,inner sep=3pt},
+  arr/.style={-{Stealth[length=2mm]},thick,manganese}
+]
+\node[box,fill=ochre!25] (mic) at (0,0) {Guest speaks\\(mic button)};
+\node[box,fill=ochre!25] (asr) at (3.5,0) {Web Speech API\\(fr-FR, en-US, ar-TN)\\up to 5 guesses};
+\node[box,fill=copper!12] (api) at (7.0,0) {HTTP request\\\texttt{POST /api/}\\\texttt{voice/parse}};
+\node[box,fill=copper!12] (par) at (10.5,0) {\texttt{voice.py}\\best guess vs.\ menu and tables};
+\node[box,fill=ochre!25] (cart) at (14.0,0) {Cart + table filled, read back aloud};
+\node[box,fill=slip,text width=4.2cm] (ok) at (14.0,-2.2) {Guest taps Order\\$\rightarrow$ \texttt{/delivery\_request} $\rightarrow$ robot};
+\draw[arr] (mic) -- (asr);
+\draw[arr] (asr) -- (api);
+\draw[arr] (api) -- (par);
+\draw[arr] (par) -- (cart);
+\draw[arr] (cart) -- (ok);
+\end{tikzpicture}}
+\caption{Voice ordering pipeline: the browser does speech-to-text, our parser turns the text into an order, the guest confirms.}
+\end{figure}
+
+\paragraph{How it works.}
+\begin{enumerate}
+  \item \textbf{Speech to text, in the browser.} Chrome or Edge turns the speech into text with the Web Speech API, in the language chosen in the voice panel (\texttt{fr-FR}, \texttt{en-US} or \texttt{ar-TN} for Darija). Listening continues through short pauses and stops after 2.5\,s of silence. The browser is asked for up to five alternative transcripts.
+  \item \textbf{Parsing, on our server.} All alternatives go to \texttt{POST /api/voice/parse}. The parser \texttt{voice.py} (plain Python, no ROS, works offline) reads each one against the menu and the tables of the world that is running, and keeps the alternative that fits best: most dishes recognised, a table found, fewest unknown words.
+  \item \textbf{Confirmation.} The page fills the cart and the table, shows what it understood (and any word it could not place), and speaks the order back with speech synthesis. The guest confirms or corrects it by hand.
+\end{enumerate}
+
+\paragraph{What the parser understands.}
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\linewidth}{l L}
+\toprule
+\textbf{Element} & \textbf{Examples} \\
+\midrule
+Quantities & French \emph{un, deux, trois}\ldots; English \emph{one, two, three}\ldots; Darija \emph{wahed, zouz, tletha, arba}\ldots; digits, including Arabic-Indic digits \\
+Tables & \emph{table 4}, \emph{table numéro 10}, \emph{table seven}, \emph{tawla tletha}, Arabic \emph{taawila} with a number \\
+Dish names and aliases & \emph{thé à la menthe / atay / tay}, \emph{café / kahwa}, \emph{couscous / kousksi} \\
+Speech-to-text mistakes & \emph{brique} $\rightarrow$ brik, \emph{bamba louni} $\rightarrow$ bambalouni, \emph{makrout} $\rightarrow$ makroudh \\
+Darija in Arabic script & known words mapped directly (numbers, \emph{table}, dish names, ``and''), the rest transliterated to Latin letters before matching \\
+Filler words & \emph{je voudrais}, \emph{s'il vous plaît}, \emph{please}, \emph{n7eb}, \emph{aatini} are ignored \\
+\bottomrule
+\end{tabularx}
+\caption{Language coverage of the voice parser.}
+\end{table}
+
+Matching combines accent folding, plural removal, a phonetic key and fuzzy
+string matching. A dish that is not on the menu is reported to the guest,
+never replaced by a guess, and a table that does not exist in the current
+world is rejected. Quantities are capped at nine per dish, like on the
+touch menu.
+
+\paragraph{Design decision from testing.} The first version used the page
+language for recognition. On an English page, French speech came back as
+nonsense (``\ldots uventies and a birthday before''). The voice panel
+therefore has its own language choice, and French is the default because
+it is what most guests in Tunisia speak to a machine.
+
+\paragraph{Testing.} 28 automated tests cover the parser: French, English
+and Darija sentences in Latin and Arabic script, sound-alike spellings,
+unknown dishes, tables that do not exist, the quantity cap and the choice
+of the best alternative. Two browser end-to-end tests (Playwright) check
+the full flow: a voice order is parsed, confirmed, sent to the simulated
+robot and reaches ``Delivered'', and the microphone flow keeps the best of
+several alternatives. Figure~\ref{fig:client}\,(c) shows a Darija order on
+a phone.
+
+\paragraph{Limits.} Speech recognition depends on the browser (Chrome or
+Edge) and on its online service, and browsers only allow the microphone on
+\texttt{localhost} or HTTPS. An on-device model is listed in the future
+improvements.
+
+\subsection{Additional features beyond the requirements}
+\label{sec:extras}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\linewidth}{l L}
+\toprule
+\textbf{Feature} & \textbf{What it adds} \\
+\midrule
+Several orders at once & A guest can place a new order while earlier ones are still on their way and follow each one separately; orders survive a page reload \\
+Table picked on the floor plan & The guest taps their table on the real restaurant plan, and can watch the robot drive to it \\
+Arrival estimate & Remaining Nav2 path length turned into a time estimate while the robot drives \\
+Bilingual interface & Client and Admin pages in French and English, with translated dish descriptions \\
+Illustrated menu book & Menu with page turns and a drawing for every dish, following the world that is running (Tunisian menu for Dar Tunibot) \\
+Battery monitoring panel & Live percentage, voltage, current, power, temperature, runtime and a 5-minute history with the 25\,\% and 15\,\% thresholds \\
+Live control room & Robot, Nav2 path, pedestrian and pending orders per table on one map; tap a table to send the robot \\
+Demo mode & Buttons to set the battery to low or critical and to change the pedestrian's behaviour, to show the robot's reactions live \\
+Mock robot & The whole interface runs without ROS or Gazebo (\texttt{-{}-mock}), reusing the real queue and battery classes, for demos and tests \\
+\bottomrule
+\end{tabularx}
+\caption{Additional features.}
+\end{table}
+
+% =====================================================================
 \section{Technologies, Frameworks and Tools}
 
 \begin{table}[H]
@@ -689,7 +802,7 @@ Robot logic & Python 3.12 (rclpy) & Task manager, docking, battery, pedestrian c
 Operator tool & Tkinter & Mission Control simulator (GUI and CLI) \\
 Web server & FastAPI, Uvicorn, Pydantic & REST API, WebSocket, request validation \\
 Front end & HTML5, CSS3, JavaScript & Client and Admin pages (no framework), canvas map, SVG illustrations \\
-Speech & Web Speech API & Speech recognition and read-back in the browser \\
+Speech (bonus) & Web Speech API & Speech recognition and read-back in the browser \\
 Testing & pytest, unittest, Playwright & Unit, integration and browser end-to-end tests \\
 Tools & Git, GitHub, VS Code & Version control, pull requests, development on Ubuntu 24.04 \\
 \bottomrule
