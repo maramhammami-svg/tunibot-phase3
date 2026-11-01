@@ -36,6 +36,13 @@ const Icons = (() => {
     plug: '<path d="M9 3.5v4M15 3.5v4"/><path d="M6.5 7.5h11v3a5.5 5.5 0 0 1-11 0z"/><path d="M12 16v4.5"/>',
     undock: '<path d="M4 4v16"/><path d="M9 12h11"/><path d="M16 8l4 4-4 4"/>',
     pot: '<path d="M4 10h16v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M2.5 10h19"/><path d="M9 6.5c-.6.8.6 1.5 0 2.3M12.5 5.5c-.6.8.6 1.5 0 2.3M16 6.5c-.6.8.6 1.5 0 2.3"/>',
+    pin: '<path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
+    person: '<circle cx="12" cy="5" r="2"/><path d="M12 7.5v6.5M12 14l-3 6.5M12 14l3 6.5M8 10.5l4-2 4 2"/>',
+    bolt: '<path d="M13 3L5.5 13.5H12L10.5 21 18.5 10H12z"/>',
+    wave: '<path d="M3 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0"/>',
+    thermo: '<path d="M10 14.5V5a2 2 0 0 1 4 0v9.5a4 4 0 1 1-4 0z"/><path d="M12 9v7"/>',
+    list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+    flask: '<path d="M9.5 3.5h5M10.5 3.5v6L5 19a1.5 1.5 0 0 0 1.3 2h11.4a1.5 1.5 0 0 0 1.3-2l-5.5-9.5v-6"/><path d="M7.5 15h9"/>',
     note: '<path d="M5 4h10l4 4v12H5z"/><path d="M15 4v4h4M8 12h8M8 15.5h5"/>',
   };
   function svg(name, cls = 'ico') {

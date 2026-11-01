@@ -120,7 +120,7 @@ def test_language_switch_and_admin(server, browser):
     page.wait_for_function("document.querySelector('#conn-text').textContent === 'Live'")
     page.wait_for_function("document.querySelector('#events').innerText.includes('Voice order understood')", timeout=5000)
     page.click("#lang-btn")
-    assert page.text_content("[data-i18n=a_queue]") == "File de livraisons"
+    assert page.text_content("[data-i18n=a_queue]") == "Commandes en cours"
     assert "Commande vocale comprise" in page.inner_text("#events")
     page.close()
 

@@ -71,68 +71,63 @@
 
     <!-- Side panel with tabs -->
     <aside class="side">
-      <nav class="side-tabs" role="tablist">
-        <button type="button" role="tab" class="side-tab" data-tab="orders"><span data-i18n="a_tab_orders"></span><span class="tab-count" id="queue-count">0</span></button>
-        <button type="button" role="tab" class="side-tab" data-tab="robot"><span data-i18n="a_robot"></span></button>
-        <button type="button" role="tab" class="side-tab" data-tab="battery"><span data-i18n="a_battery"></span><i class="tab-dot" id="battery-tab-dot"></i></button>
-        <button type="button" role="tab" class="side-tab" data-tab="events"><span data-i18n="a_tab_events"></span></button>
-        <button type="button" role="tab" class="side-tab" data-tab="tests"><span data-i18n="a_tab_tests"></span></button>
-      </nav>
 
-      <section class="side-panel" data-panel="orders" role="tabpanel">
-        <h2 class="side-h" data-i18n="a_queue"></h2>
+      <section class="side-panel" data-panel="orders">
+        <header class="sec-head"><span class="sec-ico" data-icon="receipt"></span><h2 class="side-h" data-i18n="a_queue"></h2><span class="tab-count" id="queue-count">0</span></header>
+        <p class="sec-hint" data-i18n="a_queue_hint"></p>
         <ul class="queue tickets" id="queue"></ul>
         <div class="lock-note hidden" id="lock-note" data-i18n="a_lock_note"></div>
       </section>
 
-      <section class="side-panel" data-panel="robot" role="tabpanel">
-        <h2 class="side-h" data-i18n="a_robot"></h2>
-        <dl class="metrics">
-          <div class="wide"><dt data-i18n="a_current_task"></dt><dd id="r-task">—</dd></div>
-          <div><dt data-i18n="a_position"></dt><dd id="r-pos">—</dd></div>
-          <div><dt data-i18n="a_delivered"></dt><dd id="r-done">0</dd></div>
-          <div class="wide"><dt data-i18n="a_pedestrian"></dt><dd id="r-obstacle">—</dd></div>
-        </dl>
+      <section class="side-panel" data-panel="robot">
+        <header class="sec-head"><span class="sec-ico" data-icon="robot"></span><h2 class="side-h" data-i18n="a_robot"></h2></header>
+        <ul class="facts">
+          <li class="wide"><span class="f-ico" data-icon="tray"></span><span class="f-label" data-i18n="a_current_task"></span><strong id="r-task">—</strong></li>
+          <li><span class="f-ico" data-icon="pin"></span><span class="f-label" data-i18n="a_position"></span><strong id="r-pos">—</strong></li>
+          <li><span class="f-ico" data-icon="check"></span><span class="f-label" data-i18n="a_delivered"></span><strong id="r-done">0</strong></li>
+          <li class="wide"><span class="f-ico" data-icon="person"></span><span class="f-label" data-i18n="a_pedestrian"></span><strong id="r-obstacle">—</strong></li>
+        </ul>
         <h3 class="sub-h" data-i18n="a_health"></h3>
         <ul class="health" id="health"></ul>
       </section>
 
-      <section class="side-panel" data-panel="battery" role="tabpanel">
-        <div class="side-head"><h2 class="side-h" data-i18n="a_battery"></h2><span class="chip" id="battery-status-chip">—</span></div>
+      <section class="side-panel" data-panel="battery">
+        <header class="sec-head"><span class="sec-ico" data-icon="battery"></span><h2 class="side-h" data-i18n="a_battery"></h2><span class="chip" id="battery-status-chip">—</span></header>
         <div class="battery-big">
+          <div class="battery-pct" id="battery-pct">—</div>
           <div class="gauge" role="meter" data-i18n-aria="a_battery_level" aria-valuemin="0" aria-valuemax="100" id="battery-meter">
             <div class="gauge-fill" id="gauge-fill"></div>
             <div class="gauge-mark low"></div>
             <div class="gauge-mark critical"></div>
           </div>
-          <div class="battery-pct" id="battery-pct">—</div>
         </div>
         <canvas id="battery-chart" class="spark" height="90" data-i18n-aria="a_spark_caption"></canvas>
         <div class="spark-caption muted" data-i18n="a_spark_caption"></div>
-        <dl class="metrics">
-          <div><dt data-i18n="a_voltage"></dt><dd id="m-voltage">—</dd></div>
-          <div><dt data-i18n="a_current"></dt><dd id="m-current">—</dd></div>
-          <div><dt data-i18n="a_power"></dt><dd id="m-power">—</dd></div>
-          <div><dt data-i18n="a_temperature"></dt><dd id="m-temp">—</dd></div>
-          <div class="wide"><dt data-i18n="a_runtime"></dt><dd id="m-runtime">—</dd></div>
-        </dl>
+        <ul class="tiles">
+          <li><span class="f-ico" data-icon="bolt"></span><span class="f-label" data-i18n="a_voltage"></span><strong id="m-voltage">—</strong></li>
+          <li><span class="f-ico" data-icon="wave"></span><span class="f-label" data-i18n="a_current"></span><strong id="m-current">—</strong></li>
+          <li><span class="f-ico" data-icon="plug"></span><span class="f-label" data-i18n="a_power"></span><strong id="m-power">—</strong></li>
+          <li><span class="f-ico" data-icon="thermo"></span><span class="f-label" data-i18n="a_temperature"></span><strong id="m-temp">—</strong></li>
+          <li class="wide"><span class="f-ico" data-icon="hourglass"></span><span class="f-label" data-i18n="a_runtime"></span><strong id="m-runtime">—</strong></li>
+        </ul>
       </section>
 
-      <section class="side-panel" data-panel="events" role="tabpanel">
-        <h2 class="side-h" data-i18n="a_events"></h2>
+      <section class="side-panel" data-panel="events">
+        <header class="sec-head"><span class="sec-ico" data-icon="list"></span><h2 class="side-h" data-i18n="a_events"></h2></header>
         <ul class="events" id="events" aria-live="polite"></ul>
       </section>
 
-      <section class="side-panel" data-panel="tests" role="tabpanel">
-        <div class="side-head"><h2 class="side-h" data-i18n="a_tests"></h2><span class="muted small" data-i18n="a_for_demo"></span></div>
+      <section class="side-panel" data-panel="tests">
+        <header class="sec-head"><span class="sec-ico" data-icon="flask"></span><h2 class="side-h" data-i18n="a_tests"></h2></header>
+        <p class="sec-hint" data-i18n="a_tests_hint"></p>
         <h3 class="sub-h" data-i18n="a_battery_level"></h3>
-        <div class="btn-row">
-          <button class="btn small" data-battery="100" type="button">100%</button>
-          <button class="btn small warn" data-battery="24" type="button">24% <span data-i18n="a_low"></span></button>
-          <button class="btn small danger" data-battery="14" type="button">14% <span data-i18n="a_critical"></span></button>
+        <div class="seg">
+          <button class="btn small" data-battery="100" type="button">100 %</button>
+          <button class="btn small warn" data-battery="24" type="button">24 % <span data-i18n="a_low"></span></button>
+          <button class="btn small danger" data-battery="14" type="button">14 % <span data-i18n="a_critical"></span></button>
         </div>
         <h3 class="sub-h" data-i18n="a_ped_obstacle"></h3>
-        <div class="btn-row">
+        <div class="seg">
           <button class="btn small" data-obstacle="patrol" type="button" data-i18n="a_patrol"></button>
           <button class="btn small" data-obstacle="cross" type="button" data-i18n="a_cross"></button>
           <button class="btn small" data-obstacle="block" type="button" data-i18n="a_block"></button>

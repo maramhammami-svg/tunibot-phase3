@@ -27,20 +27,6 @@
   }
   window.addEventListener('resize', setChrome);
 
-  // Side panel tabs (remembered)
-  let tab = 'orders';
-  try { tab = localStorage.getItem('tunibot_admin_tab') || 'orders'; } catch (e) { /* private mode */ }
-  function showTab(name) {
-    tab = name;
-    document.querySelectorAll('.side-tab').forEach(b => {
-      const on = b.dataset.tab === name;
-      b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on));
-    });
-    document.querySelectorAll('.side-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
-    try { localStorage.setItem('tunibot_admin_tab', name); } catch (e) { /* ignore */ }
-    if (name === 'battery' && lastSnap) drawSpark(lastSnap.battery_history || []);
-  }
-  document.querySelectorAll('.side-tab').forEach(b => { b.onclick = () => showTab(b.dataset.tab); });
   window.__floorMap = map;  // used by the browser tests
   let config = null;
   let world = null;
@@ -112,7 +98,7 @@
       fill.style.width = `${pct}%`;
       fill.style.background = b.is_critical ? 'var(--red)' : (b.is_low ? 'var(--amber)' : 'var(--green)');
       $('battery-meter').setAttribute('aria-valuenow', String(pct));
-      $('battery-pct').textContent = `${pct.toFixed(1)}%`;
+      $('battery-pct').textContent = `${pct.toFixed(0)} %`;
       $('battery-pill-text').textContent = `${pct.toFixed(0)}%`;
       $('battery-pill').dataset.level = b.is_critical ? 'critical' : (b.is_low ? 'low' : 'ok');
       $('battery-pill').classList.toggle('charging', !!b.is_docked);
@@ -129,7 +115,6 @@
       const [txt, cls] = statusMap[b.status] || [b.status || '—', ''];
       chip.textContent = txt;
       chip.className = `chip ${cls}`;
-      $('battery-tab-dot').className = `tab-dot ${b.is_critical ? 'bad' : (b.is_low ? 'warn' : '')}`;
     }
     drawSpark(s.battery_history || []);
 
@@ -158,7 +143,7 @@
       [hn[0], s.online.battery], [hn[1], s.online.task_manager],
       [hn[2], s.online.localization], [hn[3], s.online.obstacle],
     ];
-    $('health').innerHTML = health.map(([n, ok]) => `<li><span class="dot ${ok ? 'on' : 'off'}"></span>${n}</li>`).join('');
+    setHtml('health', health.map(([n, ok]) => `<li class="${ok ? 'on' : 'off'}"><span class="h-ico">${Icons.svg(ok ? 'check' : 'cross')}</span><span>${n}</span><em>${ok ? t('a_up') : t('a_down')}</em></li>`).join(''));
 
     // Queue
     const items = [];
@@ -241,7 +226,6 @@
   });
 
   // ---------------------------------------------------------------- start
-  showTab(tab);
   setChrome();
   renderStatic();
   loadWorld().catch(e => Tuni.toast(e.message, 'error'));
