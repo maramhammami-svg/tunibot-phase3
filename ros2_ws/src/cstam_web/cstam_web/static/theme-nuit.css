@@ -89,29 +89,6 @@ body.theme-nuit .toast { border-radius: 999px; background: #0f1a2e; }
    the middle, order tickets hanging on the right like a kitchen pass.
    ================================================================== */
 body.theme-nuit .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-body.theme-nuit .pass {
-  display: grid; gap: 16px; padding: 16px; max-width: 1720px; margin: 0 auto;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) 340px;
-  grid-template-areas:
-    "mission mission mission mission"
-    "map map map rail"
-    "bat robot events tests";
-}
-body.theme-nuit .mission { grid-area: mission; }
-body.theme-nuit .map-panel { grid-area: map; }
-body.theme-nuit .rail { grid-area: rail; }
-body.theme-nuit .bat { grid-area: bat; }
-body.theme-nuit .robot { grid-area: robot; }
-body.theme-nuit .events-panel { grid-area: events; }
-body.theme-nuit .tests { grid-area: tests; }
-@media (max-width: 1200px) {
-  body.theme-nuit .pass { grid-template-columns: 1fr 1fr; grid-template-areas: "mission mission" "map map" "rail events" "bat robot" "tests tests"; }
-}
-@media (max-width: 720px) {
-  body.theme-nuit .pass { grid-template-columns: 1fr; grid-template-areas: "mission" "map" "rail" "events" "bat" "robot" "tests"; padding: 10px; gap: 12px; }
-  body.theme-nuit .top-pills .btn[href] { display: none; }
-}
-
 body.theme-nuit .panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; min-width: 0; }
 body.theme-nuit .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 body.theme-nuit .panel h2 { font-family: var(--display); font-weight: 800; font-size: 21px; letter-spacing: -.4px; }
@@ -162,17 +139,6 @@ body.theme-nuit .m-count strong { font-family: var(--display); font-weight: 800;
   body.theme-nuit .m-sub { white-space: normal; }
 }
 
-/* The room */
-body.theme-nuit .map-panel .map-wrap { border-radius: 14px; overflow: hidden; background: #1d1411; }
-body.theme-nuit .map-legend .lg-tip { display: none; }
-body.theme-nuit .map-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin-top: 14px; }
-body.theme-nuit .tool-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-body.theme-nuit .tool-row .btn { padding: 9px 14px; font-size: 14px; }
-body.theme-nuit .dispatch { display: inline-flex; gap: 6px; align-items: center; padding-left: 8px; border-left: 1px solid var(--border-2); }
-body.theme-nuit .dispatch select { padding: 9px 12px; border-radius: 999px; background: var(--bg-2); color: var(--text); border: 1px solid var(--border-2); font: inherit; font-size: 14px; }
-body.theme-nuit .btn.primary { background: var(--saffron); border-color: var(--saffron); color: #1d1411; }
-body.theme-nuit .btn.primary:hover:not(:disabled) { background: var(--gold-2); }
-
 /* Order tickets */
 body.theme-nuit .rail { display: flex; flex-direction: column; }
 body.theme-nuit .rail .count { font-family: var(--display); font-weight: 800; font-size: 22px; color: var(--saffron); }
@@ -182,8 +148,9 @@ body.theme-nuit .ticket {
   background: #f7efe0; box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
   -webkit-mask: radial-gradient(circle 5px at 50% 0, transparent 98%, #000) 0 0 / 14px 100% repeat-x;
           mask: radial-gradient(circle 5px at 50% 0, transparent 98%, #000) 0 0 / 14px 100% repeat-x;
-  animation: t-in .35s ease-out both; transform-origin: top center;
+  transform-origin: top center;
 }
+body.theme-nuit .ticket.new { animation: t-in .35s ease-out both; }
 body.theme-nuit .ticket:nth-child(even) { rotate: .6deg; }
 body.theme-nuit .ticket:nth-child(odd) { rotate: -.5deg; }
 @keyframes t-in { from { opacity: 0; transform: translateY(-12px); } }
@@ -229,3 +196,119 @@ body.theme-nuit .events .empty::before { display: none; }
 
 body.theme-nuit .brand-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 520px) { body.theme-nuit .brand-title { font-size: 17px; } body.theme-nuit .brand-sub { display: none; } }
+
+/* ==================================================================
+   Command centre: the room fills the screen, the mission card and the
+   tool dock float on it, details live in a tabbed side panel.
+   ================================================================== */
+body.theme-nuit { overflow: hidden; }
+body.theme-nuit .cc { display: grid; grid-template-columns: minmax(0, 1fr) 400px; height: calc(100vh - var(--chrome, 62px)); }
+body.theme-nuit .stage { position: relative; min-height: 0; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 40%, #241915 0%, #171010 70%); }
+body.theme-nuit .stage .map-wrap { position: absolute; inset: 0; }
+body.theme-nuit .stage #map { display: block; border-radius: 0; }
+
+/* Mission card floats top-left; clicks go through to the map */
+body.theme-nuit .mission {
+  position: absolute; top: 16px; left: 16px; right: auto; z-index: 3; pointer-events: none;
+  grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 20px; padding: 14px 20px; max-width: min(760px, calc(100% - 32px));
+  background: rgba(36, 26, 22, .88); backdrop-filter: blur(8px); border: 1px solid var(--border-2); border-radius: 22px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .35);
+}
+body.theme-nuit .mission .m-avatar { width: 64px; height: 64px; }
+body.theme-nuit .mission .m-avatar .ico { width: 34px; height: 34px; }
+body.theme-nuit .mission .m-title { font-size: clamp(24px, 2.6vw, 36px); }
+body.theme-nuit .mission .m-sub { margin: 6px 0 8px; font-size: 15px; }
+body.theme-nuit .mission .m-ring { width: 84px; height: 84px; }
+body.theme-nuit .mission .ring-label strong { font-size: 20px; }
+body.theme-nuit .mission .m-count { padding-left: 20px; }
+body.theme-nuit .mission .m-count strong { font-size: 38px; }
+
+/* Legend bottom-left, tool dock bottom-centre */
+body.theme-nuit .legend {
+  position: absolute; left: 16px; bottom: 18px; z-index: 3; pointer-events: none;
+  display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; font-size: 13px; color: var(--muted);
+  background: rgba(36, 26, 22, .7); border: 1px solid var(--border); border-radius: 14px;
+}
+body.theme-nuit .legend .lg { display: flex; align-items: center; gap: 8px; }
+body.theme-nuit .legend .sw { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+body.theme-nuit .legend .sw.s-robot { background: #f0b23a; }
+body.theme-nuit .legend .sw.s-person { background: #e0553f; }
+body.theme-nuit .legend .sw.s-dock { background: #3fa37a; border-radius: 2px; }
+body.theme-nuit .legend .sw.s-kitchen { background: #d27b52; border-radius: 2px; }
+body.theme-nuit .legend .sw.s-badge { width: 16px; height: 16px; background: #f0b23a; color: #1d1411; font-style: normal; font-weight: 700; font-size: 10px; display: grid; place-items: center; }
+body.theme-nuit .legend .lg-tip { margin-top: 4px; color: var(--dim); max-width: 18ch; }
+body.theme-nuit .dock {
+  position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 4;
+  display: flex; align-items: center; gap: 8px; padding: 8px; flex-wrap: nowrap; white-space: nowrap;
+  background: rgba(43, 32, 27, .94); backdrop-filter: blur(8px); border: 1px solid var(--border-2); border-radius: 999px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .4);
+}
+body.theme-nuit .dock .btn { padding: 10px 16px; font-size: 14px; border-radius: 999px; }
+body.theme-nuit .dock .dispatch { display: inline-flex; gap: 6px; align-items: center; padding-left: 10px; margin-left: 2px; border-left: 1px solid var(--border-2); }
+body.theme-nuit .dock select { padding: 10px 12px; border-radius: 999px; background: var(--bg-2); color: var(--text); border: 1px solid var(--border-2); font: inherit; font-size: 14px; max-width: 160px; }
+body.theme-nuit .btn.primary { background: var(--saffron); border-color: var(--saffron); color: #1d1411; }
+
+/* Side panel */
+body.theme-nuit .side { display: flex; flex-direction: column; min-height: 0; background: var(--card); border-left: 1px solid var(--border); }
+body.theme-nuit .side-tabs { display: flex; gap: 2px; padding: 10px 10px 0; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+body.theme-nuit .side-tab {
+  position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 10px 12px 12px; border: none; background: none;
+  color: var(--muted); font-weight: 700; font-size: 14px; border-radius: 12px 12px 0 0; white-space: nowrap;
+}
+body.theme-nuit .side-tab:hover { color: var(--text); }
+body.theme-nuit .side-tab.active { color: var(--text); background: var(--card-2); }
+body.theme-nuit .side-tab.active::after { content: ''; position: absolute; left: 10px; right: 10px; bottom: 0; height: 3px; border-radius: 3px; background: var(--saffron); }
+body.theme-nuit .tab-count { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--saffron); color: #1d1411; font-size: 12px; display: inline-grid; place-items: center; }
+body.theme-nuit .tab-count:empty, body.theme-nuit .tab-count[data-zero] { display: none; }
+body.theme-nuit .tab-dot { width: 8px; height: 8px; border-radius: 50%; background: transparent; }
+body.theme-nuit .tab-dot.warn { background: var(--saffron); }
+body.theme-nuit .tab-dot.bad { background: var(--red); animation: m-breathe 1.4s ease-in-out infinite; }
+body.theme-nuit .side-panel { display: none; flex: 1; min-height: 0; overflow-y: auto; padding: 18px 20px 24px; }
+body.theme-nuit .side-panel.active { display: block; animation: panel-in .2s ease-out; }
+@keyframes panel-in { from { opacity: 0; transform: translateY(4px); } }
+body.theme-nuit .side-h { font-family: var(--display); font-weight: 800; font-size: 24px; letter-spacing: -.5px; margin-bottom: 14px; }
+body.theme-nuit .side-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+body.theme-nuit .side .tickets { max-height: none; }
+body.theme-nuit .side .events { max-height: none; }
+body.theme-nuit .spark { width: 100%; margin-top: 14px; display: block; }
+body.theme-nuit .spark-caption { font-size: 12px; margin-top: 4px; }
+body.theme-nuit .health { list-style: none; display: grid; grid-template-columns: 1fr; gap: 8px; }
+body.theme-nuit .health li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--card-2); font-size: 14px; }
+body.theme-nuit .health .dot.on { color: var(--green); }
+body.theme-nuit .health .dot.off { color: var(--red); }
+body.theme-nuit .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+body.theme-nuit .gauge { position: relative; flex: 1; height: 26px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--border-2); overflow: hidden; }
+body.theme-nuit .gauge-fill { height: 100%; width: 0; transition: width .5s, background .3s; }
+body.theme-nuit .gauge-mark { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(255, 255, 255, .3); }
+body.theme-nuit .gauge-mark.low { left: 25%; }
+body.theme-nuit .gauge-mark.critical { left: 15%; background: rgba(224, 85, 63, .7); }
+body.theme-nuit .lock-note { margin-top: 12px; color: var(--gold-2); }
+
+/* Medium screens: narrower side panel, compact mission card */
+@media (max-width: 1250px) {
+  body.theme-nuit .cc { grid-template-columns: minmax(0, 1fr) 340px; }
+  body.theme-nuit .mission .m-count { display: none; }
+  body.theme-nuit .legend .lg-tip { display: none; }
+}
+@media (max-width: 1050px) { body.theme-nuit .dock .btn [data-i18n] { display: none; } body.theme-nuit .dock .btn { padding: 10px 12px; } }
+/* Phones and small tablets: everything stacks and the page scrolls */
+@media (max-width: 900px) {
+  body.theme-nuit { overflow: auto; }
+  body.theme-nuit .cc { display: block; height: auto; }
+  body.theme-nuit .stage { display: flex; flex-direction: column; overflow: visible; }
+  body.theme-nuit .stage .map-wrap { position: relative; inset: auto; height: 62vh; order: 2; }
+  body.theme-nuit .mission { position: relative; top: auto; left: auto; max-width: none; margin: 12px; order: 1; grid-template-columns: auto 1fr auto; pointer-events: auto; }
+  body.theme-nuit .legend { position: relative; left: auto; bottom: auto; order: 3; flex-direction: row; flex-wrap: wrap; margin: 10px 12px 0; }
+  body.theme-nuit .dock { position: relative; left: auto; bottom: auto; transform: none; order: 4; margin: 12px; border-radius: 22px; flex-wrap: wrap; justify-content: center; white-space: normal; }
+  body.theme-nuit .dock .btn [data-i18n] { display: inline; }
+  body.theme-nuit .side { border-left: none; border-top: 1px solid var(--border); }
+  body.theme-nuit .side-panel { overflow: visible; }
+}
+
+body.theme-nuit .queue li.ticket.active { background: #fff6dc; border-color: transparent; }
+body.theme-nuit .side-tab { padding: 10px 9px 12px; font-size: 13.5px; }
+body.theme-nuit .legend { left: auto; right: 16px; top: 16px; bottom: auto; flex-direction: row; flex-wrap: wrap; max-width: 300px; justify-content: flex-end; gap: 6px 12px; }
+body.theme-nuit .legend .lg-tip { flex-basis: 100%; text-align: right; max-width: none; }
+@media (max-width: 1250px) { body.theme-nuit .legend { top: auto; bottom: 86px; } }
+@media (max-width: 900px) { body.theme-nuit .stage .map-wrap { height: auto; } body.theme-nuit .legend { bottom: auto; max-width: none; justify-content: flex-start; } body.theme-nuit .legend .lg-tip { text-align: left; } }

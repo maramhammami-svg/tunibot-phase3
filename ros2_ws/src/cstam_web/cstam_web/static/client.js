@@ -16,11 +16,11 @@
   // Floor plans: pick a table, then watch the robot drive to it
   const lightPlan = document.body.classList.contains('theme-nabeul') ? FLOOR_MAP_NABEUL : null;
   const plan = new FloorMap($('plan'), lightPlan);
-  plan.maxHeight = 360;
+  plan.maxHeight = window.innerWidth >= 1000 ? 440 : 360;
   plan.minTablePx = 15;
   window.__plan = plan;  // used by the browser tests
   const trackPlan = new FloorMap($('track-plan'), lightPlan);
-  trackPlan.maxHeight = 320;
+  trackPlan.maxHeight = window.innerWidth >= 1000 ? 560 : 320;
   trackPlan.minTablePx = 12;
   plan.onTableClick = name => {
     if (!config || !config.tables.some(tb => tb.id === name)) return;

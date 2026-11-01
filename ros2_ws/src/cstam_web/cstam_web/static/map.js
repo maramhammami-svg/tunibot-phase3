@@ -44,6 +44,9 @@ class FloorMap {
     this.trail = [];
     this.bounds = { minX: -10, maxX: 10, minY: -10, maxY: 10 };
     this.onTableClick = null;
+    this.fillHeight = false;               // admin: use the whole height of the parent
+    this.pad = { t: 0, r: 0, b: 0, l: 0 }; // keep the drawing clear of overlays
+    this.badges = {};                      // table name -> number of orders waiting there
     this.hoverTable = null;
     new ResizeObserver(() => this.resize()).observe(canvas.parentElement);
     canvas.addEventListener('click', ev => {
@@ -94,7 +97,7 @@ class FloorMap {
     const w = parent.clientWidth;
     const b = this.bounds;
     const aspect = (b.maxY - b.minY) / (b.maxX - b.minX || 1);
-    const h = Math.min(Math.max(200, w * aspect), this.maxHeight);
+    const h = this.fillHeight ? Math.max(200, parent.clientHeight) : Math.min(Math.max(200, w * aspect), this.maxHeight);
     const dpr = window.devicePixelRatio || 1;
     this.canvas.style.width = `${w}px`;
     this.canvas.style.height = `${h}px`;
@@ -102,10 +105,11 @@ class FloorMap {
     this.canvas.height = Math.round(h * dpr);
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.w = w; this.h = h;
-    const sx = w / (b.maxX - b.minX), sy = h / (b.maxY - b.minY);
+    const P = this.pad, aw = Math.max(50, w - P.l - P.r), ah = Math.max(50, h - P.t - P.b);
+    const sx = aw / (b.maxX - b.minX), sy = ah / (b.maxY - b.minY);
     this.scale = Math.min(sx, sy);
-    this.ox = (w - (b.maxX - b.minX) * this.scale) / 2;
-    this.oy = (h - (b.maxY - b.minY) * this.scale) / 2;
+    this.ox = P.l + (aw - (b.maxX - b.minX) * this.scale) / 2;
+    this.oy = P.t + (ah - (b.maxY - b.minY) * this.scale) / 2;
   }
 
   /** Name of the table waypoint under the pointer (within ~0.8 m), or null. */
@@ -241,6 +245,19 @@ class FloorMap {
       c.strokeStyle = color; c.lineWidth = 3;
       c.beginPath(); c.moveTo(0, 0); c.lineTo(r * 1.3, 0); c.stroke();
       c.restore();
+    }
+
+    // Order badges: how many tickets are waiting for each table
+    for (const [name, n] of Object.entries(this.badges || {})) {
+      const wp = (this.layout.tables || []).find(tb => tb.label === name) || this.waypoints[name];
+      if (!wp || !n) continue;
+      const p = this.px(wp.x, wp.y), br = 9;
+      const bx = p.x + Math.max(10, 0.35 * s), by = p.y - Math.max(10, 0.35 * s);
+      c.fillStyle = P.badge || '#f0b23a'; c.strokeStyle = P.bg; c.lineWidth = 2.5;
+      c.beginPath(); c.arc(bx, by, br, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.fillStyle = P.badgeText || '#1d1411';
+      c.font = `700 11px ${P.font}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillText(String(n), bx, by + 0.5);
     }
   }
 }

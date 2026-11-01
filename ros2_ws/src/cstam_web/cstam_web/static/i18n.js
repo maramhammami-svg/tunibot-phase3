@@ -11,10 +11,10 @@ const I18n = (() => {
       track_plan_aria: 'Position du robot en direct',
       grid_label: 'ou choisissez le numéro :',
       hero_sub: 'Choisissez votre table et vos plats : notre robot vous les apporte.',
-      your_table: 'Où êtes-vous assis ?', page_next: c => `Page suivante : ${c}`, page_first: c => `Retour au début : ${c}`,
+      your_table: 'Où êtes-vous assis\u00a0?', page_next: c => `Page suivante : ${c}`, page_first: c => `Retour au début : ${c}`,
       change: 'Changer',
       choose_table: 'Choisissez votre table',
-      choose_order: 'Qu’est-ce qui vous ferait plaisir ?',
+      choose_order: 'Qu’est-ce qui vous ferait plaisir\u00a0?',
       note_label: 'Note pour la cuisine (facultatif)',
       note_ph: 'ex. sans oignons, plus de sucre',
       no_items: 'Aucun article',
@@ -169,7 +169,7 @@ const I18n = (() => {
   // ---------------------------------------------------------------- admin page
   Object.assign(STRINGS.fr, {
     a_title: w => `${w}, supervision du robot`,
-    a_client_page: 'Page client', a_m_going: x => `En route vers ${x}`, a_m_at: x => `Arrivé à ${x}`, a_m_idle_sub: 'Prêt pour la prochaine commande', a_m_battery: 'batterie', a_m_delivered: 'livrées', a_m_more: n => `+ ${n} en attente`, a_cancel_ticket: id => `Annuler ${id}`,
+    a_client_page: 'Page client', a_tab_orders: 'Commandes', a_tab_events: 'Journal', a_tab_tests: 'Démo', a_lg_orders: 'commandes en attente', a_controls: 'Contrôles', a_m_going: x => `En route vers ${x}`, a_m_at: x => `Arrivé à ${x}`, a_m_idle_sub: 'Prêt pour la prochaine commande', a_m_battery: 'batterie', a_m_delivered: 'livrées', a_m_more: n => `+ ${n} en attente`, a_cancel_ticket: id => `Annuler ${id}`,
     a_demo_banner: 'Mode démo : robot simulé (ROS 2 non connecté). Lancez sans --mock pour utiliser le vrai robot.',
     a_offline_banner: 'Aucune donnée du robot. Le système (cstam_system.launch.py) est-il lancé ?',
     a_battery: 'Batterie', a_battery_level: 'Niveau de batterie', a_voltage: 'Tension', a_current: 'Courant',
@@ -200,7 +200,7 @@ const I18n = (() => {
   });
   Object.assign(STRINGS.en, {
     a_title: w => `${w}, robot monitoring`,
-    a_client_page: 'Client page', a_m_going: x => `Heading to ${x}`, a_m_at: x => `At ${x}`, a_m_idle_sub: 'Ready for the next order', a_m_battery: 'battery', a_m_delivered: 'delivered', a_m_more: n => `+ ${n} waiting`, a_cancel_ticket: id => `Cancel ${id}`,
+    a_client_page: 'Client page', a_tab_orders: 'Orders', a_tab_events: 'Log', a_tab_tests: 'Demo', a_lg_orders: 'orders waiting', a_controls: 'Controls', a_m_going: x => `Heading to ${x}`, a_m_at: x => `At ${x}`, a_m_idle_sub: 'Ready for the next order', a_m_battery: 'battery', a_m_delivered: 'delivered', a_m_more: n => `+ ${n} waiting`, a_cancel_ticket: id => `Cancel ${id}`,
     a_demo_banner: 'Demo mode: simulated robot (ROS 2 not connected). Start without --mock to use the real robot.',
     a_offline_banner: 'No data from the robot. Is cstam_system.launch.py running?',
     a_battery: 'Battery', a_battery_level: 'Battery level', a_voltage: 'Voltage', a_current: 'Current',

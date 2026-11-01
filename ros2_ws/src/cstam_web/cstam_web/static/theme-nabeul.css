@@ -295,3 +295,47 @@ body.theme-nabeul .menu-name { font-size: 18px; }
 body.theme-nabeul .menu-desc { font-style: italic; }
 body.theme-nabeul .fly-ghost .dish { width: 100%; height: 100%; }
 @media (max-width: 380px) { body.theme-nabeul .menu-emoji, body.theme-nabeul .menu-item.selected .menu-emoji { width: 56px; height: 56px; } body.theme-nabeul .menu-book .page { padding-left: 24px; } }
+
+/* ==================================================================
+   Wide screens: use the room. Table picking on the left (stays in
+   view), the menu book on the right; tracking puts the plan beside
+   the status.
+   ================================================================== */
+@media (min-width: 1000px) {
+  body.theme-nabeul .client { max-width: 1240px; padding: 22px 32px 0; }
+  body.theme-nabeul #order-screen { display: grid; grid-template-columns: minmax(380px, 1fr) minmax(0, 1.2fr); column-gap: 56px; align-items: start; }
+  body.theme-nabeul #order-screen > .card.step:first-of-type { position: sticky; top: 76px; }
+  body.theme-nabeul #order-screen > .card.step + .card.step { margin-top: 0; }
+  body.theme-nabeul #order-screen > .spacer { grid-column: 1 / -1; }
+  body.theme-nabeul .card h2 { font-size: 44px; max-width: 14ch; }
+  body.theme-nabeul .waiter { width: 150px; }
+  body.theme-nabeul .menu-book .page { padding: 32px 34px 22px 44px; min-height: 560px; }
+  body.theme-nabeul .page-head h3 { font-size: 42px; }
+  body.theme-nabeul .menu-emoji, body.theme-nabeul .menu-item.selected .menu-emoji { width: 84px; height: 84px; }
+  body.theme-nabeul .menu-name { font-size: 20px; }
+  body.theme-nabeul .menu-desc { font-size: 15px; }
+  body.theme-nabeul .checkout { left: auto; right: max(32px, calc((100vw - 1240px) / 2 + 32px)); transform: none; width: min(720px, 58vw); }
+  body.theme-nabeul .checkout.tray-bump { animation: tray-bump .35s ease-out; }
+
+  /* Tracking */
+  body.theme-nabeul #track-screen .track-card {
+    display: grid; grid-template-columns: minmax(320px, 1fr) minmax(0, 1.3fr); column-gap: 56px; align-items: start;
+    grid-template-areas: "badge plan" "title plan" "sub plan" "eta plan" "steps plan" "items plan" "actions plan";
+  }
+  body.theme-nabeul #track-screen .track-emoji, body.theme-nabeul #track-screen .track-waiter { grid-area: badge; }
+  body.theme-nabeul #track-screen .track-title { grid-area: title; }
+  body.theme-nabeul #track-screen .track-sub { grid-area: sub; }
+  body.theme-nabeul #track-screen .eta { grid-area: eta; justify-self: start; }
+  body.theme-nabeul #track-screen .track-plan { grid-area: plan; margin: 0; position: sticky; top: 90px; }
+  body.theme-nabeul #track-screen .stepper { grid-area: steps; }
+  body.theme-nabeul #track-screen .track-items { grid-area: items; margin-top: 22px; }
+  body.theme-nabeul #track-screen .track-actions { grid-area: actions; }
+}
+@media (min-width: 1000px) {
+  /* The plan stays visible on wide screens: tap another table to change */
+  body.theme-nabeul #order-screen #plan-wrap.hidden { display: block !important; }
+  body.theme-nabeul #order-screen #table-grid.hidden { display: grid !important; }
+  body.theme-nabeul #order-screen #grid-label.hidden { display: block !important; }
+  body.theme-nabeul #change-table-btn { display: none !important; }
+  body.theme-nabeul .welcome { margin-top: 0; }
+}

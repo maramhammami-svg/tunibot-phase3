@@ -4,7 +4,43 @@
   const t = I18n.t;
   document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = Icons.svg(el.dataset.icon); });
   const map = new FloorMap($('map'), FLOOR_MAP_NUIT);
-  map.maxHeight = 620;
+  map.fillHeight = true;
+  // Keep the drawing clear of the floating mission card (top) and tool dock (bottom)
+  function fitMapPad() {
+    const wide = window.innerWidth > 900;
+    map.fillHeight = wide;
+    map.maxHeight = wide ? 4000 : 520;
+    map.pad = wide ? { t: 150, r: 24, b: 92, l: 24 } : { t: 12, r: 12, b: 12, l: 12 };
+    map.resize();
+  }
+  fitMapPad();
+  window.addEventListener('resize', fitMapPad);
+
+  // The command centre fills the window below the top bar and banners
+  function setChrome() {
+    let h = document.querySelector('.topbar').offsetHeight;
+    document.querySelectorAll('.banner:not(.hidden)').forEach(b => { h += b.offsetHeight; });
+    if (document.body.dataset.chrome !== String(h)) {
+      document.body.dataset.chrome = String(h);
+      document.body.style.setProperty('--chrome', `${h}px`);
+    }
+  }
+  window.addEventListener('resize', setChrome);
+
+  // Side panel tabs (remembered)
+  let tab = 'orders';
+  try { tab = localStorage.getItem('tunibot_admin_tab') || 'orders'; } catch (e) { /* private mode */ }
+  function showTab(name) {
+    tab = name;
+    document.querySelectorAll('.side-tab').forEach(b => {
+      const on = b.dataset.tab === name;
+      b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on));
+    });
+    document.querySelectorAll('.side-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+    try { localStorage.setItem('tunibot_admin_tab', name); } catch (e) { /* ignore */ }
+    if (name === 'battery' && lastSnap) drawSpark(lastSnap.battery_history || []);
+  }
+  document.querySelectorAll('.side-tab').forEach(b => { b.onclick = () => showTab(b.dataset.tab); });
   window.__floorMap = map;  // used by the browser tests
   let config = null;
   let world = null;
@@ -15,6 +51,7 @@
     world = config.world;
     renderStatic(config);
     $('demo-banner').classList.toggle('hidden', config.mode !== 'mock');
+    setChrome();
     map.setWorld(layout, config.waypoints);
     const sel = $('dispatch-target');
     sel.innerHTML = Object.keys(config.waypoints)
@@ -44,6 +81,7 @@
 
   // Only touch the DOM when a list really changed (keeps entry animations and hover states)
   const htmlCache = {};
+  const seenTickets = new Set();
   function setHtml(id, html) {
     if (htmlCache[id] === html) return;
     htmlCache[id] = html;
@@ -58,6 +96,7 @@
 
     const robotOnline = s.online.robot;
     $('offline-banner').classList.toggle('hidden', robotOnline || s.mode === 'mock');
+    setChrome();
 
     // State
     const st = s.robot_state;
@@ -90,6 +129,7 @@
       const [txt, cls] = statusMap[b.status] || [b.status || '—', ''];
       chip.textContent = txt;
       chip.className = `chip ${cls}`;
+      $('battery-tab-dot').className = `tab-dot ${b.is_critical ? 'bad' : (b.is_low ? 'warn' : '')}`;
     }
     drawSpark(s.battery_history || []);
 
@@ -125,14 +165,18 @@
     if (task) items.push({ ...task, active: true });
     for (const p of s.pending_tasks || []) items.push(p);
     $('queue-count').textContent = String(items.length);
+    const badges = {};
+    for (const q of items) badges[q.target] = (badges[q.target] || 0) + 1;
+    map.badges = badges;
     setHtml('queue', items.length ? items.map(q => `
-      <li class="ticket ${q.active ? 'active' : ''}">
+      <li class="ticket${q.active ? ' active' : ''}${seenTickets.has(q.id) ? '' : ' new'}">
         <div class="t-top"><span class="q-id">${Tuni.escapeHtml(q.id)}</span>
           <button class="t-cancel" data-cancel="${Tuni.escapeHtml(q.id)}" type="button" aria-label="${Tuni.escapeHtml(t('a_cancel_ticket', q.id))}">${Icons.svg('cross')}</button></div>
         <div class="q-target">${Tuni.escapeHtml(q.target)}</div>
         <div class="q-item">${Tuni.escapeHtml(q.item).split(/,\s*/).join('<br>')}</div>
         <span class="stamp">${q.active ? stateLabel(st) : t('a_queued')}</span>
       </li>`).join('') : `<li class="empty">${t('a_no_orders')}</li>`);
+    items.forEach(q => seenTickets.add(q.id));
     $('lock-note').classList.toggle('hidden', !s.battery_docking_lock);
 
     // Buttons that make no sense in the current state
@@ -148,7 +192,8 @@
 
   function drawSpark(hist) {
     const c = $('battery-chart');
-    const w = c.clientWidth, h = 70, dpr = window.devicePixelRatio || 1;
+    const w = c.clientWidth, h = 90, dpr = window.devicePixelRatio || 1;
+    if (!w) return;
     if (c.width !== Math.round(w * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
     const ctx = c.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -196,6 +241,8 @@
   });
 
   // ---------------------------------------------------------------- start
+  showTab(tab);
+  setChrome();
   renderStatic();
   loadWorld().catch(e => Tuni.toast(e.message, 'error'));
   Tuni.telemetry(render, connected => {
