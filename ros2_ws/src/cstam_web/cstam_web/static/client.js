@@ -13,6 +13,18 @@
   let pollTimer = null;
   let lastStatus = null;
   let lastOrder = null;
+  // Floor plans: pick a table, then watch the robot drive to it
+  const plan = new FloorMap($('plan'));
+  plan.maxHeight = 360;
+  plan.minTablePx = 15;
+  window.__plan = plan;  // used by the browser tests
+  const trackPlan = new FloorMap($('track-plan'));
+  trackPlan.maxHeight = 320;
+  trackPlan.minTablePx = 12;
+  plan.onTableClick = name => {
+    if (!config || !config.tables.some(tb => tb.id === name)) return;
+    table = name; tableLocked = false; renderTables(); updateCheckout();
+  };
 
   // ------------------------------------------------------------ setup
   async function init() {
@@ -26,6 +38,10 @@
       return;
     }
     $('demo-banner').classList.toggle('hidden', config.mode !== 'mock');
+    Tuni.api('/api/map/layout').then(layout => {
+      plan.setWorld(layout, config.waypoints);
+      trackPlan.setWorld(layout, config.waypoints);
+    }).catch(() => $('plan-wrap').classList.add('hidden'));
 
     const fromUrl = new URLSearchParams(location.search).get('table');
     if (fromUrl) {
@@ -77,6 +93,10 @@
       grid.appendChild(b);
     }
     const showGrid = !tableLocked || !table;
+    plan.selectedTable = table;
+    trackPlan.selectedTable = table;
+    $('plan-wrap').classList.toggle('hidden', !showGrid);
+    $('grid-label').classList.toggle('hidden', !showGrid);
     grid.classList.toggle('hidden', !showGrid);
     $('table-selected').classList.toggle('hidden', showGrid);
     $('table-selected').textContent = table || '';
@@ -473,6 +493,7 @@
 
   function renderOrder(o) {
     lastOrder = o;
+    trackPlan.selectedTable = o.target;
     const status = VIEW[o.status] ? o.status : 'submitted';
     const v = VIEW[status];
     const [title, defaultSub] = t(`st_${status}`);
@@ -552,6 +573,8 @@
 
   Tuni.telemetry(snap => {
     connected = true;
+    plan.update(snap);
+    trackPlan.update(snap);
     availability = snap.availability;
     renderAvailability();
     updateCheckout();

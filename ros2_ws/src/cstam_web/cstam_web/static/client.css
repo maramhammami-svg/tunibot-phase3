@@ -204,3 +204,13 @@ body.theme-dar .hero { border-radius: 22px; }
 @media (min-width: 700px) {
   .checkout { left: 50%; right: auto; transform: translateX(-50%); width: 640px; bottom: 12px; border: 1px solid var(--border-2); border-radius: 18px; padding: 12px 16px; }
 }
+
+/* Floor plan table picker + live tracking plan */
+.plan-wrap { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--border-2); }
+.plan-wrap canvas { display: block; width: 100%; touch-action: manipulation; }
+.plan-hint { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); white-space: nowrap; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: rgba(0,0,0,.55); color: #fff; pointer-events: none; }
+.grid-label { margin: 12px 0 8px; }
+.track-plan { margin: 16px 0 4px; }
+body.theme-dar .table-btn { aspect-ratio: auto; border-radius: 999px; padding: 8px 0; font-size: 14px; }
+body.theme-dar .table-grid { grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; }
+@media (max-width: 520px) { body.theme-dar .table-grid { grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); } }

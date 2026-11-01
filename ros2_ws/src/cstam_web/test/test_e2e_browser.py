@@ -192,3 +192,22 @@ def test_microphone_flow_with_alternatives(server, browser):
     page.wait_for_timeout(300)
     assert page.evaluate("window.__speechLang") == "en-US"
     ctx.close()
+
+
+def test_pick_table_on_floor_plan(server, browser):
+    page = browser.new_page(locale="fr-FR", viewport={"width": 390, "height": 844})
+    page.goto(server + "/")
+    page.wait_for_selector(".cat-tab")
+    page.wait_for_timeout(800)
+    pos = page.evaluate("""async () => {
+      const cfg = await (await fetch('/api/config')).json();
+      const wp = cfg.waypoints['Table 8'];
+      const c = document.getElementById('plan');
+      c.scrollIntoView({block: 'center'});
+      const r = c.getBoundingClientRect(), p = window.__plan.px(wp.x, wp.y);
+      return {x: r.left + p.x, y: r.top + p.y};
+    }""")
+    page.mouse.click(pos["x"], pos["y"])
+    assert page.locator(".table-btn[aria-label='Table 8']").get_attribute("aria-checked") == "true"
+    assert page.inner_text("#order-btn") == "Commander · Table 8"
+    page.close()

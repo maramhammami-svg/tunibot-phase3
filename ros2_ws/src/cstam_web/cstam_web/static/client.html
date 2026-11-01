@@ -42,7 +42,12 @@
           <h2><span class="step-num">1</span> <span data-i18n="your_table"></span></h2>
           <button class="btn small hidden" id="change-table-btn" type="button" data-i18n="change"></button>
         </div>
+        <div class="plan-wrap" id="plan-wrap">
+          <canvas id="plan" data-i18n-aria="plan_aria"></canvas>
+          <div class="plan-hint" id="plan-hint" data-i18n="plan_hint"></div>
+        </div>
         <div id="table-selected" class="table-selected hidden"></div>
+        <div class="grid-label muted small" id="grid-label" data-i18n="grid_label"></div>
         <div id="table-grid" class="table-grid" role="radiogroup" data-i18n-aria="choose_table"></div>
       </div>
 
@@ -84,6 +89,7 @@
         <h1 class="track-title" id="track-title"></h1>
         <p class="track-sub muted" id="track-sub"></p>
         <div class="eta hidden" id="eta"></div>
+        <div class="plan-wrap track-plan" id="track-plan-wrap"><canvas id="track-plan" data-i18n-aria="track_plan_aria"></canvas></div>
         <ol class="stepper" id="stepper">
           <li data-step="received"><span class="bullet"></span><span data-i18n="step_received"></span></li>
           <li data-step="queued"><span class="bullet"></span><span data-i18n="step_queued"></span></li>
@@ -129,6 +135,7 @@
 
   <script src="/static/common.js"></script>
   <script src="/static/i18n.js"></script>
+  <script src="/static/map.js"></script>
   <script src="/static/client.js"></script>
 </body>
 </html>
