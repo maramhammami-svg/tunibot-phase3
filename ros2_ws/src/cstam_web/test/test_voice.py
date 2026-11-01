@@ -80,3 +80,38 @@ def test_voice_endpoint():
     assert body["table"] == "Table 5" and body["items"] == [{"id": "the-menthe", "name": "Thé à la menthe", "qty": 2}]
     assert any("Voice order understood" in e["message"] for e in store.events)
     assert client.post("/api/voice/parse", json={"text": "x" * 301}).status_code == 422
+
+
+@pytest.mark.parametrize("text, table, items", [
+    # Spellings that French speech-to-text actually produces for Tunisian dishes
+    ("2 briques et un thé à la table 4", "Table 4", {"brik": 2, "the-menthe": 1}),
+    ("deux bricks table4", "Table 4", {"brik": 2}),
+    ("trois makrout et une odja", None, {"makroudh": 3, "ojja": 1}),
+    ("un bamba louni et un couscous table 5", "Table 5", {"bambalouni": 1, "couscous": 1}),
+    ("deux cafés directs tableau 3", "Table 3", {"cafe-direct": 2}),
+    ("une citronade et un macroud", None, {"citronnade": 1, "makroudh": 1}),
+    ("2 bambalounis", None, {"bambalouni": 2}),
+])
+def test_sound_alike_spellings(text, table, items):
+    res = parse_order(text, ARBI, TABLES_10, "fr")
+    assert res["table"] == table
+    assert cart(res) == items
+
+
+def test_best_alternative_is_kept():
+    from cstam_web.voice import parse_best
+    res = parse_best(["deux trucs à la table quatre", "deux briks à la table quatre"], ARBI, TABLES_10, "fr")
+    assert cart(res) == {"brik": 2} and res["table"] == "Table 4"
+    assert res["text"] == "deux briks à la table quatre"
+    # On a tie the first (most confident) guess wins
+    assert parse_best(["un brik", "un thé"], ARBI, TABLES_10)["text"] == "un brik"
+
+
+def test_voice_endpoint_uses_alternatives():
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+    from cstam_web.server import create_app
+    store = TelemetryStore(world="resto_arbi", waypoints=load_waypoints("resto_arbi"))
+    client = TestClient(create_app(store, commands=None))
+    body = client.post("/api/voice/parse", json={"text": "un bric à brac", "alternatives": ["un brik table 2"]}).json()
+    assert body["table"] == "Table 2" and body["items"][0]["id"] == "brik"

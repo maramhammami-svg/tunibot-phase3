@@ -14,13 +14,13 @@
       ]},
       {"name": "Dishes", "name_fr": "Plats", "items": [
         {"id": "brik", "name": "Brik à l'oeuf", "emoji": "🥟", "desc": "Crispy pastry, egg, tuna, parsley", "desc_fr": "Feuille croustillante, œuf, thon, persil",
-         "aliases": ["brik", "brick", "breek"]},
+         "aliases": ["brik", "brick", "breek", "brique"]},
         {"id": "salade-tunisienne", "name": "Salade tunisienne", "emoji": "🥗", "desc": "Tomato, cucumber, onion, tuna", "desc_fr": "Tomate, concombre, oignon, thon",
          "aliases": ["salade", "salad", "tunisian salad", "slata"]},
         {"id": "couscous", "name": "Couscous royal", "emoji": "🥘", "desc": "Lamb, vegetables, chickpeas", "desc_fr": "Agneau, légumes, pois chiches",
          "aliases": ["couscous", "kousksi", "kosksi", "cous cous"]},
         {"id": "ojja", "name": "Ojja merguez", "emoji": "🍳", "desc": "Spicy tomato & egg skillet", "desc_fr": "Poêlée épicée tomate et œufs",
-         "aliases": ["ojja", "oja", "merguez", "chakchouka"]}
+         "aliases": ["ojja", "oja", "odja", "merguez", "chakchouka"]}
       ]},
       {"name": "Desserts", "name_fr": "Desserts", "items": [
         {"id": "bambalouni", "name": "Bambalouni", "emoji": "🍩", "desc": "Sidi Bou Said doughnut", "desc_fr": "Beignet de Sidi Bou Saïd",

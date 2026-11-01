@@ -35,7 +35,8 @@ NUMBER_WORDS = {
 }
 # "six" is French and English, already listed once.
 
-TABLE_WORDS = ("table", "tables", "tawla", "tawlah", "tabla", "tabel")
+TABLE_WORDS = ("table", "tables", "tawla", "tawlah", "tabla", "tabel", "tableau", "tablee", "tabl", "tabler",
+               "towla", "tauila", "taula")
 # Words skipped between a number and the item ("deux tasses de thé", "two cups of tea")
 FILLER = {"de", "d", "des", "du", "of", "x", "fois", "times", "tasse", "tasses", "cup", "cups",
           "verre", "verres", "glass", "glasses", "portion", "portions", "assiette", "assiettes",
@@ -56,7 +57,25 @@ def normalize(text: str) -> str:
     text = "".join(c for c in text if not unicodedata.combining(c))
     text = text.lower().replace("’", "'").replace("œ", "oe")
     text = re.sub(r"[^a-z0-9]+", " ", text)
+    text = re.sub(r"([a-z])(\d)", r"\1 \2", text)  # "table4" -> "table 4"
+    text = re.sub(r"(\d)([a-z])", r"\1 \2", text)  # "2brik" -> "2 brik"
     return text.strip()
+
+
+_PHON_RULES = [
+    (r"ph", "f"), (r"qu", "k"), (r"ck", "k"), (r"q", "k"), (r"c(?=[aoukrl]|$)", "k"), (r"c", "s"),
+    (r"kh", "k"), (r"th", "t"), (r"dh", "d"), (r"gh", "g"), (r"ou", "u"), (r"oo", "u"), (r"w", "u"),
+    (r"ee", "i"), (r"y", "i"), (r"z", "s"), (r"9", "k"), (r"3", "a"), (r"7", "h"), (r"h", ""),
+    (r"(.)\1+", r"\1"), (r"(?<=..)(es|e|s|x)$", ""),
+]
+
+
+def phonetic(tok: str) -> str:
+    """Rough sound-alike key, so speech-to-text spellings still match:
+    'brique' / 'bric' / 'brick' -> 'brik', 'makrout' ~ 'makroudh', 'kousksi' ~ 'couscous'."""
+    for pat, rep in _PHON_RULES:
+        tok = re.sub(pat, rep, tok)
+    return tok
 
 
 def _singular(tok: str) -> str:
@@ -69,8 +88,14 @@ def _tok_eq(a: str, b: str) -> bool:
     a, b = _singular(a), _singular(b)
     if a == b:
         return True
+    if a.isdigit() or b.isdigit():
+        return False
+    pa, pb = phonetic(a), phonetic(b)
+    if pa == pb and len(pa) >= 2:
+        return True
     if len(a) >= 4 and len(b) >= 4:
-        return difflib.SequenceMatcher(None, a, b).ratio() >= 0.8
+        return (difflib.SequenceMatcher(None, a, b).ratio() >= 0.8
+                or (min(len(pa), len(pb)) >= 4 and difflib.SequenceMatcher(None, pa, pb).ratio() >= 0.75))
     return False
 
 
@@ -140,6 +165,11 @@ def parse_order(text: str, menu: Dict[str, Any], tables: List[str], lang: str = 
             if _tok_eq(tokens[j], alias[k]):
                 k += 1
                 j += 1
+            elif j + 1 < len(tokens) and j + 1 not in used and len(alias[k]) >= 6 \
+                    and _number(tokens[j]) is None and tokens[j] not in STOP \
+                    and _tok_eq(tokens[j] + tokens[j + 1], alias[k]):
+                k += 1
+                j += 2
             elif k > 0 and tokens[j] in GLUE and j + 1 < len(tokens):
                 j += 1
             else:
@@ -181,3 +211,16 @@ def parse_order(text: str, menu: Dict[str, Any], tables: List[str], lang: str = 
     leftovers = [t for i, t in enumerate(tokens) if i not in used and t not in STOP and _number(t) is None
                  and t not in TABLE_WORDS and not (t == "the" and str(lang).lower().startswith("en"))]
     return {"text": text, "table": table, "items": items, "unmatched": leftovers}
+
+
+def _score(res: Dict[str, Any]) -> float:
+    return 2.0 * sum(i["qty"] > 0 for i in res["items"]) + (1.5 if res["table"] else 0.0) - 0.5 * len(res["unmatched"])
+
+
+def parse_best(texts: List[str], menu: Dict[str, Any], tables: List[str], lang: str = "fr") -> Dict[str, Any]:
+    """Speech engines return several guesses for one sentence: keep the one that
+    makes the most sense for this menu (most dishes recognised, a table, fewest leftovers)."""
+    results = [parse_order(t, menu, tables, lang) for t in texts if t and t.strip()]
+    if not results:
+        return {"text": "", "table": None, "items": [], "unmatched": []}
+    return max(results, key=_score)  # max keeps the first (most confident) guess on ties

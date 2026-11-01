@@ -98,3 +98,38 @@ def test_language_switch_and_admin(server, browser):
     page.wait_for_function("document.querySelector('#conn-text').textContent === 'Live'")
     assert "Voice order understood" in page.inner_text("#events")
     page.close()
+
+
+# A fake speech engine injected in the page: it "hears" a sentence with two
+# guesses, like Chrome does, so the real client code path is exercised.
+FAKE_SPEECH = """
+class FakeRecognition {
+  start() {
+    setTimeout(() => this.onstart && this.onstart(), 10);
+    setTimeout(() => {
+      const alt = (t) => ({ transcript: t, confidence: 0.8 });
+      const r1 = Object.assign([alt('deux briques et un bric à brac'), alt('deux briques et un thé à la menthe')], { isFinal: true });
+      const r2 = Object.assign([alt('pour la table 6')], { isFinal: true });
+      this.onresult({ resultIndex: 0, results: [r1, r2] });
+    }, 50);
+  }
+  stop() { setTimeout(() => this.onend && this.onend(), 10); }
+}
+window.webkitSpeechRecognition = FakeRecognition;
+window.SpeechRecognition = FakeRecognition;
+"""
+
+
+def test_microphone_flow_with_alternatives(server, browser):
+    ctx = browser.new_context(locale="fr-FR")
+    ctx.add_init_script(FAKE_SPEECH)
+    page = ctx.new_page()
+    page.goto(server + "/")
+    page.wait_for_selector(".table-btn")
+    page.click("#voice-btn")
+    # Stops by itself after the silence delay, then sends both guesses
+    page.wait_for_selector("#voice-result.ok", timeout=10000)
+    text = page.inner_text("#voice-result")
+    assert "2 × Brik à l'oeuf" in text and "1 × Thé à la menthe" in text
+    assert page.inner_text("#table-selected") == "Table 6"
+    ctx.close()

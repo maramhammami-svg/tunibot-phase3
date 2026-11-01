@@ -24,7 +24,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .store import TelemetryStore
-from .voice import parse_order
+from .voice import parse_best
 from .world import STATIC_DIR, WORLD_TITLES, load_layout, load_menu, normalize_world
 
 OBSTACLE_MODES = {"patrol", "cross", "block", "clear"}
@@ -63,6 +63,8 @@ class ObstacleRequest(BaseModel):
 class VoiceRequest(BaseModel):
     text: str = Field(..., max_length=300)
     lang: str = Field("fr", max_length=10)
+    # Other guesses of the speech engine for the same sentence (best first)
+    alternatives: List[str] = []
 
 
 class DispatchRequest(BaseModel):
@@ -170,7 +172,8 @@ def create_app(store: TelemetryStore, commands: RobotCommands, broadcast_hz: flo
     def voice_parse(req: VoiceRequest):
         """Voice ordering: the browser sends the speech transcript, we return table + cart."""
         tables = [n for n in store.waypoints if n.lower().startswith("table")]
-        result = parse_order(req.text, load_menu(store.world), tables, req.lang)
+        texts = [req.text] + [a[:300] for a in req.alternatives[:5]]
+        result = parse_best(texts, load_menu(store.world), tables, req.lang)
         if result["items"]:
             label = ", ".join(f"{i['qty']}x {i['name']}" for i in result["items"])
             store.add_event("info", f"Voice order understood: {label}" + (f" for {result['table']}" if result["table"] else ""))

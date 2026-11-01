@@ -165,36 +165,63 @@
 
   function setVoiceStatus(state) {
     voiceState = state;
-    const msg = { listening: 'voice_listening', idle: SR ? 'voice_idle' : 'voice_unsupported', denied: 'voice_denied', nothing: 'voice_nothing' }[state];
+    const msg = { listening: 'voice_listening', idle: SR ? 'voice_idle' : 'voice_unsupported', denied: 'voice_denied',
+                  nothing: 'voice_nothing', nomic: 'voice_nomic', network: 'voice_network' }[state];
     $('voice-status').textContent = t(msg || 'voice_idle');
     $('mic-dot').classList.toggle('on', state === 'listening');
   }
+
+  const SILENCE_MS = 2500;   // stop listening after this much silence once something was heard
+  const MAX_LISTEN_MS = 15000;
 
   function startListening() {
     if (!SR) { setVoiceStatus('idle'); $('voice-input').focus(); return; }
     if (recognizing) { recognition.stop(); return; }
     recognition = new SR();
     recognition.lang = t('speech_lang');
+    recognition.continuous = true;      // do not cut the sentence at the first short pause
     recognition.interimResults = true;
-    recognition.maxAlternatives = 1;
-    let finalText = '';
-    recognition.onstart = () => { recognizing = true; setVoiceStatus('listening'); };
+    recognition.maxAlternatives = 5;    // the server keeps the guess that best fits the menu
+    const finals = [];                  // one entry per final segment: [best, alt2, ...]
+    let silenceTimer = null;
+    let hardStop = null;
+    const armSilence = () => {
+      clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(() => recognition.stop(), SILENCE_MS);
+    };
+    recognition.onstart = () => {
+      recognizing = true;
+      setVoiceStatus('listening');
+      hardStop = setTimeout(() => recognition.stop(), MAX_LISTEN_MS);
+    };
     recognition.onresult = ev => {
       let interim = '';
       for (let i = ev.resultIndex; i < ev.results.length; i++) {
-        if (ev.results[i].isFinal) finalText += ev.results[i][0].transcript;
-        else interim += ev.results[i][0].transcript;
+        const r = ev.results[i];
+        if (r.isFinal) finals.push(Array.from(r).map(a => a.transcript.trim()));
+        else interim += r[0].transcript;
       }
-      showHeard(finalText + interim);
+      showHeard([...finals.map(f => f[0]), interim].join(' ').trim());
+      armSilence();
     };
     recognition.onerror = ev => {
-      if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') setVoiceStatus('denied');
-      else if (ev.error === 'no-speech') setVoiceStatus('nothing');
+      const map = { 'not-allowed': 'denied', 'service-not-allowed': 'denied', 'no-speech': 'nothing',
+                    'audio-capture': 'nomic', network: 'network' };
+      if (map[ev.error]) setVoiceStatus(map[ev.error]);
     };
     recognition.onend = () => {
       recognizing = false;
+      clearTimeout(silenceTimer);
+      clearTimeout(hardStop);
       if (voiceState === 'listening') setVoiceStatus('idle');
-      if (finalText.trim()) understand(finalText.trim());
+      if (!finals.length) return;
+      const best = finals.map(f => f[0]).join(' ').trim();
+      // Alternatives: swap one segment at a time for its other guesses
+      const alts = [];
+      finals.forEach((f, i) => f.slice(1).forEach(alt => {
+        alts.push(finals.map((g, j) => (j === i ? alt : g[0])).join(' ').trim());
+      }));
+      understand(best, alts.slice(0, 5));
     };
     recognition.start();
   }
@@ -204,10 +231,11 @@
     $('voice-heard').textContent = text ? t('voice_heard', text) : '';
   }
 
-  async function understand(text) {
+  async function understand(text, alternatives = []) {
     showHeard(text);
     try {
-      const res = await Tuni.api('/api/voice/parse', { method: 'POST', body: { text, lang: I18n.get() } });
+      const res = await Tuni.api('/api/voice/parse', { method: 'POST', body: { text, alternatives, lang: I18n.get() } });
+      if (res.text && res.text !== text) showHeard(res.text);
       applyVoiceResult(res);
     } catch (e) {
       Tuni.toast(e.message, 'error');
