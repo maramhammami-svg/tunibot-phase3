@@ -47,16 +47,3 @@ class TestCstamCoreNodes(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-
-def test_order_ref_round_trip_and_history():
-    mgr = TaskQueueManager()
-    res = mgr.add_delivery_request("Table 1", "Tea", order_ref="web-123")
-    assert res["task"]["order_ref"] == "web-123"
-    plain = mgr.add_delivery_request("Table 2", "Water")
-    assert "order_ref" not in plain["task"]
-    mgr.get_next_task()
-    mgr.complete_current_task(success=True)
-    summary = mgr.get_status_summary()
-    assert summary["recent_history"][-1]["order_ref"] == "web-123"
-    assert summary["pending_tasks"][0]["id"] == plain["task"]["id"]

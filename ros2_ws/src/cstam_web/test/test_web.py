@@ -54,9 +54,10 @@ def make_store():
     return store, clock
 
 
-def queue_status(state="idle", current=None, pending=(), history=(), lock=False):
+def queue_status(state="idle", current=None, pending=(), completed=0, lock=False):
+    """Same shape as DeliveryTaskManager.get_status_summary() (Phase 1/2, unchanged)."""
     return {"robot_state": state, "current_task": current, "pending_tasks": list(pending),
-            "queue_length": len(pending), "completed_count": len(history), "recent_history": list(history),
+            "queue_length": len(pending), "completed_count": completed,
             "battery_docking_lock": lock}
 
 
@@ -88,7 +89,7 @@ def test_order_lifecycle_follows_task_manager():
     assert store.get_order("abc")["status"] == "submitted"
 
     other = {"id": "TASK-0001", "target": "Table 1", "item": "y"}
-    mine = {"id": "TASK-0002", "target": "Table 3", "item": "1x Soup", "order_ref": "abc"}
+    mine = {"id": "TASK-0002", "target": "Table 3", "item": "1x Soup"}
     store.update_queue_status(queue_status("navigating", current=other, pending=[mine]))
     o = store.get_order("abc")
     assert o["status"] == "queued" and o["queue_position"] == 2 and o["task_id"] == "TASK-0002"
@@ -97,15 +98,27 @@ def test_order_lifecycle_follows_task_manager():
     assert store.get_order("abc")["status"] == "en_route"
     store.update_queue_status(queue_status("at_table", current=mine))
     assert store.get_order("abc")["status"] == "arrived"
-    store.update_queue_status(queue_status("idle", history=[dict(mine, status="completed")]))
+    store.update_queue_status(queue_status("idle", completed=1))
     assert store.get_order("abc")["status"] == "delivered"
+
+
+def test_order_matched_by_table_and_item_not_older_tasks():
+    store, _ = make_store()
+    store.update_battery(BATTERY_OK)
+    old = {"id": "TASK-0001", "target": "Table 3", "item": "1x Soup"}
+    store.update_queue_status(queue_status(pending=[old]))
+    store.register_order("abc", "Table 3", [], "1x Soup")
+    admin = {"id": "TASK-0002", "target": "Table 3", "item": "Admin dispatch"}
+    mine = {"id": "TASK-0003", "target": "Table 3", "item": "1x Soup"}
+    store.update_queue_status(queue_status(pending=[old, admin, mine]))
+    assert store.get_order("abc")["task_id"] == "TASK-0003"
 
 
 def test_order_disappearing_from_queue_is_cancelled():
     store, _ = make_store()
     store.update_battery(BATTERY_OK)
     store.register_order("abc", "Table 3", [], "x")
-    store.update_queue_status(queue_status(pending=[{"id": "TASK-0001", "target": "Table 3", "order_ref": "abc"}]))
+    store.update_queue_status(queue_status(pending=[{"id": "TASK-0001", "target": "Table 3", "item": "x"}]))
     store.update_queue_status(queue_status())
     assert store.get_order("abc")["status"] == "cancelled"
 
@@ -122,8 +135,9 @@ def test_failed_delivery_reported():
     store, _ = make_store()
     store.update_battery(BATTERY_OK)
     store.register_order("abc", "Table 3", [], "x")
-    task = {"id": "TASK-0001", "target": "Table 3", "order_ref": "abc", "status": "failed"}
-    store.update_queue_status(queue_status(history=[task]))
+    task = {"id": "TASK-0001", "target": "Table 3", "item": "x"}
+    store.update_queue_status(queue_status("navigating", current=task))
+    store.update_queue_status(queue_status("idle", completed=0))
     assert store.get_order("abc")["status"] == "failed"
 
 
@@ -193,12 +207,12 @@ def test_cancel_order_only_while_waiting(api):
     client, store, cmds = api
     store.update_battery(BATTERY_OK)
     ref = client.post("/api/orders", json={"target": "Table 2", "items": [{"id": "a", "name": "Tea", "qty": 1}]}).json()["order"]["order_ref"]
-    task = {"id": "TASK-0007", "target": "Table 2", "order_ref": ref}
+    task = {"id": "TASK-0007", "target": "Table 2", "item": "1x Tea"}
     store.update_queue_status(queue_status("navigating", current=task))
     assert client.delete(f"/api/orders/{ref}").status_code == 409
 
     ref2 = client.post("/api/orders", json={"target": "Table 4", "items": [{"id": "a", "name": "Tea", "qty": 1}]}).json()["order"]["order_ref"]
-    task2 = {"id": "TASK-0008", "target": "Table 4", "order_ref": ref2}
+    task2 = {"id": "TASK-0008", "target": "Table 4", "item": "1x Tea"}
     store.update_queue_status(queue_status("navigating", current=task, pending=[task2]))
     assert client.delete(f"/api/orders/{ref2}").status_code == 200
     assert ("cancel", "TASK-0008") in cmds.calls

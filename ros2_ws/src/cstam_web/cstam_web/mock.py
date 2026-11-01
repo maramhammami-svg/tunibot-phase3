@@ -49,7 +49,7 @@ class MockRobot:
     # --------------------------------------------------------------- commands
     def send_delivery(self, target: str, item: str, order_ref: str) -> None:
         with self._lock:
-            self.mgr.add_delivery_request(target, item, order_ref=order_ref or None)
+            self.mgr.add_delivery_request(target, item)
 
     def cancel_task(self, task_id: str) -> None:
         with self._lock:

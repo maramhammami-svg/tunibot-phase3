@@ -45,7 +45,6 @@ class TelemetryStore:
             "queue_length": 0,
             "pending_tasks": [],
             "completed_count": 0,
-            "recent_history": [],
             "battery_docking_lock": False,
         }
         self.battery: Dict[str, Any] = {}
@@ -57,8 +56,9 @@ class TelemetryStore:
         self.battery_history: deque = deque(maxlen=BATTERY_HISTORY_LEN)
         self._last_history_sample = 0.0
 
-        # Orders placed from the web UI, keyed by order_ref
+        # Orders placed from the web UI, keyed by order_ref (a web-side id only)
         self.orders: Dict[str, Dict[str, Any]] = {}
+        self._seen_task_ids: set = set()
 
         # Short event feed for the admin view
         self.events: deque = deque(maxlen=60)
@@ -179,47 +179,67 @@ class TelemetryStore:
             order = self.orders.get(order_ref)
             if order is None:
                 return None
-            out = {k: v for k, v in order.items() if k != "seen"}
+            out = {k: v for k, v in order.items() if k not in ("seen", "completed_seen")}
             return out
+
+    def _match_new_tasks(self, tasks: List[Dict[str, Any]]):
+        """Links web orders to the task ids the task manager created for them.
+
+        The Phase 1/2 task manager is left untouched, so it knows nothing about
+        web orders. A task that appears for the first time, for the same table
+        and with the same item text as a waiting web order, is that order.
+        """
+        for task in tasks:
+            tid = task.get("id")
+            if not tid or tid in self._seen_task_ids:
+                continue
+            self._seen_task_ids.add(tid)
+            waiting = [o for o in self.orders.values()
+                       if o["task_id"] is None and o["status"] == "submitted"
+                       and str(o["target"]).lower() == str(task.get("target", "")).lower()
+                       and o["label"] == task.get("item")]
+            if not waiting:
+                continue
+            order = min(waiting, key=lambda o: o["created_at"])
+            order["task_id"] = tid
 
     def _refresh_orders(self):
         """Derives each web order's status from the task manager's own queue status."""
         qs = self.queue_status
         pending = qs.get("pending_tasks") or []
         current = qs.get("current_task")
-        history = qs.get("recent_history") or []
+        completed = int(qs.get("completed_count") or 0)
         robot_state = qs.get("robot_state") or self.robot_state
         now = self._clock()
 
-        for ref, order in self.orders.items():
+        self._match_new_tasks(([current] if current else []) + list(pending))
+
+        for order in self.orders.values():
             if order["status"] in ("delivered", "failed", "cancelled", "rejected"):
                 continue
+            tid = order["task_id"]
 
-            found = False
-            for idx, task in enumerate(pending):
-                if task.get("order_ref") == ref:
-                    order.update(status="queued", task_id=task.get("id"), queue_position=idx + 1 + (1 if current else 0), seen=True)
-                    found = True
-                    break
-            if found:
+            if tid is None:
+                if now - order["created_at"] > ORDER_ACK_TIMEOUT_S and self.is_online():
+                    order.update(status="rejected")
                 continue
 
-            if current and current.get("order_ref") == ref:
+            idx = next((i for i, t in enumerate(pending) if t.get("id") == tid), None)
+            if idx is not None:
+                order.update(status="queued", queue_position=idx + 1 + (1 if current else 0),
+                             completed_seen=completed, seen=True)
+            elif current and current.get("id") == tid:
                 status = "arrived" if robot_state == "at_table" else "en_route"
-                order.update(status=status, task_id=current.get("id"), queue_position=0, seen=True)
-                continue
-
-            done = next((t for t in reversed(history) if t.get("order_ref") == ref), None)
-            if done is not None:
-                order.update(status="delivered" if done.get("status") == "completed" else "failed",
-                             task_id=done.get("id"), queue_position=None, seen=True)
-                continue
-
-            if order["seen"]:
-                # It was in the queue and disappeared without reaching the history: cancelled
-                order.update(status="cancelled", queue_position=None)
-            elif now - order["created_at"] > ORDER_ACK_TIMEOUT_S and self.is_online():
-                order.update(status="rejected")
+                order.update(status=status, queue_position=0, completed_seen=completed, seen=True)
+            elif order["seen"]:
+                # The task left the queue. The task manager's success counter tells
+                # a delivery apart from a failure / cancellation.
+                if completed > order.get("completed_seen", completed):
+                    order.update(status="delivered", queue_position=None)
+                elif order["status"] in ("en_route", "arrived"):
+                    order.update(status="failed", queue_position=None)
+                else:
+                    order.update(status="cancelled", queue_position=None)
 
     def mark_order_cancelled(self, order_ref: str):
         with self._lock:
@@ -271,7 +291,6 @@ class TelemetryStore:
                 "pending_tasks": list(qs.get("pending_tasks") or []),
                 "queue_length": qs.get("queue_length", 0),
                 "completed_count": qs.get("completed_count", 0),
-                "recent_history": list(qs.get("recent_history") or []),
                 "battery_docking_lock": bool(qs.get("battery_docking_lock")),
                 "battery": dict(self.battery),
                 "battery_history": list(self.battery_history),

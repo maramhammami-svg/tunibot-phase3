@@ -6,7 +6,7 @@ them into the TelemetryStore; publishes the commands coming from the web UI on
 the topics those nodes already listen to. No robot logic lives here.
 
   Subscribed                      Published
-  /delivery_queue_status (JSON)   /delivery_request      {"target","item","order_ref"}
+  /delivery_queue_status (JSON)   /delivery_request      {"target","item"}
   /robot_system_state             /delivery_task_action  {"action":"delete","task_id"}
   /battery_status (JSON)          /dock_command          DOCK_NOW:<reason> | STOP
   /amcl_pose + TF map->base       /battery_set_percentage "<pct>"   (test tool)
@@ -140,9 +140,9 @@ class WebBridgeNode(Node):
         pub.publish(msg)
 
     def send_delivery(self, target: str, item: str, order_ref: str) -> None:
+        # Same message format as Phase 1/2; the web order is matched to its task
+        # id from /delivery_queue_status (see TelemetryStore._match_new_tasks).
         payload = {"target": target, "item": item}
-        if order_ref:
-            payload["order_ref"] = order_ref
         self._pub(self.req_pub, json.dumps(payload))
 
     def cancel_task(self, task_id: str) -> None:
