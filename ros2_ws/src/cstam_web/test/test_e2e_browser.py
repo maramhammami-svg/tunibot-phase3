@@ -211,3 +211,30 @@ def test_pick_table_on_floor_plan(server, browser):
     assert page.locator(".table-btn[aria-label='Table 8']").get_attribute("aria-checked") == "true"
     assert page.inner_text("#order-btn") == "Commander (Table 8)"
     page.close()
+
+
+def test_several_orders_at_once(server, browser):
+    page = browser.new_page(locale="fr-FR", viewport={"width": 390, "height": 844})
+    page.goto(server + "/")
+    page.wait_for_selector(".cat-tab")
+
+    def order(table, dish, cat):
+        if page.is_visible("#change-table-btn"):
+            page.click("#change-table-btn")
+        page.click(f".table-btn[aria-label='{table}']")
+        page.click(f".cat-tab[data-cat='{cat}']")
+        page.click(f".menu-item[data-id={dish}] .add")
+        page.click("#order-btn")
+        page.click("#review-confirm")
+        page.wait_for_selector("#track-screen:not(.hidden)")
+
+    order("Table 3", "couscous", 1)
+    page.click("#another-btn")              # back to the menu, first order keeps going
+    page.wait_for_selector("#my-orders-btn:not(.hidden)")
+    order("Table 6", "bambalouni", 2)
+    page.wait_for_function("document.querySelectorAll('#my-orders .order-chip').length === 2", timeout=5000)
+    chips = page.locator("#my-orders .order-chip strong").all_inner_texts()
+    assert chips == ["Table 3", "Table 6"]
+    page.click("#my-orders .order-chip[data-ref] >> nth=0")   # switch to the first order
+    page.wait_for_function("document.querySelector('#track-items').innerText.includes('Table 3')", timeout=5000)
+    page.close()

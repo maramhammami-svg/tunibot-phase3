@@ -9,7 +9,16 @@
   const cart = {};          // item id -> qty
   let menuIndex = {};
   let availability = null;
-  let activeRef = localStorage.getItem(STORAGE_KEY);
+  // Several orders can be on their way at once: keep them all, view one at a time
+  const ORDERS_KEY = 'tunibot_orders';
+  let myOrders = [];  // [{ ref, status, target }]
+  try { myOrders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]').filter(o => o && o.ref); } catch (e) { myOrders = []; }
+  const legacy = localStorage.getItem(STORAGE_KEY);
+  if (legacy && !myOrders.some(o => o.ref === legacy)) myOrders.push({ ref: legacy, status: 'submitted', target: '' });
+  localStorage.removeItem(STORAGE_KEY);
+  let activeRef = myOrders.length ? myOrders[myOrders.length - 1].ref : null;
+  const FINAL = ['delivered', 'cancelled', 'failed', 'rejected'];
+  function saveOrders() { try { localStorage.setItem(ORDERS_KEY, JSON.stringify(myOrders)); } catch (e) { /* private mode */ } }
   let pollTimer = null;
   let lastStatus = null;
   let lastOrder = null;
@@ -508,7 +517,8 @@
         body: { target: table, items, note: $('note-input').value.trim() || null },
       });
       activeRef = res.order.order_ref;
-      localStorage.setItem(STORAGE_KEY, activeRef);
+      myOrders.push({ ref: activeRef, status: res.order.status, target: res.order.target });
+      saveOrders();
       for (const k of Object.keys(cart)) delete cart[k];
       $('note-input').value = '';
       $('voice-result').classList.add('hidden');
@@ -549,14 +559,43 @@
   }
 
   async function pollOrder() {
-    if (!activeRef) return;
-    try {
-      renderOrder(await Tuni.api(`/api/orders/${activeRef}`));
-    } catch (e) {
-      if (/not found/i.test(e.message)) {  // server restarted: forget the order
-        resetToOrder();
-      }
+    if (!myOrders.length) { renderMyOrders(); return; }
+    const results = await Promise.all(myOrders.map(o =>
+      Tuni.api(`/api/orders/${o.ref}`).then(r => ({ o, r }), e => ({ o, e }))));
+    for (const { o, r, e } of results) {
+      if (r) { o.status = r.status; o.target = r.target; o.data = r; }
+      else if (e && /not found/i.test(e.message)) o.gone = true;  // server restarted
     }
+    myOrders = myOrders.filter(o => !o.gone);
+    saveOrders();
+    if (activeRef && !myOrders.some(o => o.ref === activeRef)) activeRef = myOrders.length ? myOrders[myOrders.length - 1].ref : null;
+    const current = myOrders.find(o => o.ref === activeRef);
+    if (current && current.data && !$('track-screen').classList.contains('hidden')) renderOrder(current.data);
+    if (!current && !$('track-screen').classList.contains('hidden')) resetToOrder();
+    renderMyOrders();
+  }
+
+  // Chips to switch between your orders + the header button that opens them
+  function renderMyOrders() {
+    const live = myOrders.filter(o => !FINAL.includes(o.status));
+    const btn = $('my-orders-btn');
+    btn.classList.toggle('hidden', !myOrders.length || !$('track-screen').classList.contains('hidden'));
+    btn.querySelector('span').textContent = t('my_orders', live.length || myOrders.length);
+    const box = $('my-orders');
+    box.classList.toggle('hidden', myOrders.length < 2);
+    box.innerHTML = myOrders.map(o => {
+      const st = VIEW[o.status] ? o.status : 'submitted';
+      return `<button type="button" class="order-chip${o.ref === activeRef ? ' active' : ''}" data-ref="${Tuni.escapeHtml(o.ref)}" data-status="${st}">
+        <strong>${Tuni.escapeHtml(o.target || '…')}</strong><span>${Tuni.escapeHtml(t(`st_${st}`)[0])}</span></button>`;
+    }).join('');
+    box.querySelectorAll('.order-chip').forEach(b => {
+      b.onclick = () => {
+        activeRef = b.dataset.ref; lastStatus = null;
+        const o = myOrders.find(x => x.ref === activeRef);
+        if (o && o.data) renderOrder(o.data);
+        renderMyOrders();
+      };
+    });
   }
 
   function renderOrder(o) {
@@ -594,11 +633,11 @@
     const final = ['delivered', 'cancelled', 'failed', 'rejected'].includes(o.status);
     $('cancel-btn').classList.toggle('hidden', !['submitted', 'queued'].includes(o.status));
     $('new-order-btn').classList.toggle('hidden', !final);
+    $('another-btn').classList.toggle('hidden', final);
     if (o.status !== lastStatus) {
       if (o.status === 'arrived' && navigator.vibrate) navigator.vibrate([200, 100, 200]);
       lastStatus = o.status;
     }
-    if (final) clearInterval(pollTimer);
   }
 
   $('cancel-btn').onclick = async () => {
@@ -611,18 +650,24 @@
     }
   };
 
+  // Back to the menu; orders still on their way stay in "My orders"
   function resetToOrder() {
-    clearInterval(pollTimer);
-    activeRef = null;
+    myOrders = myOrders.filter(o => !FINAL.includes(o.status));
+    saveOrders();
+    activeRef = myOrders.length ? myOrders[myOrders.length - 1].ref : null;
     lastStatus = null;
     lastOrder = null;
-    localStorage.removeItem(STORAGE_KEY);
     $('track-screen').classList.add('hidden');
     $('order-screen').classList.remove('hidden');
     $('checkout').classList.remove('hidden');
+    clearInterval(pollTimer);
+    if (myOrders.length) pollTimer = setInterval(pollOrder, 3000);
+    renderMyOrders();
     updateCheckout();
   }
   $('new-order-btn').onclick = resetToOrder;
+  $('another-btn').onclick = resetToOrder;
+  $('my-orders-btn').onclick = () => { if (myOrders.length) showTracking(); };
 
   // ------------------------------------------------------------ live status
   let connected = false;

@@ -114,6 +114,7 @@
     <!-- TRACKING SCREEN -->
     <section id="track-screen" class="hidden" aria-live="polite">
       <div class="card track-card">
+        <div class="my-orders hidden" id="my-orders" role="tablist" data-i18n-aria="my_orders_aria"></div>
         <div class="track-emoji" id="track-emoji"></div>
         <svg class="waiter track-waiter" id="track-waiter" viewBox="0 0 160 170" aria-hidden="true">
           <g class="w-steam" fill="none" stroke="#a8603a" stroke-width="2.4" stroke-linecap="round">
@@ -150,6 +151,7 @@
         <div class="track-actions">
           <button class="btn danger block hidden" id="cancel-btn" type="button" data-i18n="cancel_order"></button>
           <button class="btn primary block big hidden" id="new-order-btn" type="button" data-i18n="new_order"></button>
+          <button class="btn block another-btn" id="another-btn" type="button" data-i18n="another_order"></button>
         </div>
       </div>
     </section>
@@ -169,6 +171,9 @@
       <button class="btn primary big" id="review-confirm" type="button"></button>
     </div>
   </section>
+
+  <!-- Your other orders, one tap away -->
+  <button class="btn small my-orders-btn hidden" id="my-orders-btn" type="button"><span class="ico-slot" data-icon="receipt"></span><span></span></button>
 
   <!-- Sticky checkout bar -->
   <div class="checkout" id="checkout">
