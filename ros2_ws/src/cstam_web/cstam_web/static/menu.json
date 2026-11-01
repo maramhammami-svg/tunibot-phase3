@@ -1,0 +1,43 @@
+{
+  "resto_arbi": {
+    "title": "Dar Tunibot",
+    "subtitle": "Mediterranean heritage restaurant",
+    "categories": [
+      {"name": "Drinks", "items": [
+        {"id": "cafe-direct", "name": "Café Direct", "emoji": "☕", "desc": "Tunisian coffee with milk"},
+        {"id": "the-menthe", "name": "Thé à la menthe", "emoji": "🍵", "desc": "Mint tea with pine nuts"},
+        {"id": "citronnade", "name": "Citronnade aux amandes", "emoji": "🥤", "desc": "Fresh lemon & almond drink"}
+      ]},
+      {"name": "Dishes", "items": [
+        {"id": "brik", "name": "Brik à l'oeuf", "emoji": "🥟", "desc": "Crispy pastry, egg, tuna, parsley"},
+        {"id": "salade-tunisienne", "name": "Salade tunisienne", "emoji": "🥗", "desc": "Tomato, cucumber, onion, tuna"},
+        {"id": "couscous", "name": "Couscous royal", "emoji": "🥘", "desc": "Lamb, vegetables, chickpeas"},
+        {"id": "ojja", "name": "Ojja merguez", "emoji": "🍳", "desc": "Spicy tomato & egg skillet"}
+      ]},
+      {"name": "Desserts", "items": [
+        {"id": "bambalouni", "name": "Bambalouni", "emoji": "🍩", "desc": "Sidi Bou Said doughnut"},
+        {"id": "makroudh", "name": "Makroudh au miel", "emoji": "🍯", "desc": "Semolina & date pastry"}
+      ]}
+    ]
+  },
+  "restaurant": {
+    "title": "Restaurant Lounge",
+    "subtitle": "Modern restaurant & grand promenade",
+    "categories": [
+      {"name": "Drinks", "items": [
+        {"id": "espresso", "name": "Espresso", "emoji": "☕", "desc": "Double shot"},
+        {"id": "lemonade", "name": "Sparkling lemonade", "emoji": "🥤", "desc": "House-made"},
+        {"id": "water", "name": "Mineral water", "emoji": "💧", "desc": "50 cl"}
+      ]},
+      {"name": "Dishes", "items": [
+        {"id": "burger", "name": "Burger & fries", "emoji": "🍔", "desc": "Beef, cheddar, fries"},
+        {"id": "pasta", "name": "Pasta carbonara", "emoji": "🍝", "desc": "Chef's recipe"},
+        {"id": "salad", "name": "Mediterranean salad", "emoji": "🥗", "desc": "Feta, olives, tomato"}
+      ]},
+      {"name": "Desserts", "items": [
+        {"id": "croissant", "name": "Croissant", "emoji": "🥐", "desc": "Butter croissant & jam"},
+        {"id": "tiramisu", "name": "Tiramisu", "emoji": "🍰", "desc": "Classic"}
+      ]}
+    ]
+  }
+}

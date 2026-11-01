@@ -1,0 +1,68 @@
+.top-pills { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.admin-grid { display: grid; grid-template-columns: 320px minmax(0, 1fr) 340px; gap: 16px; padding: 16px; max-width: 1700px; margin: 0 auto; }
+.col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.small { font-size: 12px; }
+.label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin: 10px 0 6px; }
+.chip { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--card-2); color: var(--muted); text-transform: uppercase; }
+.chip.ok { background: var(--green-soft); color: #6ee7b7; }
+.chip.warn { background: var(--amber-soft); color: #fcd34d; }
+.chip.bad { background: var(--red-soft); color: #fda4af; }
+.chip.info { background: var(--blue-soft); color: #7dd3fc; }
+.sub-h { margin-top: 16px; }
+
+.battery-big { display: flex; align-items: center; gap: 14px; }
+.gauge { position: relative; flex: 1; height: 26px; border-radius: 8px; background: var(--bg-2); border: 1px solid var(--border-2); overflow: hidden; }
+.gauge-fill { height: 100%; width: 0; background: var(--green); transition: width .5s, background .3s; }
+.gauge-mark { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,.35); }
+.gauge-mark.low { left: 25%; }
+.gauge-mark.critical { left: 15%; background: rgba(244,63,94,.6); }
+.battery-pct { font-size: 26px; font-weight: 800; min-width: 86px; text-align: right; }
+.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin-top: 12px; }
+.metrics > div { display: flex; flex-direction: column; gap: 2px; font-size: 14px; min-width: 0; }
+.metrics .wide { grid-column: span 2; }
+.metrics .label { margin: 0; }
+.spark { width: 100%; margin-top: 12px; display: block; }
+.spark-caption { font-size: 11px; margin-top: 4px; }
+
+.health { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.health li { display: flex; align-items: center; gap: 7px; font-size: 13px; }
+.health .dot.on { color: var(--green); }
+.health .dot.off { color: var(--red); }
+
+.map-card { padding-bottom: 12px; }
+.map-wrap { width: 100%; }
+#map { display: block; border-radius: 12px; }
+
+.events { list-style: none; max-height: 220px; overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
+.events li { display: flex; gap: 10px; }
+.events time { font-family: var(--mono); color: var(--dim); font-size: 12px; flex-shrink: 0; }
+.events .warn { color: #fcd34d; }
+.events .alert { color: #fda4af; font-weight: 600; }
+.events .empty { color: var(--dim); font-style: italic; }
+
+.queue { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; }
+.queue li { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; background: var(--bg-2); border: 1px solid var(--border); }
+.queue li.active { border-color: rgba(56,189,248,.5); background: rgba(56,189,248,.07); }
+.queue .q-main { flex: 1; min-width: 0; }
+.queue .q-target { font-weight: 700; }
+.queue .q-item { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.queue .q-id { font-family: var(--mono); font-size: 11px; color: var(--gold-2); }
+.queue .empty { justify-content: center; color: var(--dim); font-style: italic; background: none; border: 1px dashed var(--border-2); }
+.lock-note { margin-top: 10px; font-size: 13px; color: #fcd34d; }
+
+.btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn-grid .btn { font-size: 13px; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.dispatch-row { display: flex; gap: 8px; }
+.dispatch select { flex: 1; padding: 8px 10px; border-radius: 10px; background: var(--bg-2); color: var(--text); border: 1px solid var(--border-2); font: inherit; }
+
+@media (max-width: 1250px) {
+  .admin-grid { grid-template-columns: 300px minmax(0, 1fr); }
+  .admin-grid > .col:last-child { grid-column: span 2; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+}
+@media (max-width: 760px) {
+  .admin-grid { grid-template-columns: 1fr; padding: 10px; }
+  .admin-grid > .col:last-child { grid-column: auto; }
+  .admin-grid > .center { order: -1; }
+  .top-pills .btn { display: none; }
+}

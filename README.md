@@ -62,6 +62,34 @@ The system integrates 3D Gazebo simulation (Harmonic), a BellaBot differential-d
 
 ---
 
+## 🖥️ Phase 3: Web Interface (Client + Admin)
+
+A web interface served by the new ROS 2 package `cstam_web`. It only relays the topics the robot already publishes (task manager, battery simulator, AMCL/Nav2, pedestrian), so the UI always shows the real robot state.
+
+| Page | URL | For |
+|------|-----|-----|
+| Client | `http://<PC-IP>:8000/` (or `/?table=5` from a table QR code) | Guests: pick a table and dishes, then follow the delivery live (queued → on the way → at your table → delivered), cancel while still queued |
+| Admin | `http://<PC-IP>:8000/admin` | Staff: live floor map with the Nav2 path, battery gauge and 5-minute history, queue with cancel, return-to-dock, system health, event log, and test buttons (low/critical battery, pedestrian modes) |
+
+<p>
+<img src="docs/screenshots/web_client_order.png" width="200"> <img src="docs/screenshots/web_client_tracking.png" width="200"> <img src="docs/screenshots/web_admin.png" width="520">
+</p>
+
+**Run it**
+
+```bash
+pip install -r requirements.txt               # fastapi + uvicorn[standard]
+cd ros2_ws && colcon build --symlink-install && source install/setup.bash && cd ..
+
+./run_autonomous_system.sh                    # terminal 1: robot (Gazebo, Nav2, core nodes)
+./run_web_interface.sh                        # terminal 2: web interface on port 8000
+./run_web_interface.sh --mock --world resto_arbi   # or: demo mode without ROS 2 / Gazebo
+```
+
+Phones on the same Wi-Fi can open the client page with the PC's IP address. Web tests: `python3 -m pytest ros2_ws/src/cstam_web/test`.
+
+---
+
 ## 🚀 Quick Start Guide
 
 ### 1. Prerequisites & Environment Setup

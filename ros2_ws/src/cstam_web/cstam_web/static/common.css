@@ -1,0 +1,91 @@
+/* CSTAM TuniBot web interface — shared styles (palette carried over from the Phase 1 dashboard) */
+:root {
+  --bg: #0b0f17;
+  --bg-2: #111725;
+  --card: #151c2b;
+  --card-2: #1b2436;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-2: rgba(255, 255, 255, 0.16);
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --dim: #64748b;
+  --gold: #d4a04b;
+  --gold-2: #f3c273;
+  --gold-soft: rgba(212, 160, 75, 0.14);
+  --blue: #38bdf8;
+  --blue-soft: rgba(56, 189, 248, 0.14);
+  --green: #10b981;
+  --green-soft: rgba(16, 185, 129, 0.14);
+  --amber: #f59e0b;
+  --amber-soft: rgba(245, 158, 11, 0.14);
+  --red: #f43f5e;
+  --red-soft: rgba(244, 63, 94, 0.14);
+  --radius: 16px;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--text); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+body { min-height: 100vh; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 0.45; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+a { color: var(--blue); }
+.mono { font-family: var(--mono); }
+.muted { color: var(--muted); }
+.hidden { display: none !important; }
+
+/* Top bar */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 18px; background: rgba(11, 15, 23, 0.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand > div { min-width: 0; }
+.topbar > .pill { flex-shrink: 0; }
+.brand-logo { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--gold-soft); font-size: 20px; flex-shrink: 0; }
+.brand-title { font-weight: 800; font-size: 15px; letter-spacing: 0.2px; }
+.brand-sub { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Pills, chips, dots */
+.pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--card); border: 1px solid var(--border); white-space: nowrap; }
+.pill.ready { color: #6ee7b7; border-color: rgba(16,185,129,.35); background: var(--green-soft); }
+.pill.busy { color: #7dd3fc; border-color: rgba(56,189,248,.35); background: var(--blue-soft); }
+.pill.charging { color: #fcd34d; border-color: rgba(245,158,11,.35); background: var(--amber-soft); }
+.pill.offline { color: #fda4af; border-color: rgba(244,63,94,.35); background: var(--red-soft); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.dot.pulse { animation: pulse 1.4s infinite ease-in-out; }
+@keyframes pulse { 50% { transform: scale(1.4); opacity: .6; } }
+
+.banner { padding: 10px 18px; font-size: 13px; text-align: center; }
+.banner.demo { background: var(--amber-soft); color: #fcd34d; border-bottom: 1px solid rgba(245,158,11,.3); }
+.banner.offline { background: var(--red-soft); color: #fda4af; border-bottom: 1px solid rgba(244,63,94,.3); }
+
+/* Cards */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.card h2 { font-size: 15px; font-weight: 700; }
+.card h3 { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 16px; border-radius: 12px; border: 1px solid var(--border-2); background: var(--card-2); font-weight: 600; font-size: 14px; transition: transform .08s, background .15s, border-color .15s; }
+.btn:hover:not(:disabled) { border-color: var(--gold); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn.primary { background: linear-gradient(135deg, #d97706, #b45309); border-color: transparent; color: #fff; }
+.btn.primary:hover:not(:disabled) { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.btn.danger { background: var(--red-soft); border-color: rgba(244,63,94,.4); color: #fda4af; }
+.btn.warn { background: var(--amber-soft); border-color: rgba(245,158,11,.4); color: #fcd34d; }
+.btn.ok { background: var(--green-soft); border-color: rgba(16,185,129,.4); color: #6ee7b7; }
+.btn.small { padding: 7px 11px; font-size: 12px; border-radius: 10px; }
+.btn.block { width: 100%; }
+.btn.big { padding: 15px 18px; font-size: 16px; border-radius: 14px; }
+
+/* Toasts */
+.toasts { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 50; width: min(92vw, 420px); pointer-events: none; }
+.toast { background: #0f172a; border: 1px solid var(--border-2); border-radius: 12px; padding: 11px 14px; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,.5); animation: toast-in .25s ease-out; }
+.toast.error { border-color: rgba(244,63,94,.5); }
+.toast.success { border-color: rgba(16,185,129,.5); }
+@keyframes toast-in { from { transform: translateY(10px); opacity: 0; } }
