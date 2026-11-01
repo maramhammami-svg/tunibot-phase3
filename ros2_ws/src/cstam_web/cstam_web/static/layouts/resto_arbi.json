@@ -1,0 +1,484 @@
+{
+  "walls": [
+    {
+      "model": "dar_walls",
+      "link": "wall0_c",
+      "x": 0.0,
+      "y": 8.0,
+      "sx": 22.2,
+      "sy": 0.2,
+      "sz": 3.0,
+      "yaw": 0.0
+    },
+    {
+      "model": "dar_walls",
+      "link": "wall1_c",
+      "x": -11.0,
+      "y": 0.0,
+      "sx": 16.2,
+      "sy": 0.2,
+      "sz": 3.0,
+      "yaw": 1.5708
+    },
+    {
+      "model": "dar_walls",
+      "link": "wall2_c",
+      "x": 11.0,
+      "y": 0.0,
+      "sx": 16.2,
+      "sy": 0.2,
+      "sz": 3.0,
+      "yaw": 1.5708
+    },
+    {
+      "model": "dar_walls",
+      "link": "wall3_c",
+      "x": -6.0,
+      "y": -8.0,
+      "sx": 10.2,
+      "sy": 0.2,
+      "sz": 3.0,
+      "yaw": 0.0
+    },
+    {
+      "model": "dar_walls",
+      "link": "wall4_c",
+      "x": 6.0,
+      "y": -8.0,
+      "sx": 10.2,
+      "sy": 0.2,
+      "sz": 3.0,
+      "yaw": 0.0
+    },
+    {
+      "model": "dar_walls",
+      "link": "wall5_c",
+      "x": -8.5,
+      "y": 2.0,
+      "sx": 5.2,
+      "sy": 0.2,
+      "sz": 3.0,
+      "yaw": 0.0
+    },
+    {
+      "model": "dar_walls",
+      "link": "wall6_c",
+      "x": -6.0,
+      "y": 3.3,
+      "sx": 2.8,
+      "sy": 0.2,
+      "sz": 3.0,
+      "yaw": 1.5708
+    },
+    {
+      "model": "dar_walls",
+      "link": "wall7_c",
+      "x": -6.0,
+      "y": 7.0,
+      "sx": 2.2,
+      "sy": 0.2,
+      "sz": 3.0,
+      "yaw": 1.5708
+    },
+    {
+      "model": "dar_walls",
+      "link": "wall8_c",
+      "x": 6.0,
+      "y": 5.5,
+      "sx": 5.2,
+      "sy": 0.2,
+      "sz": 3.0,
+      "yaw": 1.5708
+    },
+    {
+      "model": "dar_walls",
+      "link": "wall9_c",
+      "x": 6.45,
+      "y": 3.0,
+      "sx": 1.1,
+      "sy": 0.2,
+      "sz": 3.0,
+      "yaw": 0.0
+    },
+    {
+      "model": "dar_walls",
+      "link": "wall10_c",
+      "x": 9.5,
+      "y": 3.0,
+      "sx": 3.2,
+      "sy": 0.2,
+      "sz": 3.0,
+      "yaw": 0.0
+    },
+    {
+      "model": "fountain",
+      "link": "basin_0_c",
+      "x": 0.0,
+      "y": 1.0,
+      "sx": 1.36,
+      "sy": 1.36,
+      "sz": 0.5,
+      "yaw": 0.0
+    },
+    {
+      "model": "fountain",
+      "link": "basin_1_c",
+      "x": 0.0,
+      "y": 1.0,
+      "sx": 1.36,
+      "sy": 1.36,
+      "sz": 0.5,
+      "yaw": 0.7854
+    },
+    {
+      "model": "fountain",
+      "link": "pedestal1_c",
+      "x": 0.0,
+      "y": 1.0,
+      "sx": 0.34,
+      "sy": 0.34,
+      "sz": 0.5,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.17
+    },
+    {
+      "model": "fountain",
+      "link": "pedestal2_c",
+      "x": 0.0,
+      "y": 1.0,
+      "sx": 0.22,
+      "sy": 0.22,
+      "sz": 0.4,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.11
+    },
+    {
+      "model": "fountain",
+      "link": "pedestal3_c",
+      "x": 0.0,
+      "y": 1.0,
+      "sx": 0.14,
+      "sy": 0.14,
+      "sz": 0.28,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.07
+    },
+    {
+      "model": "fountain",
+      "link": "bowl1_c",
+      "x": 0.0,
+      "y": 1.0,
+      "sx": 1.16,
+      "sy": 1.16,
+      "sz": 0.08,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.58
+    },
+    {
+      "model": "fountain",
+      "link": "bowl2_c",
+      "x": 0.0,
+      "y": 1.0,
+      "sx": 0.76,
+      "sy": 0.76,
+      "sz": 0.07,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.38
+    },
+    {
+      "model": "column_0",
+      "link": "base_c",
+      "x": -4.0,
+      "y": -2.0,
+      "sx": 0.52,
+      "sy": 0.52,
+      "sz": 0.15,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.26
+    },
+    {
+      "model": "column_0",
+      "link": "shaft_c",
+      "x": -4.0,
+      "y": -2.0,
+      "sx": 0.4,
+      "sy": 0.4,
+      "sz": 3.0,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.2
+    },
+    {
+      "model": "column_1",
+      "link": "base_c",
+      "x": 0.0,
+      "y": -2.0,
+      "sx": 0.52,
+      "sy": 0.52,
+      "sz": 0.15,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.26
+    },
+    {
+      "model": "column_1",
+      "link": "shaft_c",
+      "x": 0.0,
+      "y": -2.0,
+      "sx": 0.4,
+      "sy": 0.4,
+      "sz": 3.0,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.2
+    },
+    {
+      "model": "column_2",
+      "link": "base_c",
+      "x": 4.0,
+      "y": -2.0,
+      "sx": 0.52,
+      "sy": 0.52,
+      "sz": 0.15,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.26
+    },
+    {
+      "model": "column_2",
+      "link": "shaft_c",
+      "x": 4.0,
+      "y": -2.0,
+      "sx": 0.4,
+      "sy": 0.4,
+      "sz": 3.0,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.2
+    },
+    {
+      "model": "column_3",
+      "link": "base_c",
+      "x": -4.0,
+      "y": 4.0,
+      "sx": 0.52,
+      "sy": 0.52,
+      "sz": 0.15,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.26
+    },
+    {
+      "model": "column_3",
+      "link": "shaft_c",
+      "x": -4.0,
+      "y": 4.0,
+      "sx": 0.4,
+      "sy": 0.4,
+      "sz": 3.0,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.2
+    },
+    {
+      "model": "column_4",
+      "link": "base_c",
+      "x": 0.0,
+      "y": 4.0,
+      "sx": 0.52,
+      "sy": 0.52,
+      "sz": 0.15,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.26
+    },
+    {
+      "model": "column_4",
+      "link": "shaft_c",
+      "x": 0.0,
+      "y": 4.0,
+      "sx": 0.4,
+      "sy": 0.4,
+      "sz": 3.0,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.2
+    },
+    {
+      "model": "column_5",
+      "link": "base_c",
+      "x": 4.0,
+      "y": 4.0,
+      "sx": 0.52,
+      "sy": 0.52,
+      "sz": 0.15,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.26
+    },
+    {
+      "model": "column_5",
+      "link": "shaft_c",
+      "x": 4.0,
+      "y": 4.0,
+      "sx": 0.4,
+      "sy": 0.4,
+      "sz": 3.0,
+      "yaw": 0.0,
+      "is_cylinder": true,
+      "radius": 0.2
+    },
+    {
+      "model": "pickup_counter",
+      "link": "body_c",
+      "x": -8.5,
+      "y": 7.55,
+      "sx": 4.0,
+      "sy": 0.6,
+      "sz": 0.95,
+      "yaw": 0.0
+    },
+    {
+      "model": "charging_dock",
+      "link": "body_c",
+      "x": -10.8,
+      "y": -1.45,
+      "sx": 0.2,
+      "sy": 0.7,
+      "sz": 0.4,
+      "yaw": 0.0
+    }
+  ],
+  "tables": [
+    {
+      "model": "table_1",
+      "x": -2.3,
+      "y": 6.4,
+      "radius": 0.55,
+      "chairs": 4,
+      "label": "Table 1"
+    },
+    {
+      "model": "table_2",
+      "x": 2.3,
+      "y": 6.4,
+      "radius": 0.55,
+      "chairs": 4,
+      "label": "Table 2"
+    },
+    {
+      "model": "table_3",
+      "x": 8.3,
+      "y": 1.0,
+      "radius": 0.55,
+      "chairs": 4,
+      "label": "Table 3"
+    },
+    {
+      "model": "table_4",
+      "x": 8.3,
+      "y": -2.3,
+      "radius": 0.55,
+      "chairs": 4,
+      "label": "Table 4"
+    },
+    {
+      "model": "table_5",
+      "x": -7.2,
+      "y": -6.3,
+      "radius": 0.55,
+      "chairs": 4,
+      "label": "Table 5"
+    },
+    {
+      "model": "table_6",
+      "x": -3.6,
+      "y": -6.3,
+      "radius": 0.55,
+      "chairs": 4,
+      "label": "Table 6"
+    },
+    {
+      "model": "table_7",
+      "x": 3.6,
+      "y": -6.3,
+      "radius": 0.55,
+      "chairs": 4,
+      "label": "Table 7"
+    },
+    {
+      "model": "table_8",
+      "x": 7.2,
+      "y": -6.3,
+      "radius": 0.55,
+      "chairs": 4,
+      "label": "Table 8"
+    },
+    {
+      "model": "table_9",
+      "x": -7.6,
+      "y": 0.0,
+      "radius": 0.55,
+      "chairs": 4,
+      "label": "Table 9"
+    },
+    {
+      "model": "table_10",
+      "x": -7.6,
+      "y": -2.9,
+      "radius": 0.55,
+      "chairs": 4,
+      "label": "Table 10"
+    }
+  ],
+  "zones": [
+    {
+      "name": "Kitchen Prep & Pickup",
+      "x": -8.5,
+      "y": 6.6,
+      "color": "#3b82f6"
+    },
+    {
+      "name": "Charging Dock",
+      "x": -10.0,
+      "y": -1.45,
+      "color": "#10b981"
+    },
+    {
+      "name": "North Dining Salon",
+      "x": 0.0,
+      "y": 5.8,
+      "color": "#f59e0b"
+    },
+    {
+      "name": "Central Fountain Court",
+      "x": 0.0,
+      "y": 1.0,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "East Grand Salon",
+      "x": 8.0,
+      "y": -0.5,
+      "color": "#8b5cf6"
+    },
+    {
+      "name": "South Terrace",
+      "x": 0.0,
+      "y": -5.8,
+      "color": "#ec4899"
+    },
+    {
+      "name": "West Arcade",
+      "x": -7.0,
+      "y": -1.5,
+      "color": "#6366f1"
+    }
+  ]
+}

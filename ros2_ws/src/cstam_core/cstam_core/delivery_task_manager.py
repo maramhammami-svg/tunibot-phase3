@@ -108,7 +108,7 @@ class TaskQueueManager:
                 return wp
         return None
 
-    def add_delivery_request(self, target_location: str, item_description: str = "") -> dict:
+    def add_delivery_request(self, target_location: str, item_description: str = "", order_ref: str | None = None) -> dict:
         with self.lock:
             resolved = self._resolve_target(target_location)
             if not resolved:
@@ -122,6 +122,9 @@ class TaskQueueManager:
                 "created_at": time.time(),
                 "completed_at": None
             }
+            if order_ref:
+                # Client-side reference (e.g. from the web UI) so the order can be tracked end to end
+                task["order_ref"] = str(order_ref)[:64]
             self.task_id_counter += 1
             self.queue.append(task)
             return {"success": True, "task": task}
@@ -223,7 +226,8 @@ class TaskQueueManager:
                 "current_task": self.current_task,
                 "queue_length": len(self.queue),
                 "pending_tasks": list(self.queue),
-                "completed_count": completed_success
+                "completed_count": completed_success,
+                "recent_history": list(self.task_history[-10:])
             }
 
 
@@ -454,7 +458,7 @@ class DeliveryTaskManagerNode(Node):
             data = json.loads(msg.data)
             target = data.get('target', '')
             item = data.get('item', '')
-            res = self.manager.add_delivery_request(target, item)
+            res = self.manager.add_delivery_request(target, item, order_ref=data.get('order_ref'))
             if res['success']:
                 task_id = res['task']['id']
                 resolved_target = res['task']['target']

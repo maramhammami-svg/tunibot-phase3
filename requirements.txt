@@ -5,3 +5,8 @@ pytest>=7.0.0
 # Only needed for record_dynamic_obstacle_demo.py
 numpy>=1.24
 opencv-python>=4.8
+# Phase 3 web interface (ros2_ws/src/cstam_web)
+fastapi>=0.110
+uvicorn[standard]>=0.27
+# Only needed to run the web tests
+httpx>=0.27
