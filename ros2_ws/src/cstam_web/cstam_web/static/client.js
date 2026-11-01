@@ -115,18 +115,23 @@
     root.innerHTML = '';
     menuIndex = {};
     const catNames = t('cat');
-    for (const cat of config.menu.categories) {
+    const cats = config.menu.categories;
+    const catName = c => I18n.field(c, 'name') || catNames[c.name] || c.name;
+    root.classList.add('menu-book');
+    for (const cat of cats) {
+      const idx = cats.indexOf(cat);
       const sec = document.createElement('div');
-      sec.className = 'menu-cat';
-      sec.id = `cat-${config.menu.categories.indexOf(cat)}`;
-      sec.innerHTML = `<h3>${Tuni.escapeHtml(I18n.field(cat, 'name') || catNames[cat.name] || cat.name)}</h3>`;
+      sec.className = `menu-cat page${idx === bookPage ? ' current' : ''}`;
+      sec.id = `cat-${idx}`;
+      sec.dataset.page = idx;
+      sec.innerHTML = `<header class="page-head"><h3>${Tuni.escapeHtml(catName(cat))}</h3><span class="page-orn" aria-hidden="true"></span></header>`;
       for (const it of cat.items) {
         menuIndex[it.id] = it;
         const row = document.createElement('div');
         row.className = 'menu-item';
         row.dataset.id = it.id;
         row.innerHTML = `
-          <div class="menu-emoji" aria-hidden="true">${Icons.svg(it.id)}</div>
+          <div class="menu-emoji" aria-hidden="true">${Dishes.svg(it.id)}</div>
           <div class="menu-text">
             <div class="menu-name">${Tuni.escapeHtml(it.name)}</div>
             <div class="menu-desc">${Tuni.escapeHtml(I18n.field(it, 'desc'))}</div>
@@ -140,10 +145,57 @@
         row.querySelector('.minus').onclick = () => changeQty(it.id, -1);
         sec.appendChild(row);
       }
+      const next = (idx + 1) % cats.length;
+      const foot = document.createElement('footer');
+      foot.className = 'page-foot';
+      foot.innerHTML = `<span class="page-no">${idx + 1} / ${cats.length}</span>
+        <button type="button" class="page-turn">${Tuni.escapeHtml(idx + 1 < cats.length ? t('page_next', catName(cats[next])) : t('page_first', catName(cats[0])))}</button>`;
+      foot.querySelector('.page-turn').onclick = () => goToPage(next, true);
+      sec.appendChild(foot);
       root.appendChild(sec);
     }
     refreshQty();
   }
+
+  // ---- Menu book: one category per page, pages turn like a real menu
+  let bookPage = 0;
+  let turning = null;
+  function goToPage(i, scroll) {
+    const cats = config.menu.categories;
+    i = Math.max(0, Math.min(cats.length - 1, i));
+    const book = $('menu');
+    if (i === bookPage) return;
+    const from = $(`cat-${bookPage}`), to = $(`cat-${i}`);
+    const forward = i > bookPage;
+    bookPage = i;
+    highlightCat();
+    if (turning) { clearTimeout(turning.t); turning.done(); }
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    book.querySelectorAll('.page').forEach(p => p.classList.remove('current', 'turn-out', 'turn-in', 'under'));
+    to.classList.add('current');
+    if (!reduce && from) {
+      from.classList.add(forward ? 'turn-out' : 'under');
+      if (!forward) to.classList.add('turn-in');
+      const done = () => { from.classList.remove('turn-out', 'under'); to.classList.remove('turn-in'); turning = null; };
+      turning = { done, t: setTimeout(done, 650) };
+    }
+    if (scroll) {
+      const nav = $('cat-tabs');
+      const y = nav.getBoundingClientRect().top + window.scrollY - 70;
+      if (window.scrollY > y) window.scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+    }
+  }
+  // Swipe left / right on the book to turn pages
+  (() => {
+    let x0 = null, y0 = null;
+    $('menu').addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    $('menu').addEventListener('touchend', e => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+      x0 = null;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) goToPage(bookPage + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+  })();
 
   function renderCatTabs() {
     const nav = $('cat-tabs');
@@ -151,36 +203,17 @@
     nav.innerHTML = config.menu.categories.map((cat, i) =>
       `<button type="button" class="cat-tab" data-cat="${i}">${Tuni.escapeHtml(I18n.field(cat, 'name') || catNames[cat.name] || cat.name)}<span class="cat-count" id="cat-count-${i}"></span></button>`).join('');
     nav.querySelectorAll('.cat-tab').forEach(b => {
-      b.onclick = () => {
-        const sec = $(`cat-${b.dataset.cat}`);
-        const y = sec.getBoundingClientRect().top + window.scrollY - nav.offsetHeight - 70;
-        pendingCat = Number(b.dataset.cat);
-        window.scrollTo({ top: y, behavior: 'smooth' });
-        highlightCat();
-        clearTimeout(b._t);
-        b._t = setTimeout(() => { pendingCat = null; }, 1200);
-      };
+      b.onclick = () => goToPage(Number(b.dataset.cat));
     });
     highlightCat();
   }
 
-  let pendingCat = null;  // tab just tapped, kept while the page scrolls to it
   function highlightCat() {
     const nav = $('cat-tabs');
     if (!config || !nav.children.length) return;
-    let active = 0;
-    config.menu.categories.forEach((_, i) => {
-      const sec = $(`cat-${i}`);
-      if (sec && sec.getBoundingClientRect().top - nav.offsetHeight - 90 <= 0) active = i;
-    });
-    // At the bottom of the page the last sections can never reach the top
-    if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) {
-      active = config.menu.categories.length - 1;
-    }
-    if (pendingCat !== null) active = pendingCat;
+    const active = bookPage;
     nav.querySelectorAll('.cat-tab').forEach(b => b.classList.toggle('active', Number(b.dataset.cat) === active));
   }
-  window.addEventListener('scroll', highlightCat, { passive: true });
 
   function changeQty(id, delta) {
     cart[id] = Math.max(0, Math.min(9, (cart[id] || 0) + delta));
@@ -364,6 +397,9 @@
       if (!menuIndex[it.id]) continue;
       cart[it.id] = Math.min(9, (cart[it.id] || 0) + it.qty);
     }
+    // Open the book on the page of the first dish heard
+    const first = res.items.find(it => menuIndex[it.id]);
+    if (first) goToPage(config.menu.categories.findIndex(c => c.items.some(x => x.id === first.id)));
     refreshQty();
     updateCheckout();
 
@@ -431,7 +467,7 @@
     $('review-items').innerHTML = ids.map(id => {
       const it = menuIndex[id];
       return `<li data-id="${Tuni.escapeHtml(id)}">
-        <span class="menu-emoji small" aria-hidden="true">${Icons.svg(it.id)}</span>
+        <span class="menu-emoji small" aria-hidden="true">${Dishes.svg(it.id)}</span>
         <span class="review-name">${Tuni.escapeHtml(it.name)}</span>
         <span class="qty">
           <button type="button" class="minus" aria-label="${Tuni.escapeHtml(t('remove_one', it.name))}">−</button>

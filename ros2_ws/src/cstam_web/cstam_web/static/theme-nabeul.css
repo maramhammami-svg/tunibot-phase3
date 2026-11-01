@@ -217,3 +217,81 @@ body.theme-nabeul .checkout.tray-bump { animation: tray-bump .35s ease-out; }
 @media (min-width: 700px) { body.theme-nabeul .checkout.tray-bump { animation: tray-bump-d .35s ease-out; } }
 @keyframes tray-bump-d { 0%, 100% { transform: translateX(-50%); } 40% { transform: translate(-50%, -5px); } }
 @media (max-width: 380px) { body.theme-nabeul .waiter { width: 104px; } }
+
+/* ==================================================================
+   The menu book: bookmark ribbons on top, one category per page,
+   pages turn around the spine. Dishes are drawn illustrations.
+   ================================================================== */
+/* Ribbons */
+body.theme-nabeul .cat-tabs {
+  position: relative; top: auto; z-index: 2; display: flex; gap: 8px; justify-content: flex-start;
+  margin: 6px 0 -6px 18px; padding: 0; background: none; box-shadow: none; border: none; border-radius: 0; overflow: visible;
+}
+body.theme-nabeul .cat-tab {
+  --rib: var(--copper);
+  flex: 0 0 auto; position: relative; padding: 12px 14px 20px; border-radius: 0; background: var(--rib); color: #fff;
+  font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: -.1px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 9px), 0 100%);
+  transform: translateY(-4px); transition: transform .25s cubic-bezier(.3,1.4,.5,1), filter .2s;
+  filter: saturate(.75) brightness(1.05);
+}
+body.theme-nabeul .cat-tab[data-cat="1"] { --rib: #b07a06; }
+body.theme-nabeul .cat-tab[data-cat="2"] { --rib: var(--clay); }
+body.theme-nabeul .cat-tab::after { display: none; }
+body.theme-nabeul .cat-tab.active { background: var(--rib); color: #fff; transform: translateY(0); padding-bottom: 28px; filter: none; }
+body.theme-nabeul .cat-tab:hover:not(.active) { transform: translateY(-1px); }
+body.theme-nabeul .cat-count:not(:empty) { background: #fff; color: var(--manganese); }
+body.theme-nabeul .cat-tab.active .cat-count { background: var(--manganese); color: #fff; }
+
+/* Book and pages */
+body.theme-nabeul .menu-book { position: relative; display: grid; perspective: 1600px; }
+body.theme-nabeul .menu-book .page {
+  grid-area: 1 / 1; display: none; position: relative; margin: 0;
+  padding: 26px 18px 18px 30px; background: #fffdf6; border-radius: 6px 18px 18px 6px;
+  border: 2px solid var(--manganese);
+  box-shadow: 4px 4px 0 #f1e7d2, 4px 4px 0 2px var(--manganese), 8px 8px 0 #e6d9be, 8px 8px 0 4px var(--manganese);
+  transform-origin: left center; backface-visibility: hidden;
+}
+body.theme-nabeul .menu-book .page::before {   /* spine */
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 18px; border-radius: 4px 0 0 4px;
+  background: linear-gradient(90deg, rgba(43, 29, 25, .16), rgba(43, 29, 25, 0));
+  pointer-events: none;
+}
+body.theme-nabeul .menu-book .page.current, body.theme-nabeul .menu-book .page.turn-out, body.theme-nabeul .menu-book .page.under { display: block; }
+body.theme-nabeul .menu-book .page.turn-out { z-index: 3; pointer-events: none; animation: page-out .6s cubic-bezier(.45,.05,.35,1) forwards; }
+body.theme-nabeul .menu-book .page.turn-in { z-index: 3; animation: page-in .6s cubic-bezier(.45,.05,.35,1) both; }
+body.theme-nabeul .menu-book .page.under { z-index: 1; pointer-events: none; }
+body.theme-nabeul .menu-book .page.current { z-index: 2; }
+@keyframes page-out {
+  0% { transform: rotateY(0); box-shadow: 4px 4px 0 #f1e7d2; }
+  100% { transform: rotateY(-100deg); box-shadow: -30px 0 40px rgba(43, 29, 25, .25); opacity: .6; }
+}
+@keyframes page-in {
+  0% { transform: rotateY(-100deg); opacity: .6; }
+  100% { transform: rotateY(0); opacity: 1; }
+}
+body.theme-nabeul .menu-cat + .menu-cat { margin-top: 0; }
+body.theme-nabeul .page-head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 6px; }
+body.theme-nabeul .page-head h3 { margin: 0; font-size: 34px; font-stretch: 85%; letter-spacing: -1px; color: var(--plate); }
+body.theme-nabeul .page-orn {     /* Nabeul border: little fish-scale arches */
+  display: block; height: 10px; width: 100%;
+  background: radial-gradient(circle at 50% 100%, transparent 4px, var(--plate) 4.5px, var(--plate) 5.5px, transparent 6px) 0 0 / 14px 10px repeat-x;
+  opacity: .7;
+}
+body.theme-nabeul .page-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding-top: 12px; border-top: 1.5px dashed var(--border-2); }
+body.theme-nabeul .page-no { font-family: var(--display); font-weight: 700; color: var(--muted); font-size: 14px; }
+body.theme-nabeul .page-turn { border: none; background: none; color: var(--plate); font-weight: 700; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; padding: 6px 0; }
+
+/* Dishes as drawings */
+body.theme-nabeul .menu-emoji, body.theme-nabeul .menu-item.selected .menu-emoji {
+  width: 68px; height: 68px; background: none; outline: none; border-radius: 0; color: inherit; transform: none;
+}
+body.theme-nabeul .menu-emoji .dish { width: 100%; height: 100%; display: block; transition: transform .35s cubic-bezier(.3,1.5,.5,1); }
+body.theme-nabeul .menu-item.selected .menu-emoji .dish { transform: rotate(-10deg) scale(1.06); }
+body.theme-nabeul .menu-item .add:active ~ * { }
+body.theme-nabeul .menu-emoji.small { width: 44px; height: 44px; }
+body.theme-nabeul .menu-item { padding: 14px 0; }
+body.theme-nabeul .menu-name { font-size: 18px; }
+body.theme-nabeul .menu-desc { font-style: italic; }
+body.theme-nabeul .fly-ghost .dish { width: 100%; height: 100%; }
+@media (max-width: 380px) { body.theme-nabeul .menu-emoji, body.theme-nabeul .menu-item.selected .menu-emoji { width: 56px; height: 56px; } body.theme-nabeul .menu-book .page { padding-left: 24px; } }
