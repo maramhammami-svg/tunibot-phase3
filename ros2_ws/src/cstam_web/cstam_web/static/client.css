@@ -116,3 +116,91 @@
 .review-eta { margin-top: 12px; }
 .sheet-actions { display: flex; gap: 10px; margin-top: 16px; }
 .sheet-actions .btn.primary { flex: 1; }
+
+/* ================================================================
+   "Dar Tunibot" theme: Sidi Bou Said blue, whitewash, terracotta,
+   saffron and a zellige star pattern. Client page only.
+   ================================================================ */
+body.theme-dar {
+  --bg: #0a1626;
+  --bg-2: #0f1f33;
+  --card: #12253c;
+  --card-2: #183049;
+  --border: rgba(186, 214, 255, 0.10);
+  --border-2: rgba(186, 214, 255, 0.20);
+  --gold: #e0a33a;
+  --gold-2: #f6c768;
+  --gold-soft: rgba(224, 163, 58, 0.16);
+  --blue: #3fa3ff;
+  --blue-soft: rgba(63, 163, 255, 0.16);
+  --terracotta: #c8553d;
+  --display: 'Georgia', 'Times New Roman', serif;
+  background:
+    radial-gradient(1200px 500px at 50% -200px, rgba(31, 111, 235, 0.28), transparent 70%),
+    var(--bg);
+}
+body.theme-dar .topbar { background: rgba(10, 22, 38, 0.92); border-bottom: 1px solid rgba(224, 163, 58, 0.25); }
+body.theme-dar .brand-logo { background: linear-gradient(135deg, #1f6feb, #0b3d91); box-shadow: inset 0 0 0 2px rgba(246, 199, 104, .45); }
+body.theme-dar .brand-title { font-family: var(--display); font-size: 17px; letter-spacing: .3px; }
+
+/* Hero with zellige pattern and a Sidi Bou Said arch */
+.hero { display: none; }
+body.theme-dar .hero {
+  position: relative; overflow: hidden; display: flex; align-items: center; gap: 12px;
+  padding: 22px 20px; border-radius: 22px 22px var(--radius) var(--radius);
+  background: linear-gradient(135deg, #1559c4 0%, #0b3d91 55%, #0a2a63 100%);
+  border: 1px solid rgba(246, 199, 104, 0.35);
+  box-shadow: 0 14px 40px rgba(11, 61, 145, 0.35);
+}
+body.theme-dar .hero-pattern { position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23f3c273' stroke-opacity='.35' stroke-width='1.2'%3E%3Cpath d='M28 6l6.5 15.5L50 28l-15.5 6.5L28 50l-6.5-15.5L6 28l15.5-6.5z'/%3E%3Cpath d='M12.4 12.4h31.2v31.2H12.4z' transform='rotate(45 28 28)' stroke-opacity='.18'/%3E%3Ccircle cx='28' cy='28' r='5'/%3E%3Cpath d='M0 0l6 6M56 0l-6 6M0 56l6-6M56 56l-6-6'/%3E%3C/g%3E%3C/svg%3E"); background-size: 56px 56px; opacity: .9;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 55%); mask-image: linear-gradient(90deg, transparent 0%, #000 55%); }
+body.theme-dar .hero-text { position: relative; flex: 1; min-width: 0; }
+body.theme-dar .hero-hello { font-size: 13px; font-weight: 700; color: var(--gold-2); letter-spacing: .4px; }
+body.theme-dar .hero-title { font-family: var(--display); font-size: 25px; line-height: 1.15; margin-top: 4px; color: #fff; }
+body.theme-dar .hero-sub { font-size: 13.5px; color: rgba(255, 255, 255, .82); margin-top: 6px; line-height: 1.4; }
+body.theme-dar .hero-robot { position: relative; flex-shrink: 0; width: 70px; height: 84px; display: grid; place-items: end center; padding-bottom: 10px; font-size: 38px;
+  background: rgba(255, 255, 255, .10); border: 2px solid rgba(255, 255, 255, .35); border-bottom: none; border-radius: 35px 35px 6px 6px; }
+
+/* Cards and headings */
+body.theme-dar .card { background: linear-gradient(180deg, var(--card), #102136); border-color: var(--border); }
+body.theme-dar .card h2 { font-family: var(--display); font-size: 18px; font-weight: 700; letter-spacing: .2px; }
+body.theme-dar .step-num { background: var(--terracotta); color: #fff; font-family: var(--font); }
+body.theme-dar .menu-cat h3 { color: var(--gold-2); display: flex; align-items: center; gap: 10px; }
+body.theme-dar .menu-cat h3::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(224,163,58,.5), transparent); }
+
+/* Tables look like round tables */
+body.theme-dar .table-grid { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px; }
+body.theme-dar .table-btn { aspect-ratio: 1; padding: 0; border-radius: 50%; font-size: 17px; background: radial-gradient(circle at 35% 30%, #22405f, #142a42); }
+body.theme-dar .table-btn[aria-checked="true"] { background: radial-gradient(circle at 35% 30%, #f6c768, #c98a22); color: #1a1205; border-color: var(--gold-2); box-shadow: 0 0 0 4px rgba(224,163,58,.2); }
+body.theme-dar .table-selected { font-family: var(--display); }
+
+/* Dishes */
+body.theme-dar .menu-item { background: rgba(10, 22, 38, .55); border-radius: 16px; transition: border-color .15s, background .15s; }
+body.theme-dar .menu-item.selected { border-color: rgba(224, 163, 58, .7); background: rgba(224, 163, 58, .08); }
+body.theme-dar .menu-emoji { background: radial-gradient(circle at 35% 30%, #fdf3e1, #ecd9b4); border-radius: 50%; width: 50px; height: 50px; font-size: 28px; box-shadow: inset 0 0 0 2px rgba(200, 85, 61, .35); }
+body.theme-dar .menu-emoji.small { width: 34px; height: 34px; font-size: 19px; }
+body.theme-dar .menu-name { font-size: 15.5px; }
+body.theme-dar .qty .add { background: var(--gold); color: #1a1205; border-color: var(--gold); }
+
+/* Primary actions in terracotta, chips in saffron */
+body.theme-dar .btn.primary { background: linear-gradient(135deg, #d9643f, #b2432c); box-shadow: 0 8px 22px rgba(200, 85, 61, .35); }
+body.theme-dar .btn.primary:hover:not(:disabled) { background: linear-gradient(135deg, #e8744d, #c24d34); }
+body.theme-dar .btn.primary:disabled { background: #2a3a52; box-shadow: none; color: var(--muted); opacity: 1; }
+body.theme-dar .cat-tabs { background: var(--card); }
+body.theme-dar .cat-tab.active { background: var(--gold); color: #1a1205; border-color: var(--gold); }
+body.theme-dar .cat-tab.active .cat-count { background: #1a1205; color: var(--gold-2); }
+body.theme-dar .checkout { background: rgba(10, 22, 38, .97); border-top: 1px solid rgba(224, 163, 58, .3); }
+body.theme-dar .sheet { background: linear-gradient(180deg, #14294a, var(--card)); border-color: rgba(224, 163, 58, .35); }
+body.theme-dar .sheet h2, body.theme-dar .track-title { font-family: var(--display); }
+body.theme-dar .voice-panel { border-color: rgba(63, 163, 255, .4); background: rgba(31, 111, 235, .08); }
+body.theme-dar .track-card { background: linear-gradient(180deg, #14294a, var(--card)); }
+#order-screen > * + * { margin-top: 14px; }
+body.theme-dar .hero { border-radius: 22px; }
+@media (max-width: 520px) {
+  body.theme-dar .table-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  body.theme-dar .table-btn { font-size: 15px; }
+  .voice-btn [data-i18n] { display: none; }
+}
+@media (min-width: 700px) {
+  .checkout { left: 50%; right: auto; transform: translateX(-50%); width: 640px; bottom: 12px; border: 1px solid var(--border-2); border-radius: 18px; padding: 12px 16px; }
+}

@@ -40,6 +40,7 @@
     I18n.apply();
     if (!config) return;
     $('venue-title').textContent = config.menu.title || config.title;
+    $('hero-title').textContent = t('hero_welcome', config.menu.title || config.title);
     $('venue-sub').textContent = I18n.field(config.menu, 'subtitle') || t('order_from_table');
     renderTables();
     renderMenu();

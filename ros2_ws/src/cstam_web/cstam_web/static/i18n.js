@@ -4,6 +4,9 @@ const I18n = (() => {
     fr: {
       demo_banner: 'Mode démo : robot simulé (ROS 2 non connecté)',
       order_from_table: 'Commandez depuis votre table',
+      hero_hello: 'Marhba bik 👋',
+      hero_welcome: v => `Bienvenue à ${v}`,
+      hero_sub: 'Choisissez votre table et vos plats : notre robot vous les apporte.',
       your_table: 'Votre table',
       change: 'Changer',
       choose_table: 'Choisissez votre table',
@@ -80,6 +83,9 @@ const I18n = (() => {
     en: {
       demo_banner: 'Demo mode: simulated robot (ROS 2 not connected)',
       order_from_table: 'Order from your table',
+      hero_hello: 'Marhba bik 👋',
+      hero_welcome: v => `Welcome to ${v}`,
+      hero_sub: 'Pick your table and your dishes: our robot brings them to you.',
       your_table: 'Your table',
       change: 'Change',
       choose_table: 'Choose your table',
