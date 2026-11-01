@@ -27,6 +27,25 @@ except ImportError:
         def __init__(self, *args, **kwargs): pass
 
 
+def pedestrian_should_yield(ped_x: float, ped_y: float, ped_yaw: float,
+                            robot_x: float, robot_y: float,
+                            yield_distance: float = 0.9, half_angle: float = math.radians(70)) -> bool:
+    """
+    A real person does not walk into a robot standing in front of them.
+    True when the robot is closer than `yield_distance` and inside the cone in
+    front of the pedestrian, so the pedestrian should pause until the robot passes.
+    """
+    dx, dy = robot_x - ped_x, robot_y - ped_y
+    dist = math.hypot(dx, dy)
+    if dist >= yield_distance:
+        return False
+    if dist < 1e-6:
+        return True
+    bearing = math.atan2(dy, dx)
+    diff = math.atan2(math.sin(bearing - ped_yaw), math.cos(bearing - ped_yaw))
+    return abs(diff) <= half_angle
+
+
 class DynamicObstacleAgent:
     """
     Kinematic model and behavior state machine for dynamic obstacles.
@@ -142,6 +161,9 @@ if HAVE_ROS2:
             self.declare_parameter('patrol_max', 0.2)
             self.declare_parameter('speed', 0.40)
             self.declare_parameter('auto_patrol', True)
+            # The pedestrian pauses when the robot is this close in front of it (0 disables).
+            # 'block' mode ignores it on purpose to test the robot's own reaction.
+            self.declare_parameter('yield_distance', 0.9)
 
             sx = self.get_parameter('start_x').value
             sy = self.get_parameter('start_y').value
@@ -150,6 +172,8 @@ if HAVE_ROS2:
             spd = self.get_parameter('speed').value
             auto = self.get_parameter('auto_patrol').value
             self.spawn_yaw = float(self.get_parameter('start_yaw').value)
+            self.yield_distance = float(self.get_parameter('yield_distance').value)
+            self.yielding = False
 
             self.agent = DynamicObstacleAgent(
                 start_x=sx, start_y=sy, patrol_y_min=pmin, patrol_y_max=pmax, speed=spd
@@ -256,7 +280,16 @@ if HAVE_ROS2:
             cmd = Twist()
             current_speed = 0.0
 
-            if not self.agent.is_active or self.agent.mode in ["idle", "stop"] or dist < 0.15:
+            yielding = (
+                self.yield_distance > 0.0 and self.have_robot_pose and self.agent.mode != "block"
+                and pedestrian_should_yield(self.agent.x, self.agent.y, self.current_yaw,
+                                            self.robot_x, self.robot_y, self.yield_distance)
+            )
+            if yielding != self.yielding:
+                self.get_logger().info("Pedestrian pausing: robot right in front." if yielding else "Pedestrian walking again.")
+                self.yielding = yielding
+
+            if not self.agent.is_active or self.agent.mode in ["idle", "stop"] or dist < 0.15 or yielding:
                 # Halt model cleanly
                 cmd.linear.x = 0.0
                 cmd.angular.z = 0.0

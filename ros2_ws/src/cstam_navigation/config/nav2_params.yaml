@@ -232,7 +232,17 @@ collision_monitor:
     source_timeout: 2.0
     base_shift_correction: True
     stop_pub_timeout: 2.0
-    polygons: ["FootprintApproach"]
+    # StopZone: hard stop when anything (e.g. a pedestrian) is within 0.35 m of the robot centre (~9 cm from the 0.26 m footprint).
+    # FootprintApproach: slows down so the footprint never reaches an obstacle within 1.2 s.
+    polygons: ["StopZone", "FootprintApproach"]
+    StopZone:
+      type: "circle"
+      radius: 0.35
+      action_type: "stop"
+      min_points: 4
+      visualize: True
+      polygon_pub_topic: "collision_monitor/stop_zone"
+      enabled: True
     FootprintApproach:
       type: "circle"
       radius: 0.26

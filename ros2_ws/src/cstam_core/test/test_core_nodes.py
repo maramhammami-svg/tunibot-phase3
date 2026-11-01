@@ -47,3 +47,15 @@ class TestCstamCoreNodes(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+def test_pedestrian_yields_only_when_robot_close_in_front():
+    import math
+    from cstam_core.dynamic_obstacle_controller import pedestrian_should_yield
+    # Pedestrian at origin walking north (+y)
+    north = math.pi / 2
+    assert pedestrian_should_yield(0, 0, north, 0.0, 0.6)          # robot straight ahead, close
+    assert pedestrian_should_yield(0, 0, north, 0.4, 0.5)          # ahead, slightly to the side
+    assert not pedestrian_should_yield(0, 0, north, 0.0, 1.5)      # ahead but far
+    assert not pedestrian_should_yield(0, 0, north, 0.0, -0.6)     # behind: keep walking away
+    assert not pedestrian_should_yield(0, 0, north, 0.0, 0.6, yield_distance=0.0)
