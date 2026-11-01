@@ -8,7 +8,7 @@
         {"id": "cafe-direct", "name": "Café Direct", "emoji": "☕", "desc": "Tunisian coffee with milk", "desc_fr": "Café tunisien au lait",
          "aliases": ["café", "cafe", "coffee", "kahwa", "9ahwa", "direct", "café au lait"]},
         {"id": "the-menthe", "name": "Thé à la menthe", "emoji": "🍵", "desc": "Mint tea with pine nuts", "desc_fr": "Thé à la menthe aux pignons",
-         "aliases": ["thé", "the", "tea", "mint tea", "atay", "tay", "thé menthe"]},
+         "aliases": ["thé", "the", "tea", "mint tea", "atay", "tay", "thé menthe", "tay menthe"]},
         {"id": "citronnade", "name": "Citronnade aux amandes", "emoji": "🥤", "desc": "Fresh lemon & almond drink", "desc_fr": "Boisson fraîche citron et amandes",
          "aliases": ["citronnade", "lemonade", "citron", "lemon", "jus de citron"]}
       ]},

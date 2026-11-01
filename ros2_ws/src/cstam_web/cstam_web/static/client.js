@@ -293,7 +293,7 @@
   let voiceState = 'idle';
   // The language you SPEAK is chosen separately from the page language
   // (French by default): an English page with French speech gave nonsense.
-  const SPEECH_LANGS = { fr: 'fr-FR', en: 'en-US' };
+  const SPEECH_LANGS = { fr: 'fr-FR', en: 'en-US', ar: 'ar-TN' };  // ar = Tunisian Darija
   let voiceLang = localStorage.getItem('tunibot_voice_lang') || 'fr';
   if (!SPEECH_LANGS[voiceLang]) voiceLang = 'fr';
   function renderVoiceLang() {
@@ -422,8 +422,10 @@
 
     if (res.items.length && 'speechSynthesis' in window) {
       const list = res.items.map(i => `${i.qty} ${i.name}`).join(', ');
-      const u = new SpeechSynthesisUtterance(I18n.tIn(voiceLang, 'voice_say_ok', list, res.table));
-      u.lang = SPEECH_LANGS[voiceLang];
+      // Dish names are French, so a Darija order is read back in French
+      const sayLang = voiceLang === 'ar' ? 'fr' : voiceLang;
+      const u = new SpeechSynthesisUtterance(I18n.tIn(sayLang, 'voice_say_ok', list, res.table));
+      u.lang = SPEECH_LANGS[sayLang];
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(u);
     }

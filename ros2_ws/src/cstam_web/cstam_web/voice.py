@@ -4,10 +4,11 @@ Voice ordering: turns a spoken (or typed) sentence into a table + cart.
 The browser does the speech-to-text (Web Speech API); this module only parses
 the transcript, so it works offline, is fast and is easy to unit test.
 
-Understands French, English and Tunisian derja written in Latin letters, e.g.
+Understands French, English and Tunisian derja, in Latin or Arabic letters, e.g.
   "deux thés à la menthe et un brik pour la table 4"
   "two coffees and a couscous, table seven"
   "zouz kahwa w brik, tawla tletha"
+  "زوز قهوة و بريك طاولة ثلاثة"   (what Chrome returns in Darija / ar-TN mode)
 
 Plain Python, no ROS import.
 """
@@ -48,11 +49,81 @@ STOP = FILLER | {"et", "and", "w", "pour", "for", "avec", "with", "please", "svp
                  "je", "veux", "voudrais", "voudrions", "i", "want", "would", "like", "id", "nous",
                  "on", "prend", "prendre", "commande", "order", "nheb", "n7eb", "bech", "bich",
                  "aatini", "a3tini", "jibli", "jible", "s", "il", "vous", "plait", "numero", "no",
-                 "number", "a", "an", "un", "une", "sil", "yaatik", "ya3tik", "saha", "chokran"}
+                 "number", "a", "an", "un", "une", "sil", "yaatik", "ya3tik", "saha", "chokran",
+                 "min", "aslema", "rani", "nheb", "brabi"}
+
+
+# ---- Darija in Arabic script (speech recognition in ar-TN returns Arabic letters).
+# Known words are mapped to the Latin spellings the parser already understands;
+# anything else is transliterated letter by letter so fuzzy matching can still work.
+AR_WORDS = {
+    # numbers
+    "واحد": "wahed", "وحدة": "wahda", "واحدة": "wahda", "زوز": "zouz", "زوج": "zouj", "جوج": "zouj",
+    "اثنين": "zouz", "إثنين": "zouz", "اثنان": "zouz", "ثلاثة": "tletha", "تلاثة": "tletha", "ثلاث": "tletha",
+    "تلاتة": "tletha", "أربعة": "arba", "اربعة": "arba", "ربعة": "arba", "خمسة": "khamsa", "ستة": "setta",
+    "سبعة": "sabaa", "ثمانية": "tmanya", "ثمنية": "tmanya", "تمنية": "tmanya", "تسعة": "tesaa", "عشرة": "achra",
+    # table
+    "طاولة": "tawla", "طاوله": "tawla", "طابلة": "tawla", "تابلة": "tawla", "طاولا": "tawla", "رقم": "raqm", "نمرو": "numero",
+    # dishes and drinks
+    "بريك": "brik", "بريكة": "brik", "بريكه": "brik", "كسكسي": "couscous", "كسكسو": "couscous", "كسكس": "couscous",
+    "عجة": "ojja", "عجه": "ojja", "مرقاز": "merguez", "شكشوكة": "chakchouka", "سلاطة": "salade", "سلطة": "salade",
+    "سلاطه": "salade", "بمبالوني": "bambalouni", "بنبالوني": "bambalouni", "بامبالوني": "bambalouni",
+    "مقروض": "makroudh", "مقروظ": "makroudh", "قهوة": "kahwa", "قهوه": "kahwa", "ديراكت": "direct", "دیرکت": "direct",
+    "تاي": "tay", "شاي": "tay", "أتاي": "tay", "اتاي": "tay", "نعناع": "menthe", "سيترونادة": "citronnade",
+    "سيتروناد": "citronnade", "ليمونادة": "citronnade", "ليموناضة": "citronnade", "ليمون": "citron",
+    "تونسية": "tunisienne", "تونسي": "tunisienne", "اسبريسو": "espresso", "إسبريسو": "espresso", "ماء": "water", "ما": "water", "ميه": "water", "مياه": "water",
+    "برقر": "burger", "برڨر": "burger", "بيرغر": "burger", "برغر": "burger", "باستا": "pasta", "مقرونة": "pasta",
+    "كرواسون": "croissant", "كرواسان": "croissant", "تيراميسو": "tiramisu",
+    # little words
+    "و": "w", "من": "min", "متاع": "mtaa", "متع": "mtaa", "عطيني": "aatini", "اعطيني": "aatini", "أعطيني": "aatini",
+    "جيبلي": "jibli", "نحب": "nheb", "نحبو": "nheb", "بش": "bech", "باش": "bech", "يعيشك": "yaatik", "عيشك": "yaatik",
+    "عسلامة": "aslema", "سلام": "aslema", "شكرا": "chokran", "يرحم": "", "والديك": "", "فضلك": "", "سمحت": "", "لو": "",
+    "كاس": "verre", "كأس": "verre", "كاسات": "verre", "فنجان": "tasse", "صحن": "assiette", "طبق": "assiette",
+    "لي": "", "ليا": "", "عندي": "", "حاجة": "",
+}
+_AR_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789")
+_AR_LETTERS = {
+    "ا": "a", "أ": "a", "إ": "i", "آ": "a", "ب": "b", "ت": "t", "ث": "th", "ج": "j", "ح": "h", "خ": "kh", "د": "d",
+    "ذ": "dh", "ر": "r", "ز": "z", "س": "s", "ش": "ch", "ص": "s", "ض": "d", "ط": "t", "ظ": "dh", "ع": "a", "غ": "gh",
+    "ف": "f", "ڨ": "g", "ق": "k", "ك": "k", "ل": "l", "م": "m", "ن": "n", "ه": "h", "ة": "a", "و": "ou", "ي": "i",
+    "ى": "a", "ئ": "i", "ؤ": "ou", "ء": "", "ـ": "",
+}
+_AR_PREFIXES = ("وال", "بال", "لل", "ال", "و", "ب", "ل")
+
+
+def _is_arabic(text: str) -> bool:
+    return any("\u0600" <= c <= "\u06ff" for c in text)
+
+
+def arabic_to_latin(text: str) -> str:
+    """'زوز قهوة و بريك للطاولة ٣' -> 'zouz kahwa w brik tawla 3'."""
+    text = re.sub(r"[\u064b-\u0652\u0640]", "", (text or "").translate(_AR_DIGITS))  # vowel marks, tatweel
+    out = []
+    for word in re.split(r"[\s،؟!?.,:;]+", text):
+        if not word:
+            continue
+        if not _is_arabic(word):
+            out.append(word)
+            continue
+        latin = AR_WORDS.get(word)
+        if latin is None:
+            for pre in _AR_PREFIXES:
+                rest = word[len(pre):]
+                if word.startswith(pre) and len(rest) >= 2 and rest in AR_WORDS:
+                    latin = (("w " if pre.startswith("و") else "") + AR_WORDS[rest]).strip()
+                    break
+        if latin is None:
+            rest = word[2:] if word.startswith("ال") and len(word) > 3 else word
+            latin = "".join(_AR_LETTERS.get(c, "") for c in rest)
+        if latin:
+            out.append(latin)
+    return " ".join(out)
 
 
 def normalize(text: str) -> str:
     """Lowercase, strip accents and punctuation: 'Thé à la menthe !' -> 'the a la menthe'."""
+    if _is_arabic(text or ""):
+        text = arabic_to_latin(text)
     text = unicodedata.normalize("NFKD", text or "")
     text = "".join(c for c in text if not unicodedata.combining(c))
     text = text.lower().replace("’", "'").replace("œ", "oe")

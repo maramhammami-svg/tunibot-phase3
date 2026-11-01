@@ -28,6 +28,11 @@ def test_normalize_strips_accents_and_punctuation():
     ("Deux thés à la menthe et un brik pour la table 4", "fr", "Table 4", {"the-menthe": 2, "brik": 1}),
     ("two coffees and a couscous, table seven", "en", "Table 7", {"cafe-direct": 2, "couscous": 1}),
     ("zouz kahwa w brik, tawla tletha", "fr", "Table 3", {"cafe-direct": 2, "brik": 1}),
+    # Darija in Arabic letters, as Chrome returns it in ar-TN mode
+    ("زوز قهوة و بريك طاولة ثلاثة", "ar", "Table 3", {"cafe-direct": 2, "brik": 1}),
+    ("نحب كسكسي و جوج تاي بالنعناع للطاولة 5", "ar", "Table 5", {"couscous": 1, "the-menthe": 2}),
+    ("عطيني ثلاثة بمبالوني و عجة، طاولة رقم ٧", "ar", "Table 7", {"bambalouni": 3, "ojja": 1}),
+    ("سلاطة تونسية و مقروض للطاولة عشرة", "ar", "Table 10", {"salade-tunisienne": 1, "makroudh": 1}),
     ("je voudrais trois bambalounis s'il vous plaît, table numéro 10", "fr", "Table 10", {"bambalouni": 3}),
     ("un café direct et deux citronnades table 1", "fr", "Table 1", {"cafe-direct": 1, "citronnade": 2}),
     ("deux tasses de thé, table deux", "fr", "Table 2", {"the-menthe": 2}),
