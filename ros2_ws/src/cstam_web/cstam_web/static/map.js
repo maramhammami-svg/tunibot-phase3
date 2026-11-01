@@ -8,24 +8,26 @@ const FLOOR_MAP_DARK = {
   dock: '#10b981', kitchen: '#60a5fa', font: 'Inter, sans-serif',
 };
 
-// Light "chaux et cobalt" palette used by the client page
-const FLOOR_MAP_CHAUX = {
-  bg: '#fbfaf6', wall: '#b9b1a0',
-  table: '#efe7d6', tableEdge: '#c9b48a', tableText: '#5d4a26',
-  active: 'rgba(27,79,174,0.16)', activeEdge: '#1b4fae', activeText: '#123a85',
-  selected: '#1b4fae', selectedEdge: '#123a85', selectedText: '#ffffff',
-  robot: '#1b4fae', robotBody: '#ffffff', path: 'rgba(27,79,174,0.85)', trail: '27,79,174',
-  dock: '#4f7a3a', kitchen: '#b2472f', font: "'IBM Plex Sans', 'Segoe UI', sans-serif",
+// "Nabeul" palette (client page): white slip, ochre tables, copper-green route, ochre robot
+const FLOOR_MAP_NABEUL = {
+  bg: '#ffffff', wall: '#2b1d19',
+  table: '#fcefd0', tableEdge: '#c9932a', tableText: '#5a3c00',
+  active: 'rgba(29,107,79,0.16)', activeEdge: '#1d6b4f', activeText: '#134a37',
+  selected: '#1d6b4f', selectedEdge: '#134a37', selectedText: '#ffffff',
+  robot: '#f0b23a', robotBody: '#2b1d19', path: 'rgba(29,107,79,0.9)', trail: '29,107,79',
+  dock: '#1d6b4f', kitchen: '#a8603a', font: "'Atkinson Hyperlegible', 'Segoe UI', sans-serif",
+  person: '#c2412d', personBlock: '#c2412d', personHalo: 'rgba(194,65,45,0.14)', personHaloBlock: 'rgba(194,65,45,0.24)',
 };
 
 // Night palette for the admin control room (same identity, dark)
 const FLOOR_MAP_NUIT = {
-  bg: '#0c1526', wall: '#33415e',
-  table: '#1a2740', tableEdge: '#4a5d85', tableText: '#c9d4ec',
-  active: 'rgba(91,140,255,0.28)', activeEdge: '#5b8cff', activeText: '#ffffff',
-  selected: 'rgba(227,162,26,0.4)', selectedEdge: '#e3a21a', selectedText: '#fff7e6',
-  robot: '#7aa2ff', robotBody: '#0c1526', path: 'rgba(91,140,255,0.9)', trail: '91,140,255',
-  dock: '#7fb069', kitchen: '#e07a5f', font: "'IBM Plex Sans', 'Segoe UI', sans-serif",
+  bg: '#1d1411', wall: '#6b554c',
+  table: '#33251f', tableEdge: '#c9932a', tableText: '#f3dca6',
+  active: 'rgba(63,163,122,0.28)', activeEdge: '#3fa37a', activeText: '#ffffff',
+  selected: 'rgba(240,178,58,0.4)', selectedEdge: '#f0b23a', selectedText: '#fff7e6',
+  robot: '#f0b23a', robotBody: '#1d1411', path: 'rgba(63,163,122,0.95)', trail: '63,163,122',
+  dock: '#3fa37a', kitchen: '#d27b52', font: "'Atkinson Hyperlegible', 'Segoe UI', sans-serif",
+  person: '#e0553f', personBlock: '#e0553f', personHalo: 'rgba(224,85,63,0.16)', personHaloBlock: 'rgba(224,85,63,0.28)',
 };
 
 class FloorMap {
@@ -191,6 +193,7 @@ class FloorMap {
       c.font = `700 11px ${P.font}`;
       c.textAlign = 'center'; c.textBaseline = 'bottom';
       const tr = (k, d) => (typeof I18n !== 'undefined' ? I18n.t(k) : d);
+      c.save(); c.strokeStyle = P.bg; c.lineWidth = 3; c.lineJoin = 'round'; c.strokeText(isDock ? tr('a_dock_name', 'Dock') : tr('a_kitchen_name', 'Kitchen'), p.x, p.y - r - 3); c.restore();
       c.fillText(isDock ? tr('a_dock_name', 'Dock') : tr('a_kitchen_name', 'Kitchen'), p.x, p.y - r - 3);
     }
 
@@ -216,9 +219,9 @@ class FloorMap {
     const ob = snap.obstacle;
     if (ob && typeof ob.x === 'number' && ob.mode && ob.mode !== 'clear') {
       const p = this.px(ob.x, ob.y);
-      c.fillStyle = ob.is_blocking ? 'rgba(244,63,94,0.18)' : 'rgba(245,158,11,0.15)';
+      c.fillStyle = ob.is_blocking ? (P.personHaloBlock || 'rgba(244,63,94,0.18)') : (P.personHalo || 'rgba(245,158,11,0.15)');
       c.beginPath(); c.arc(p.x, p.y, 1.2 * s, 0, Math.PI * 2); c.fill();
-      c.fillStyle = ob.is_blocking ? '#f43f5e' : '#f59e0b';
+      c.fillStyle = ob.is_blocking ? (P.personBlock || '#f43f5e') : (P.person || '#f59e0b');
       c.beginPath(); c.arc(p.x, p.y, Math.max(5, 0.25 * s), 0, Math.PI * 2); c.fill();
     }
 

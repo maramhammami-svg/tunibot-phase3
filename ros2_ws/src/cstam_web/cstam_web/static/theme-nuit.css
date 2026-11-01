@@ -1,84 +1,85 @@
 /* ==================================================================
-   "Nuit" — admin control room. Same identity as the client page
-   (cobalt, saffron, Reem Kufi, square edges, painted trims) but dark,
+   "Nuit" — admin control room. Same Nabeul pottery identity as the
+   client page (copper-green, ochre, manganese) but dark,
    for long monitoring sessions. Active with body.theme-nuit.
    ================================================================== */
 body.theme-nuit {
-  --bg: #0a1220;
-  --bg-2: #0f1a2e;
-  --card: #111d33;
-  --card-2: #172642;
-  --border: #1f2f4f;
-  --border-2: #2c3f66;
-  --text: #e8edf7;
-  --muted: #93a0bb;
-  --dim: #64718c;
-  --cobalt: #3d6fe0;
-  --cobalt-2: #7aa2ff;
-  --saffron: #e3a21a;
-  --gold: #e3a21a;
-  --gold-2: #f2bf4f;
-  --gold-soft: rgba(227, 162, 26, .14);
-  --blue: #7aa2ff;
-  --blue-soft: rgba(61, 111, 224, .18);
-  --green: #7fb069;
-  --green-soft: rgba(127, 176, 105, .16);
-  --red: #e07a5f;
-  --red-soft: rgba(224, 122, 95, .16);
-  --amber: #f59e0b;
-  --amber-soft: rgba(245, 158, 11, .14);
-  --radius: 2px;
-  --font: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
-  --display: 'Reem Kufi', 'IBM Plex Sans', sans-serif;
+  --bg: #171010;
+  --bg-2: #1f1613;
+  --card: #241a16;
+  --card-2: #2f231e;
+  --border: #3a2c26;
+  --border-2: #4d3b33;
+  --text: #f4ece8;
+  --muted: #b9a69e;
+  --dim: #85736b;
+  --cobalt: #3fa37a;      /* copper-green glaze */
+  --cobalt-2: #6cc49d;
+  --saffron: #f0b23a;
+  --gold: #f0b23a;
+  --gold-2: #f6c868;
+  --gold-soft: rgba(240, 178, 58, .14);
+  --blue: #6cc49d;
+  --blue-soft: rgba(63, 163, 122, .18);
+  --green: #3fa37a;
+  --green-soft: rgba(63, 163, 122, .16);
+  --red: #e0553f;
+  --red-soft: rgba(224, 85, 63, .16);
+  --amber: #f0b23a;
+  --amber-soft: rgba(240, 178, 58, .14);
+  --radius: 18px;
+  --font: 'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'Atkinson Hyperlegible', 'Segoe UI', sans-serif;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', sans-serif;
   background: var(--bg);
   font-family: var(--font);
 }
 body.theme-nuit .ico { width: 18px; height: 18px; display: block; }
 body.theme-nuit .ico-slot { display: inline-grid; place-items: center; }
 
-body.theme-nuit .topbar { background: rgba(10, 18, 32, .95); border-bottom: 3px solid var(--cobalt); }
-body.theme-nuit .brand-logo { background: var(--cobalt); color: #fff; border-radius: 18px 18px 3px 3px; }
+body.theme-nuit .topbar { background: rgba(23, 16, 16, .95); border-bottom: 1px solid var(--border); }
+body.theme-nuit .brand-logo { background: var(--saffron); color: #1d1411; border-radius: 50%; }
 body.theme-nuit .brand-logo .ico { width: 22px; height: 22px; }
-body.theme-nuit .brand-title { font-family: var(--display); font-weight: 600; font-size: 19px; }
+body.theme-nuit .brand-title { font-family: var(--display); font-weight: 800; font-size: 20px; letter-spacing: -.3px; }
 
-body.theme-nuit .card { border-radius: 2px; background: var(--card); border: 1px solid var(--border); border-top: 2px solid var(--border-2); }
-body.theme-nuit .card h3 { font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: 1.6px; color: var(--cobalt-2); }
-body.theme-nuit .map-card { border-top-color: var(--cobalt); }
-body.theme-nuit #map { border-radius: 0; }
-body.theme-nuit .btn { border-radius: 3px; background: var(--card-2); border-color: var(--border-2); }
+body.theme-nuit .card { border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); }
+body.theme-nuit .card h3 { font-family: var(--display); font-weight: 800; font-size: 19px; letter-spacing: -.3px; text-transform: none; color: var(--text); }
+body.theme-nuit .map-card { border-color: var(--border-2); }
+body.theme-nuit #map { border-radius: 12px; }
+body.theme-nuit .btn { border-radius: 999px; background: var(--card-2); border-color: var(--border-2); }
 body.theme-nuit .btn:hover:not(:disabled) { border-color: var(--cobalt-2); }
 body.theme-nuit .btn.primary { background: var(--cobalt); border-color: var(--cobalt); }
 body.theme-nuit .btn.warn { background: var(--gold-soft); border-color: rgba(227, 162, 26, .5); color: var(--gold-2); }
 body.theme-nuit .btn.danger { background: var(--red-soft); border-color: rgba(224, 122, 95, .5); color: #f0a28e; }
-body.theme-nuit .pill { border-radius: 3px; }
+body.theme-nuit .pill { border-radius: 999px; }
 body.theme-nuit .pill.ready { color: #a9d394; border-color: rgba(127, 176, 105, .45); }
 body.theme-nuit .pill.busy { color: var(--cobalt-2); border-color: rgba(122, 162, 255, .45); }
 body.theme-nuit .pill.offline { color: #f0a28e; border-color: rgba(224, 122, 95, .45); }
-body.theme-nuit .chip { border-radius: 2px; letter-spacing: .6px; }
+body.theme-nuit .chip { border-radius: 999px; text-transform: none; letter-spacing: 0; }
 body.theme-nuit .chip.ok { color: #a9d394; }
 body.theme-nuit .chip.info { color: var(--cobalt-2); }
 body.theme-nuit .chip.bad { color: #f0a28e; }
-body.theme-nuit .gauge { border-radius: 2px; }
+body.theme-nuit .gauge { border-radius: 999px; }
 body.theme-nuit .gauge-fill { background: var(--green); }
-body.theme-nuit .battery-pct { font-family: var(--display); font-weight: 600; }
-body.theme-nuit .queue li { border-radius: 2px; border-left: 3px solid var(--border-2); }
+body.theme-nuit .battery-pct { font-family: var(--display); font-weight: 800; }
+body.theme-nuit .label { text-transform: none; letter-spacing: 0; font-size: 12px; }
+body.theme-nuit .queue li { border-radius: 12px; border-left: 3px solid var(--border-2); }
 body.theme-nuit .queue li.active { border-color: rgba(122, 162, 255, .5); border-left-color: var(--saffron); background: rgba(61, 111, 224, .1); }
 body.theme-nuit .queue .q-id { color: var(--gold-2); }
 body.theme-nuit .queue .empty { border-left: 1px dashed var(--border-2); }
 body.theme-nuit .events li { padding-left: 8px; border-left: 2px solid var(--border); }
 body.theme-nuit .events .warn { color: var(--gold-2); }
 body.theme-nuit .events .alert { color: #f0a28e; border-left-color: var(--red); }
-body.theme-nuit .dispatch select { border-radius: 3px; }
+body.theme-nuit .dispatch select { border-radius: 999px; }
 body.theme-nuit .lock-note { color: var(--gold-2); }
-body.theme-nuit .toast { border-radius: 3px; background: #0f1a2e; }
+body.theme-nuit .toast { border-radius: 999px; background: #0f1a2e; }
 
 /* Map legend with real colour swatches */
 .map-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; justify-content: flex-end; }
 .map-legend .lg { display: inline-flex; align-items: center; gap: 5px; }
 .map-legend .sw { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-.map-legend .sw.robot { background: #7aa2ff; }
-.map-legend .sw.person { background: #f59e0b; }
-.map-legend .sw.dock { background: #7fb069; border-radius: 1px; }
-.map-legend .sw.kitchen { background: #e07a5f; border-radius: 1px; }
+.map-legend .sw.robot { background: #f0b23a; }
+.map-legend .sw.person { background: #e0553f; }
+.map-legend .sw.dock { background: #3fa37a; border-radius: 1px; }
+.map-legend .sw.kitchen { background: #d27b52; border-radius: 1px; }
 .map-legend .lg-tip { flex-basis: 100%; text-align: right; color: var(--dim); }

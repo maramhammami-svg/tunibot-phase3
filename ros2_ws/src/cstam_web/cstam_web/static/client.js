@@ -14,7 +14,7 @@
   let lastStatus = null;
   let lastOrder = null;
   // Floor plans: pick a table, then watch the robot drive to it
-  const lightPlan = document.body.classList.contains('theme-chaux') ? FLOOR_MAP_CHAUX : null;
+  const lightPlan = document.body.classList.contains('theme-nabeul') ? FLOOR_MAP_NABEUL : null;
   const plan = new FloorMap($('plan'), lightPlan);
   plan.maxHeight = 360;
   plan.minTablePx = 15;

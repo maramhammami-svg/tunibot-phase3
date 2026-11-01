@@ -78,7 +78,7 @@ def test_voice_order_delivered_end_to_end(server, browser):
     page.wait_for_selector("#review-sheet:not(.hidden)")
     assert "Table 4" in page.inner_text("#review-table")
     page.click("#review-items li[data-id=brik] .add")
-    assert page.inner_text("#review-confirm") == "Confirmer · 4 articles"
+    assert page.inner_text("#review-confirm") == "Confirmer 4 articles"
     page.click("#review-confirm")
     page.wait_for_selector("#track-screen:not(.hidden)")
     page.wait_for_function("document.querySelector('#track-title').textContent === 'En route !'", timeout=30000)
@@ -109,7 +109,7 @@ def test_language_switch_and_admin(server, browser):
     page.goto(server + "/")
     page.wait_for_selector(".table-btn")
     page.click("#lang-btn")
-    assert page.locator("[data-i18n=your_table]").inner_text() == "Your table"
+    assert page.locator("[data-i18n=your_table]").inner_text() == "Where are you sitting?"
     assert "drinks" in page.inner_text("#menu").lower()
     page.reload()
     page.wait_for_selector(".table-btn")
@@ -209,5 +209,5 @@ def test_pick_table_on_floor_plan(server, browser):
     }""")
     page.mouse.click(pos["x"], pos["y"])
     assert page.locator(".table-btn[aria-label='Table 8']").get_attribute("aria-checked") == "true"
-    assert page.inner_text("#order-btn") == "Commander · Table 8"
+    assert page.inner_text("#order-btn") == "Commander (Table 8)"
     page.close()

@@ -1,0 +1,179 @@
+/* ==================================================================
+   "Nabeul" — client page identity.
+   Taken from Nabeul glazed pottery: copper-green glaze, ochre yellow,
+   manganese brown lines on a cool white slip. The dining-room plan is
+   the hero (the guest's first job is to say where they sit); dishes sit
+   on little glazed plates. Loaded after client.css; body.theme-nabeul.
+   ================================================================== */
+body.theme-nabeul {
+  --slip: #f3f7f2;        /* cool white slip, page background */
+  --glaze: #ffffff;       /* surfaces */
+  --manganese: #2b1d19;   /* ink, outlines */
+  --copper: #1d6b4f;      /* copper-green glaze, primary */
+  --copper-deep: #134a37;
+  --copper-wash: #dcebe3;
+  --ochre: #f0b23a;       /* the robot, highlights */
+  --ochre-wash: #fcefd0;
+  --chili: #c2412d;       /* alerts, pedestrian */
+  --clay: #a8603a;        /* desserts glaze */
+
+  --bg: var(--slip); --bg-2: #e8efe9; --card: var(--glaze); --card-2: #eef3ef;
+  --text: var(--manganese); --muted: #6b5d57; --dim: #9a8e88;
+  --border: #dde5df; --border-2: #c6d2ca;
+  --gold: var(--ochre); --gold-2: #8a5a00; --gold-soft: var(--ochre-wash);
+  --blue: var(--copper); --blue-soft: var(--copper-wash);
+  --green: var(--copper); --green-soft: var(--copper-wash);
+  --red: var(--chili); --red-soft: #f7e0db; --amber-soft: var(--ochre-wash);
+  --font: 'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', 'Segoe UI', sans-serif;
+  background: var(--slip);
+  color: var(--manganese);
+  font-family: var(--font);
+  font-size: 16px;
+}
+body.theme-nabeul .ico { width: 24px; height: 24px; display: block; }
+body.theme-nabeul .ico.inline { display: inline-block; width: 18px; height: 18px; vertical-align: -3px; }
+body.theme-nabeul .ico-slot { display: inline-grid; place-items: center; }
+body.theme-nabeul .ico-slot .ico { width: 20px; height: 20px; }
+body.theme-nabeul :focus-visible { outline: 3px solid var(--ochre); outline-offset: 2px; }
+
+/* Top bar */
+body.theme-nabeul .topbar { background: rgba(243, 247, 242, .92); border-bottom: 1px solid var(--border); }
+body.theme-nabeul .brand-logo { background: var(--ochre); color: var(--manganese); border-radius: 50%; box-shadow: 0 0 0 2px var(--slip), 0 0 0 3.5px var(--manganese); }
+body.theme-nabeul .brand-logo .ico { width: 22px; height: 22px; }
+body.theme-nabeul .brand-title { font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: -.2px; white-space: nowrap; }
+body.theme-nabeul .brand-sub { color: var(--muted); font-size: 13px; }
+body.theme-nabeul .btn { border-radius: 999px; background: var(--glaze); border: 1.5px solid var(--border-2); color: var(--manganese); font-weight: 700; }
+body.theme-nabeul .btn:hover:not(:disabled) { border-color: var(--manganese); }
+body.theme-nabeul .btn.primary { background: var(--copper); border-color: var(--copper); color: #fff; box-shadow: none; }
+body.theme-nabeul .btn.primary:hover:not(:disabled) { background: var(--copper-deep); }
+body.theme-nabeul .btn.primary:disabled { background: #d5ddd7; border-color: #d5ddd7; color: #7c8a80; opacity: 1; }
+body.theme-nabeul .btn.danger { background: var(--red-soft); border-color: #e6b3a9; color: var(--chili); }
+body.theme-nabeul .pill { background: var(--glaze); border: 1.5px solid var(--border-2); color: var(--manganese); }
+body.theme-nabeul .pill.ready { background: var(--copper-wash); border-color: #a9cbb9; color: var(--copper-deep); }
+body.theme-nabeul .pill.busy, body.theme-nabeul .pill.charging { background: var(--ochre-wash); border-color: #ecc979; color: #6e4700; }
+body.theme-nabeul .pill.offline { background: var(--red-soft); border-color: #e6b3a9; color: var(--chili); }
+body.theme-nabeul .banner.demo { background: var(--ochre-wash); color: #6e4700; border-bottom: 1px solid #ecc979; }
+body.theme-nabeul .banner.offline { background: var(--red-soft); color: var(--chili); border-bottom: 1px solid #e6b3a9; }
+body.theme-nabeul .toast { background: var(--manganese); color: #fff; border: none; border-radius: 14px; }
+
+/* The plan of the room is the hero: no separate banner */
+body.theme-nabeul .hero { display: none; }
+body.theme-nabeul #order-screen > * + * { margin-top: 0; }
+body.theme-nabeul .card { background: transparent; border: none; border-radius: 0; padding: 18px 0 4px; }
+body.theme-nabeul .card.step + .card.step { margin-top: 26px; }
+body.theme-nabeul .step-num { display: none; }
+body.theme-nabeul .card-head { align-items: flex-end; margin-bottom: 14px; }
+body.theme-nabeul .card h2 {
+  font-family: var(--display); font-weight: 800; font-size: clamp(30px, 8.5vw, 42px);
+  line-height: .98; letter-spacing: -1.2px; font-stretch: 85%; max-width: 12ch;
+}
+body.theme-nabeul .plan-wrap {
+  border-radius: 28px; border: 2px solid var(--manganese); background: var(--glaze);
+  box-shadow: 6px 6px 0 var(--copper);
+}
+body.theme-nabeul .plan-hint { background: var(--manganese); color: #fff; border-radius: 999px; font-weight: 700; }
+body.theme-nabeul .table-selected { font-family: var(--display); font-weight: 800; font-size: 26px; color: var(--copper); margin-top: 16px; }
+body.theme-nabeul .grid-label { margin-top: 20px; color: var(--muted); }
+body.theme-nabeul .table-grid { grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 8px; }
+body.theme-nabeul .table-btn { aspect-ratio: 1; padding: 0; border-radius: 50%; background: var(--glaze); border: 1.5px solid var(--border-2); color: var(--manganese); font-weight: 700; font-size: 15px; }
+body.theme-nabeul .table-btn:hover { border-color: var(--manganese); }
+body.theme-nabeul .table-btn[aria-checked="true"] { background: var(--copper); border-color: var(--copper); color: #fff; }
+
+/* Category switcher: a segmented strip */
+body.theme-nabeul .cat-tabs {
+  top: 62px; margin: 0 0 6px; padding: 5px; gap: 4px; border: none; border-radius: 999px;
+  background: var(--manganese); box-shadow: 0 6px 18px rgba(43, 29, 25, .14);
+}
+body.theme-nabeul .cat-tab { flex: 1; justify-content: center; border: none; border-radius: 999px; background: transparent; color: #e9dfd9; font-weight: 700; font-size: 15px; padding: 9px 12px; transition: background .2s, color .2s; }
+body.theme-nabeul .cat-tab.active { background: var(--ochre); color: var(--manganese); }
+body.theme-nabeul .cat-count:not(:empty) { background: var(--glaze); color: var(--manganese); }
+body.theme-nabeul .cat-tab.active .cat-count { background: var(--manganese); color: var(--ochre); }
+
+/* Dishes on glazed plates; each category has its own glaze */
+body.theme-nabeul .menu-cat { --plate: var(--copper); --plate-wash: var(--copper-wash); }
+body.theme-nabeul .menu-cat:nth-child(2) { --plate: #b07a06; --plate-wash: var(--ochre-wash); }
+body.theme-nabeul .menu-cat:nth-child(3) { --plate: var(--clay); --plate-wash: #f5e4da; }
+body.theme-nabeul .menu-cat + .menu-cat { margin-top: 26px; }
+body.theme-nabeul .menu-cat h3 { font-family: var(--display); text-transform: none; letter-spacing: -.3px; font-size: 22px; font-weight: 800; color: var(--manganese); margin: 18px 0 4px; }
+body.theme-nabeul .menu-item { background: none; border: none; border-radius: 0; padding: 12px 0; gap: 14px; }
+body.theme-nabeul .menu-item + .menu-item { margin-top: 0; border-top: 1px solid var(--border); }
+body.theme-nabeul .menu-item.selected { background: none; }
+body.theme-nabeul .menu-emoji {
+  width: 56px; height: 56px; border-radius: 50%; font-size: 0; color: var(--plate);
+  background: var(--plate-wash); box-shadow: none;
+  outline: 1.5px dashed var(--plate); outline-offset: -7px;
+  transition: background .2s, color .2s, transform .2s;
+}
+body.theme-nabeul .menu-emoji .ico { width: 28px; height: 28px; }
+body.theme-nabeul .menu-item.selected .menu-emoji { background: var(--plate); color: #fff; outline-color: rgba(255, 255, 255, .7); transform: rotate(-8deg); }
+body.theme-nabeul .menu-emoji.small { width: 40px; height: 40px; outline-offset: -5px; }
+body.theme-nabeul .menu-emoji.small .ico { width: 22px; height: 22px; }
+body.theme-nabeul .menu-name { font-weight: 700; font-size: 17px; }
+body.theme-nabeul .menu-desc { color: var(--muted); font-size: 14px; line-height: 1.35; }
+body.theme-nabeul .qty { gap: 0; background: var(--glaze); border: 1.5px solid var(--border-2); border-radius: 999px; padding: 2px; }
+body.theme-nabeul .qty button { width: 34px; height: 34px; border-radius: 50%; border: none; background: transparent; color: var(--manganese); font-size: 19px; }
+body.theme-nabeul .qty .add { background: var(--copper); color: #fff; }
+body.theme-nabeul .qty span { min-width: 24px; font-variant-numeric: tabular-nums; }
+body.theme-nabeul .menu-item:not(.selected) .qty { border-color: transparent; background: transparent; }
+body.theme-nabeul .menu-item:not(.selected) .qty .minus, body.theme-nabeul .menu-item:not(.selected) .qty span { visibility: hidden; }
+body.theme-nabeul .qty span.bump { animation: nb-bump .25s ease-out; }
+@keyframes nb-bump { 50% { transform: scale(1.4); } }
+body.theme-nabeul .note-label { color: var(--muted); font-size: 14px; margin-top: 22px; }
+body.theme-nabeul .note-input { background: var(--glaze); border: 1.5px solid var(--border-2); color: var(--manganese); border-radius: 14px; }
+body.theme-nabeul .note-input:focus { border-color: var(--copper); outline: none; box-shadow: 0 0 0 3px var(--copper-wash); }
+
+/* Voice */
+body.theme-nabeul .voice-btn { background: var(--glaze); border-color: var(--manganese); color: var(--manganese); }
+body.theme-nabeul .voice-panel { background: var(--ochre-wash); border: none; border-radius: 22px; }
+body.theme-nabeul .voice-result { background: var(--glaze); border-radius: 14px; }
+body.theme-nabeul .chip-btn { background: var(--glaze); border: 1.5px solid var(--border-2); }
+body.theme-nabeul .chip-btn[aria-pressed="true"] { background: var(--manganese); border-color: var(--manganese); color: #fff; }
+body.theme-nabeul .mic-dot.on { background: var(--chili); }
+
+/* Checkout: a dark floating tray */
+body.theme-nabeul .checkout { background: var(--manganese); color: #fff; border: none; }
+body.theme-nabeul .checkout-hint { color: #cdbfb8 !important; }
+body.theme-nabeul .checkout .muted { color: #cdbfb8; }
+body.theme-nabeul .checkout .btn.primary { background: var(--ochre); border-color: var(--ochre); color: var(--manganese); }
+body.theme-nabeul .checkout .btn.primary:hover:not(:disabled) { background: #ffc24f; }
+body.theme-nabeul .checkout .btn.primary:disabled { background: #4a3a35; border-color: #4a3a35; color: #a8968f; }
+body.theme-nabeul .mic-fab { background: transparent; border: 1.5px solid #6d5a53; color: #fff; box-shadow: none; }
+body.theme-nabeul .mic-fab .ico { width: 24px; height: 24px; }
+body.theme-nabeul .mic-fab.listening { background: var(--chili); border-color: var(--chili); animation: nb-ring 1.2s infinite; }
+@keyframes nb-ring { 0% { box-shadow: 0 0 0 0 rgba(194, 65, 45, .55); } 70%, 100% { box-shadow: 0 0 0 16px rgba(194, 65, 45, 0); } }
+@media (min-width: 700px) { body.theme-nabeul .checkout { border-radius: 999px; padding: 10px 12px 10px 26px; box-shadow: 0 14px 34px rgba(43, 29, 25, .28); } }
+
+/* Review sheet */
+body.theme-nabeul .sheet-backdrop { background: rgba(43, 29, 25, .45); }
+body.theme-nabeul .sheet { background: var(--glaze); border: none; border-radius: 28px 28px 0 0; box-shadow: 0 -12px 40px rgba(43, 29, 25, .2); }
+body.theme-nabeul .sheet h2 { font-family: var(--display); font-weight: 800; font-size: 30px; letter-spacing: -.8px; }
+body.theme-nabeul .review-table { color: var(--copper); font-weight: 700; }
+body.theme-nabeul .review-items { gap: 0; }
+body.theme-nabeul .review-items li { background: none; border: none; border-radius: 0; padding: 10px 0; }
+body.theme-nabeul .review-items li + li { border-top: 1px solid var(--border); }
+body.theme-nabeul .review-items .qty .minus, body.theme-nabeul .review-items .qty span { visibility: visible; }
+
+/* Tracking: the room again, with the robot moving across it */
+body.theme-nabeul .track-card { background: transparent; border: none; text-align: left; padding: 22px 0; }
+body.theme-nabeul .track-emoji { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--ochre); color: var(--manganese); font-size: 0; box-shadow: 0 0 0 3px var(--slip), 0 0 0 4.5px var(--manganese); }
+body.theme-nabeul .track-emoji .ico.big { width: 34px; height: 34px; }
+body.theme-nabeul .track-emoji[data-status="delivered"] { background: var(--copper); color: #fff; }
+body.theme-nabeul .track-emoji[data-status="failed"], body.theme-nabeul .track-emoji[data-status="rejected"], body.theme-nabeul .track-emoji[data-status="cancelled"] { background: var(--chili); color: #fff; }
+body.theme-nabeul .track-emoji.bounce { animation: none; }
+body.theme-nabeul .track-title { font-family: var(--display); font-weight: 800; font-size: clamp(34px, 10vw, 48px); letter-spacing: -1.4px; line-height: .98; margin-top: 18px; font-stretch: 85%; }
+body.theme-nabeul .track-sub { font-size: 17px; margin-top: 8px; }
+body.theme-nabeul .eta { background: none; padding: 0; margin-top: 14px; color: var(--copper); font-family: var(--display); font-weight: 800; font-size: 22px; border-radius: 0; }
+body.theme-nabeul .track-plan { margin: 20px 0 8px; }
+body.theme-nabeul .stepper { margin: 24px 0 0; max-width: none; }
+body.theme-nabeul .stepper .bullet { background: var(--glaze); border-color: var(--border-2); }
+body.theme-nabeul .stepper li::before { background: var(--border-2); }
+body.theme-nabeul .stepper li.done { color: var(--manganese); }
+body.theme-nabeul .stepper li.done .bullet, body.theme-nabeul .stepper li.done::before { background: var(--copper); border-color: var(--copper); }
+body.theme-nabeul .stepper li.current { color: var(--manganese); }
+body.theme-nabeul .stepper li.current .bullet { border-color: var(--manganese); background: var(--ochre); }
+body.theme-nabeul .track-items { background: var(--glaze); border-radius: 18px; border: 1.5px solid var(--border); }
+
+@media (prefers-reduced-motion: reduce) {
+  body.theme-nabeul *, body.theme-nabeul *::before, body.theme-nabeul *::after { animation: none !important; transition: none !important; }
+}
