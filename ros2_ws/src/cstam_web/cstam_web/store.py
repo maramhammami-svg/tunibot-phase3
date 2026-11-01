@@ -9,6 +9,7 @@ It is plain Python (no rclpy import) so it can be unit tested without ROS.
 """
 from __future__ import annotations
 
+import math
 import threading
 import time
 from collections import deque
@@ -27,6 +28,10 @@ ORDER_ACK_TIMEOUT_S = 8.0
 MOVING_STATES = {"navigating", "recovering", "docking"}
 
 BATTERY_HISTORY_LEN = 300  # 5 minutes at 1 sample/s
+
+# Average speed used for the arrival estimate shown to the customer. Nav2 is
+# capped at 0.45 m/s (nav2_params.yaml) but slows down for turns and people.
+ETA_AVG_SPEED = 0.3  # m/s
 
 
 class TelemetryStore:
@@ -180,7 +185,26 @@ class TelemetryStore:
             if order is None:
                 return None
             out = {k: v for k, v in order.items() if k not in ("seen", "completed_seen")}
+            out["eta_s"] = self._eta_seconds(order) if order["status"] == "en_route" else None
             return out
+
+    def _eta_seconds(self, order: Dict[str, Any]) -> Optional[int]:
+        """Rough arrival time: remaining Nav2 path length (or straight line) / average speed."""
+        if not self.pose:
+            return None
+        rx, ry = self.pose["x"], self.pose["y"]
+        dist = None
+        if len(self.plan) >= 2:
+            start = min(range(len(self.plan)), key=lambda i: (self.plan[i]["x"] - rx) ** 2 + (self.plan[i]["y"] - ry) ** 2)
+            pts = [{"x": rx, "y": ry}] + self.plan[start:]
+            dist = sum(math.hypot(b["x"] - a["x"], b["y"] - a["y"]) for a, b in zip(pts, pts[1:]))
+        else:
+            wp = self.waypoints.get(order["target"])
+            if wp:
+                dist = 1.3 * math.hypot(wp["x"] - rx, wp["y"] - ry)
+        if dist is None:
+            return None
+        return int(max(5, round(dist / ETA_AVG_SPEED / 5.0) * 5))
 
     def _match_new_tasks(self, tasks: List[Dict[str, Any]]):
         """Links web orders to the task ids the task manager created for them.

@@ -1,19 +1,77 @@
 /* Admin page: live robot status, battery, queue, map and controls. */
 (() => {
   const $ = id => document.getElementById(id);
-  const map = new FloorMap($('map'));
+  const t = I18n.t;
+  document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = Icons.svg(el.dataset.icon); });
+  const map = new FloorMap($('map'), FLOOR_MAP_NUIT);
+  map.fillHeight = true;
+  // Keep the drawing clear of the floating mission card (top) and tool dock (bottom)
+  function fitMapPad() {
+    const wide = window.innerWidth > 900;
+    map.fillHeight = wide;
+    map.maxHeight = wide ? 4000 : 520;
+    map.pad = wide ? { t: 150, r: 24, b: 92, l: 24 } : { t: 12, r: 12, b: 12, l: 12 };
+    map.resize();
+  }
+  fitMapPad();
+  window.addEventListener('resize', fitMapPad);
+
+  // The command centre fills the window below the top bar and banners
+  function setChrome() {
+    let h = document.querySelector('.topbar').offsetHeight;
+    document.querySelectorAll('.banner:not(.hidden)').forEach(b => { h += b.offsetHeight; });
+    if (document.body.dataset.chrome !== String(h)) {
+      document.body.dataset.chrome = String(h);
+      document.body.style.setProperty('--chrome', `${h}px`);
+    }
+  }
+  window.addEventListener('resize', setChrome);
+
+  window.__floorMap = map;  // used by the browser tests
+  let config = null;
   let world = null;
   let lastSnap = null;
 
   async function loadWorld() {
     const [config, layout] = await Promise.all([Tuni.api('/api/config'), Tuni.api('/api/map/layout')]);
     world = config.world;
-    $('world-title').textContent = `${config.title} · robot monitoring`;
+    renderStatic(config);
     $('demo-banner').classList.toggle('hidden', config.mode !== 'mock');
+    setChrome();
     map.setWorld(layout, config.waypoints);
     const sel = $('dispatch-target');
     sel.innerHTML = Object.keys(config.waypoints)
       .map(n => `<option value="${Tuni.escapeHtml(n)}">${Tuni.escapeHtml(n)}</option>`).join('');
+  }
+
+  function renderStatic(cfg) {
+    config = cfg || config;
+    I18n.apply();
+    const other = I18n.get() === 'fr' ? 'en' : 'fr';
+    $('lang-btn').textContent = other.toUpperCase();
+    if (config) $('world-title').textContent = t('a_title', config.title);
+  }
+  $('lang-btn').onclick = () => {
+    I18n.set(I18n.get() === 'fr' ? 'en' : 'fr');
+    renderStatic();
+    if (lastSnap) render(lastSnap);
+  };
+  const stateLabel = st => (t('states')[st] || st || t('states').unknown);
+
+  // Tap a table on the map to send the robot there
+  map.onTableClick = name => {
+    if (confirm(t('a_send_confirm', name))) {
+      act('/api/admin/dispatch', { target: name, item: 'Admin dispatch' }, t('a_sent_to', name));
+    }
+  };
+
+  // Only touch the DOM when a list really changed (keeps entry animations and hover states)
+  const htmlCache = {};
+  const seenTickets = new Set();
+  function setHtml(id, html) {
+    if (htmlCache[id] === html) return;
+    htmlCache[id] = html;
+    $(id).innerHTML = html;
   }
 
   // ---------------------------------------------------------------- render
@@ -24,12 +82,13 @@
 
     const robotOnline = s.online.robot;
     $('offline-banner').classList.toggle('hidden', robotOnline || s.mode === 'mock');
+    setChrome();
 
     // State
     const st = s.robot_state;
     const stateClass = !robotOnline ? 'offline' : ({ docked: 'ready', idle: 'ready', docking: 'charging', recovering: 'offline' }[st] || 'busy');
     $('state-pill').className = `pill ${stateClass}`;
-    $('state-text').textContent = robotOnline ? Tuni.stateLabel(st) : 'Robot offline';
+    $('state-text').textContent = robotOnline ? stateLabel(st) : t('a_offline');
 
     // Battery
     const b = s.battery || {};
@@ -39,17 +98,20 @@
       fill.style.width = `${pct}%`;
       fill.style.background = b.is_critical ? 'var(--red)' : (b.is_low ? 'var(--amber)' : 'var(--green)');
       $('battery-meter').setAttribute('aria-valuenow', String(pct));
-      $('battery-pct').textContent = `${pct.toFixed(1)}%`;
-      $('battery-pill-text').textContent = `${pct.toFixed(0)}%${b.is_docked ? ' ⚡' : ''}`;
-      $('battery-pill').className = `pill ${b.is_critical ? 'offline' : (b.is_low ? 'charging' : '')}`;
+      $('battery-pct').textContent = `${pct.toFixed(0)} %`;
+      $('battery-pill-text').textContent = `${pct.toFixed(0)}%`;
+      $('battery-pill').dataset.level = b.is_critical ? 'critical' : (b.is_low ? 'low' : 'ok');
+      $('battery-pill').classList.toggle('charging', !!b.is_docked);
+      const C = 2 * Math.PI * 27;
+      $('ring-fill').style.strokeDasharray = `${(pct / 100) * C} ${C}`;
       $('m-voltage').textContent = `${(b.voltage ?? 0).toFixed(2)} V`;
       $('m-current').textContent = `${(b.current_amps ?? 0).toFixed(2)} A ${b.is_docked ? '(in)' : '(out)'}`;
       $('m-power').textContent = `${(b.power_watts ?? 0).toFixed(0)} W`;
       $('m-temp').textContent = `${(b.temperature_c ?? 0).toFixed(1)} °C`;
       const rt = b.estimated_runtime_min;
-      $('m-runtime').textContent = b.is_docked ? 'Charging' : (rt && rt < 999 ? `${Math.floor(rt / 60)} h ${Math.round(rt % 60)} min (sim time)` : '—');
+      $('m-runtime').textContent = b.is_docked ? t('a_charging') : (rt && rt < 999 ? `${Math.floor(rt / 60)} h ${Math.round(rt % 60)} min (${t('a_sim_time')})` : '—');
       const chip = $('battery-status-chip');
-      const statusMap = { charging: ['Charging', 'info'], critical: ['Critical', 'bad'], low: ['Low', 'warn'], discharging_nav: ['In use', 'ok'], idle_standby: ['Standby', 'ok'] };
+      const statusMap = t('a_status');
       const [txt, cls] = statusMap[b.status] || [b.status || '—', ''];
       chip.textContent = txt;
       chip.className = `chip ${cls}`;
@@ -57,35 +119,49 @@
     drawSpark(s.battery_history || []);
 
     // Robot
-    const t = s.current_task;
-    $('r-task').textContent = t ? `${t.id} → ${t.target} · ${t.item}` : (s.battery_docking_lock ? 'Recharging before next order' : 'None');
+    const task = s.current_task;
+    // Mission strip: one sentence about what the robot is doing
+    let title = robotOnline ? stateLabel(st) : t('a_offline');
+    if (robotOnline && task && (st === 'navigating' || st === 'recovering')) title = t('a_m_going', task.target);
+    if (robotOnline && task && st === 'at_table') title = t('a_m_at', task.target);
+    $('mission-title').textContent = title;
+    const waiting = (s.pending_tasks || []).length;
+    $('mission-sub').textContent = task ? `${task.id}, ${task.item}${waiting ? `  (${t('a_m_more', waiting)})` : ''}`
+      : (s.battery_docking_lock ? t('a_recharging') : t('a_m_idle_sub'));
+    $('m-avatar').dataset.state = robotOnline ? (st || 'unknown') : 'offline';
+    $('mission-done').textContent = s.completed_count ?? 0;
+    $('r-task').textContent = task ? `${task.id}: ${task.target}, ${task.item}` : (s.battery_docking_lock ? t('a_recharging') : t('a_none'));
     $('r-pos').textContent = s.pose ? `${s.pose.x.toFixed(2)}, ${s.pose.y.toFixed(2)}` : '—';
     $('r-done').textContent = s.completed_count ?? 0;
     const ob = s.obstacle || {};
     $('r-obstacle').textContent = ob.mode
-      ? `${ob.mode}${typeof ob.distance_to_robot === 'number' && ob.distance_to_robot < 50 ? ` · ${ob.distance_to_robot.toFixed(1)} m from robot` : ''}${ob.is_blocking ? ' · ⚠️ close' : ''}`
-      : 'not running';
+      ? `${ob.mode}${typeof ob.distance_to_robot === 'number' && ob.distance_to_robot < 50 ? ` · ${t('a_from_robot', ob.distance_to_robot.toFixed(1))}` : ''}${ob.is_blocking ? ` · ${t('a_close')}` : ''}`
+      : t('a_not_running');
 
+    const hn = t('a_health_names');
     const health = [
-      ['Battery sim', s.online.battery], ['Task manager', s.online.task_manager],
-      ['Localization', s.online.localization], ['Pedestrian', s.online.obstacle],
+      [hn[0], s.online.battery], [hn[1], s.online.task_manager],
+      [hn[2], s.online.localization], [hn[3], s.online.obstacle],
     ];
-    $('health').innerHTML = health.map(([n, ok]) => `<li><span class="dot ${ok ? 'on' : 'off'}"></span>${n}</li>`).join('');
+    setHtml('health', health.map(([n, ok]) => `<li class="${ok ? 'on' : 'off'}"><span class="h-ico">${Icons.svg(ok ? 'check' : 'cross')}</span><span>${n}</span><em>${ok ? t('a_up') : t('a_down')}</em></li>`).join(''));
 
     // Queue
     const items = [];
-    if (t) items.push({ ...t, active: true });
+    if (task) items.push({ ...task, active: true });
     for (const p of s.pending_tasks || []) items.push(p);
     $('queue-count').textContent = String(items.length);
-    $('queue').innerHTML = items.length ? items.map(q => `
-      <li class="${q.active ? 'active' : ''}">
-        <div class="q-main">
-          <div><span class="q-id">${Tuni.escapeHtml(q.id)}</span> <span class="q-target">${Tuni.escapeHtml(q.target)}</span></div>
-          <div class="q-item" title="${Tuni.escapeHtml(q.item)}">${Tuni.escapeHtml(q.item)}</div>
-        </div>
-        <span class="chip ${q.active ? 'info' : ''}">${q.active ? Tuni.stateLabel(st) : 'Queued'}</span>
-        <button class="btn small danger" data-cancel="${Tuni.escapeHtml(q.id)}" type="button" aria-label="Cancel ${Tuni.escapeHtml(q.id)}">✕</button>
-      </li>`).join('') : '<li class="empty">No orders</li>';
+    const badges = {};
+    for (const q of items) badges[q.target] = (badges[q.target] || 0) + 1;
+    map.badges = badges;
+    setHtml('queue', items.length ? items.map(q => `
+      <li class="ticket${q.active ? ' active' : ''}${seenTickets.has(q.id) ? '' : ' new'}">
+        <div class="t-top"><span class="q-id">${Tuni.escapeHtml(q.id)}</span>
+          <button class="t-cancel" data-cancel="${Tuni.escapeHtml(q.id)}" type="button" aria-label="${Tuni.escapeHtml(t('a_cancel_ticket', q.id))}">${Icons.svg('cross')}</button></div>
+        <div class="q-target">${Tuni.escapeHtml(q.target)}</div>
+        <div class="q-item">${Tuni.escapeHtml(q.item).split(/,\s*/).join('<br>')}</div>
+        <span class="stamp">${q.active ? stateLabel(st) : t('a_queued')}</span>
+      </li>`).join('') : `<li class="empty">${t('a_no_orders')}</li>`);
+    items.forEach(q => seenTickets.add(q.id));
     $('lock-note').classList.toggle('hidden', !s.battery_docking_lock);
 
     // Buttons that make no sense in the current state
@@ -94,27 +170,28 @@
 
     // Events
     const ev = (s.events || []).slice().reverse();
-    $('events').innerHTML = ev.length ? ev.map(e => `
-      <li class="${e.level}"><time>${new Date(e.t * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</time>
-      <span>${Tuni.escapeHtml(e.message)}</span></li>`).join('') : '<li class="empty">No events yet</li>';
+    setHtml('events', ev.length ? ev.map(e => `
+      <li class="${e.level}"><i class="ev-dot" aria-hidden="true"></i><time>${new Date(e.t * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</time>
+      <span>${Tuni.escapeHtml(I18n.event(e.message))}</span></li>`).join('') : `<li class="empty">${t('a_no_events')}</li>`);
   }
 
   function drawSpark(hist) {
     const c = $('battery-chart');
-    const w = c.clientWidth, h = 70, dpr = window.devicePixelRatio || 1;
+    const w = c.clientWidth, h = 90, dpr = window.devicePixelRatio || 1;
+    if (!w) return;
     if (c.width !== Math.round(w * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
     const ctx = c.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
     const y = p => h - 4 - (p / 100) * (h - 8);
     ctx.setLineDash([3, 4]);
-    for (const [lvl, col] of [[25, 'rgba(245,158,11,.5)'], [15, 'rgba(244,63,94,.5)']]) {
+    for (const [lvl, col] of [[25, 'rgba(240,178,58,.5)'], [15, 'rgba(224,85,63,.6)']]) {
       ctx.strokeStyle = col; ctx.beginPath(); ctx.moveTo(0, y(lvl)); ctx.lineTo(w, y(lvl)); ctx.stroke();
     }
     ctx.setLineDash([]);
     if (hist.length < 2) return;
     const t0 = hist[0].t, t1 = hist[hist.length - 1].t, span = Math.max(1, t1 - t0);
-    ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2;
+    ctx.strokeStyle = '#3fa37a'; ctx.lineWidth = 2;
     ctx.beginPath();
     hist.forEach((pt, i) => { const x = ((pt.t - t0) / span) * w; i ? ctx.lineTo(x, y(pt.pct)) : ctx.moveTo(x, y(pt.pct)); });
     ctx.stroke();
@@ -130,29 +207,31 @@
     }
   }
 
-  $('dock-btn').onclick = () => act('/api/admin/dock', null, 'Return to dock requested');
-  $('undock-btn').onclick = () => act('/api/admin/dock/cancel', null, 'Docking cancelled');
-  $('kitchen-btn').onclick = () => act('/api/admin/dispatch', { target: 'Kitchen/Pickup', item: 'Pickup at kitchen' }, 'Robot sent to the kitchen');
+  $('dock-btn').onclick = () => act('/api/admin/dock', null, t('a_dock_ok'));
+  $('undock-btn').onclick = () => act('/api/admin/dock/cancel', null, t('a_undock_ok'));
+  $('kitchen-btn').onclick = () => act('/api/admin/dispatch', { target: 'Kitchen/Pickup', item: 'Pickup at kitchen' }, t('a_kitchen_ok'));
   $('dispatch-btn').onclick = () => {
     const target = $('dispatch-target').value;
-    act('/api/admin/dispatch', { target, item: 'Admin dispatch' }, `Robot sent to ${target}`);
+    act('/api/admin/dispatch', { target, item: 'Admin dispatch' }, t('a_sent_to', target));
   };
   document.querySelectorAll('[data-battery]').forEach(b => {
-    b.onclick = () => act('/api/admin/battery', { percentage: Number(b.dataset.battery) }, `Battery set to ${b.dataset.battery}%`);
+    b.onclick = () => act('/api/admin/battery', { percentage: Number(b.dataset.battery) }, t('a_battery_ok', b.dataset.battery));
   });
   document.querySelectorAll('[data-obstacle]').forEach(b => {
-    b.onclick = () => act('/api/admin/obstacle', { mode: b.dataset.obstacle }, `Pedestrian: ${b.dataset.obstacle}`);
+    b.onclick = () => act('/api/admin/obstacle', { mode: b.dataset.obstacle }, t('a_ped_ok', b.textContent.trim()));
   });
   $('queue').addEventListener('click', ev => {
     const id = ev.target.closest('[data-cancel]')?.dataset.cancel;
-    if (id && confirm(`Cancel ${id}?`)) act(`/api/admin/tasks/${encodeURIComponent(id)}/cancel`, null, `${id} cancelled`);
+    if (id && confirm(t('a_cancel_q', id))) act(`/api/admin/tasks/${encodeURIComponent(id)}/cancel`, null, t('a_cancelled', id));
   });
 
   // ---------------------------------------------------------------- start
+  setChrome();
+  renderStatic();
   loadWorld().catch(e => Tuni.toast(e.message, 'error'));
   Tuni.telemetry(render, connected => {
     $('conn-pill').className = `pill ${connected ? 'ready' : 'offline'}`;
-    $('conn-text').textContent = connected ? 'Live' : 'Reconnecting…';
+    $('conn-text').textContent = connected ? t('a_live') : t('a_reconnecting');
   });
   window.addEventListener('resize', () => lastSnap && drawSpark(lastSnap.battery_history || []));
 })();

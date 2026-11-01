@@ -68,11 +68,18 @@ A web interface served by the new ROS 2 package `cstam_web`. It only relays the 
 
 | Page | URL | For |
 |------|-----|-----|
-| Client | `http://<PC-IP>:8000/` (or `/?table=5` from a table QR code) | Guests: pick a table and dishes, then follow the delivery live (queued → on the way → at your table → delivered), cancel while still queued |
+| Client | `http://<PC-IP>:8000/` (or `/?table=5` from a table QR code) | Guests: pick a table and dishes (by tapping or **by voice**), then follow the delivery live (queued → on the way → at your table → delivered, with an arrival estimate), cancel while still queued. French / English. |
 | Admin | `http://<PC-IP>:8000/admin` | Staff: live floor map with the Nav2 path, battery gauge and 5-minute history, queue with cancel, return-to-dock, system health, event log, and test buttons (low/critical battery, pedestrian modes) |
 
 <p>
 <img src="docs/screenshots/web_client_order.png" width="200"> <img src="docs/screenshots/web_client_tracking.png" width="200"> <img src="docs/screenshots/web_admin.png" width="520">
+</p>
+
+**🎤 Voice orders (bonus feature).** Tap the microphone and say for example *« deux thés à la menthe et un brik pour la table 4 »*, *"two coffees and a couscous, table seven"* or, in derja, *« zouz kahwa w brik, tawla tletha »*. The browser turns speech into text (Web Speech API, Chrome / Edge) and `cstam_web/voice.py` matches dishes, quantities and the table against the menu. The cart is filled and read back aloud; the guest confirms with the Order button. A text box does the same when no microphone is available.
+Browsers only allow the microphone on `http://localhost` or HTTPS: use the PC's own browser for the voice demo, or on a phone enable `chrome://flags/#unsafely-treat-insecure-origin-as-secure` for `http://<PC-IP>:8000`.
+
+<p>
+<img src="docs/screenshots/web_client_voice.png" width="200"> <img src="docs/screenshots/web_client_eta.png" width="200">
 </p>
 
 **Run it**
@@ -86,7 +93,9 @@ cd ros2_ws && colcon build --symlink-install && source install/setup.bash && cd 
 ./run_web_interface.sh --mock --world resto_arbi   # or: demo mode without ROS 2 / Gazebo
 ```
 
-Phones on the same Wi-Fi can open the client page with the PC's IP address. Web tests: `python3 -m pytest ros2_ws/src/cstam_web/test`.
+Phones on the same Wi-Fi can open the client page with the PC's IP address.
+
+**Tests:** `python3 -m pytest ros2_ws/src/cstam_web/test` runs the API, order tracking and voice parser tests, plus a browser end-to-end test (voice order → simulated robot → "Delivered") when Playwright is installed (`pip install playwright && playwright install chromium`).
 
 ---
 

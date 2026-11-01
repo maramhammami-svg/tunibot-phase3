@@ -1,125 +1,146 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin · TuniBot</title>
+  <title>Salle de contrôle, Tunibot</title>
   <link rel="stylesheet" href="/static/common.css">
   <link rel="stylesheet" href="/static/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,700;12..96,75..100,800&display=swap">
+  <link rel="stylesheet" href="/static/theme-nuit.css">
 </head>
-<body>
+<body class="theme-nuit">
   <header class="topbar">
     <div class="brand">
-      <div class="brand-logo" aria-hidden="true">🛠️</div>
+      <div class="brand-logo" aria-hidden="true" data-icon="robot"></div>
       <div>
-        <div class="brand-title">TuniBot · Admin</div>
-        <div class="brand-sub" id="world-title">Robot monitoring</div>
+        <div class="brand-title">Tunibot, salle de contrôle</div>
+        <div class="brand-sub" id="world-title"></div>
       </div>
     </div>
     <div class="top-pills">
-      <span class="pill" id="state-pill"><span class="dot"></span><span id="state-text">—</span></span>
-      <span class="pill" id="battery-pill"><span aria-hidden="true">🔋</span><span id="battery-pill-text">—</span></span>
-      <span class="pill" id="conn-pill"><span class="dot"></span><span id="conn-text">Connecting…</span></span>
-      <a class="btn small" href="/" target="_blank" rel="noopener">Client page ↗</a>
+      <span class="pill" id="conn-pill"><span class="dot"></span><span id="conn-text">…</span></span>
+      <button class="btn small lang-btn" id="lang-btn" type="button">EN</button>
+      <a class="btn small" href="/" target="_blank" rel="noopener"><span data-i18n="a_client_page"></span></a>
     </div>
   </header>
-  <div class="banner demo hidden" id="demo-banner">Demo mode: simulated robot (ROS 2 not connected). Start without <code>--mock</code> to use the real robot.</div>
-  <div class="banner offline hidden" id="offline-banner">No data from the robot. Is <code>cstam_system.launch.py</code> running?</div>
+  <div class="banner demo hidden" id="demo-banner" data-i18n="a_demo_banner"></div>
+  <div class="banner offline hidden" id="offline-banner" data-i18n="a_offline_banner"></div>
 
-  <main class="admin-grid">
-    <!-- LEFT: robot & battery -->
-    <section class="col">
-      <div class="card">
-        <div class="card-head"><h3>Battery</h3><span class="chip" id="battery-status-chip">—</span></div>
-        <div class="battery-big">
-          <div class="gauge" role="meter" aria-label="Battery level" aria-valuemin="0" aria-valuemax="100" id="battery-meter">
-            <div class="gauge-fill" id="gauge-fill"></div>
-            <div class="gauge-mark low" title="Low battery: return to dock"></div>
-            <div class="gauge-mark critical" title="Critical battery: emergency dock"></div>
-          </div>
-          <div class="battery-pct mono" id="battery-pct">—</div>
+  <main class="cc">
+    <!-- The room fills the screen; live info floats on top of it -->
+    <section class="stage" aria-label="Plan">
+      <div class="map-wrap" id="map-wrap"><canvas id="map" data-i18n-aria="a_map"></canvas></div>
+
+      <section class="mission" aria-live="polite">
+        <div class="m-avatar" id="m-avatar" data-state="unknown"><span data-icon="robot"></span></div>
+        <div class="m-text">
+          <h1 class="m-title" id="mission-title">…</h1>
+          <p class="m-sub" id="mission-sub"></p>
+          <span class="pill" id="state-pill"><span class="dot"></span><span id="state-text">—</span></span>
         </div>
-        <div class="metrics">
-          <div><span class="label">Voltage</span><span class="mono" id="m-voltage">—</span></div>
-          <div><span class="label">Current</span><span class="mono" id="m-current">—</span></div>
-          <div><span class="label">Power</span><span class="mono" id="m-power">—</span></div>
-          <div><span class="label">Temperature</span><span class="mono" id="m-temp">—</span></div>
-          <div class="wide"><span class="label">Estimated runtime</span><span class="mono" id="m-runtime">—</span></div>
+        <div class="m-ring" id="battery-pill">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><circle class="ring-bg" cx="32" cy="32" r="27"/><circle class="ring-fill" id="ring-fill" cx="32" cy="32" r="27"/></svg>
+          <div class="ring-label"><strong id="battery-pill-text">—</strong><span data-i18n="a_m_battery"></span></div>
         </div>
-        <canvas id="battery-chart" class="spark" height="70" aria-label="Battery history, last 5 minutes"></canvas>
-        <div class="spark-caption muted">Last 5 minutes · dashed lines: 25% low, 15% critical</div>
+        <div class="m-count"><strong id="mission-done">0</strong><span data-i18n="a_m_delivered"></span></div>
+      </section>
+
+      <div class="legend" id="map-legend">
+        <span class="lg"><i class="sw s-robot"></i><span data-i18n="a_lg_robot"></span></span>
+        <span class="lg"><i class="sw s-person"></i><span data-i18n="a_lg_person"></span></span>
+        <span class="lg"><i class="sw s-dock"></i><span data-i18n="a_lg_dock"></span></span>
+        <span class="lg"><i class="sw s-kitchen"></i><span data-i18n="a_lg_kitchen"></span></span>
+        <span class="lg"><i class="sw s-badge">2</i><span data-i18n="a_lg_orders"></span></span>
+        <span class="lg-tip" data-i18n="a_legend"></span>
       </div>
 
-      <div class="card">
-        <div class="card-head"><h3>Robot</h3></div>
-        <div class="metrics">
-          <div class="wide"><span class="label">Current task</span><span id="r-task">—</span></div>
-          <div><span class="label">Position</span><span class="mono" id="r-pos">—</span></div>
-          <div><span class="label">Delivered</span><span class="mono" id="r-done">0</span></div>
-          <div class="wide"><span class="label">Pedestrian</span><span id="r-obstacle">—</span></div>
-        </div>
-        <h3 class="sub-h">System health</h3>
+      <div class="dock" role="toolbar" data-i18n-aria="a_controls">
+        <button class="btn warn" id="dock-btn" type="button"><span class="ico-slot" data-icon="plug"></span><span data-i18n="a_dock"></span></button>
+        <button class="btn" id="undock-btn" type="button"><span class="ico-slot" data-icon="undock"></span><span data-i18n="a_undock"></span></button>
+        <button class="btn" id="kitchen-btn" type="button"><span class="ico-slot" data-icon="pot"></span><span data-i18n="a_kitchen"></span></button>
+        <span class="dispatch">
+          <label for="dispatch-target" class="sr-only" data-i18n="a_send_to"></label>
+          <select id="dispatch-target"></select>
+          <button class="btn primary" id="dispatch-btn" type="button" data-i18n="a_go"></button>
+        </span>
+      </div>
+    </section>
+
+    <!-- Side panel with tabs -->
+    <aside class="side">
+
+      <section class="side-panel" data-panel="orders">
+        <header class="sec-head"><span class="sec-ico" data-icon="receipt"></span><h2 class="side-h" data-i18n="a_queue"></h2><span class="tab-count" id="queue-count">0</span></header>
+        <p class="sec-hint" data-i18n="a_queue_hint"></p>
+        <ul class="queue tickets" id="queue"></ul>
+        <div class="lock-note hidden" id="lock-note" data-i18n="a_lock_note"></div>
+      </section>
+
+      <section class="side-panel" data-panel="robot">
+        <header class="sec-head"><span class="sec-ico" data-icon="robot"></span><h2 class="side-h" data-i18n="a_robot"></h2></header>
+        <ul class="facts">
+          <li class="wide"><span class="f-ico" data-icon="tray"></span><span class="f-label" data-i18n="a_current_task"></span><strong id="r-task">—</strong></li>
+          <li><span class="f-ico" data-icon="pin"></span><span class="f-label" data-i18n="a_position"></span><strong id="r-pos">—</strong></li>
+          <li><span class="f-ico" data-icon="check"></span><span class="f-label" data-i18n="a_delivered"></span><strong id="r-done">0</strong></li>
+          <li class="wide"><span class="f-ico" data-icon="person"></span><span class="f-label" data-i18n="a_pedestrian"></span><strong id="r-obstacle">—</strong></li>
+        </ul>
+        <h3 class="sub-h" data-i18n="a_health"></h3>
         <ul class="health" id="health"></ul>
-      </div>
-    </section>
+      </section>
 
-    <!-- CENTER: map -->
-    <section class="col center">
-      <div class="card map-card">
-        <div class="card-head"><h3>Live floor map</h3><span class="muted small" id="map-legend">🔵 robot · 🟠 person · ⚡ dock · 🍳 kitchen</span></div>
-        <div class="map-wrap"><canvas id="map" aria-label="Floor map with robot position"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-head"><h3>Event log</h3></div>
-        <ul class="events" id="events" aria-live="polite"></ul>
-      </div>
-    </section>
-
-    <!-- RIGHT: queue & controls -->
-    <section class="col">
-      <div class="card">
-        <div class="card-head"><h3>Delivery queue</h3><span class="chip" id="queue-count">0</span></div>
-        <ul class="queue" id="queue"></ul>
-        <div class="lock-note hidden" id="lock-note">🔒 Orders are held until the battery reaches 80%.</div>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><h3>Controls</h3></div>
-        <div class="btn-grid">
-          <button class="btn warn" id="dock-btn" type="button">🔌 Return to dock</button>
-          <button class="btn" id="undock-btn" type="button">✋ Cancel docking</button>
-          <button class="btn" id="kitchen-btn" type="button">🍳 Send to kitchen</button>
-        </div>
-        <div class="dispatch">
-          <label for="dispatch-target" class="label">Send robot to</label>
-          <div class="dispatch-row">
-            <select id="dispatch-target"></select>
-            <button class="btn small" id="dispatch-btn" type="button">Go</button>
+      <section class="side-panel" data-panel="battery">
+        <header class="sec-head"><span class="sec-ico" data-icon="battery"></span><h2 class="side-h" data-i18n="a_battery"></h2><span class="chip" id="battery-status-chip">—</span></header>
+        <div class="battery-big">
+          <div class="battery-pct" id="battery-pct">—</div>
+          <div class="gauge" role="meter" data-i18n-aria="a_battery_level" aria-valuemin="0" aria-valuemax="100" id="battery-meter">
+            <div class="gauge-fill" id="gauge-fill"></div>
+            <div class="gauge-mark low"></div>
+            <div class="gauge-mark critical"></div>
           </div>
         </div>
-      </div>
+        <canvas id="battery-chart" class="spark" height="90" data-i18n-aria="a_spark_caption"></canvas>
+        <div class="spark-caption muted" data-i18n="a_spark_caption"></div>
+        <ul class="tiles">
+          <li><span class="f-ico" data-icon="bolt"></span><span class="f-label" data-i18n="a_voltage"></span><strong id="m-voltage">—</strong></li>
+          <li><span class="f-ico" data-icon="wave"></span><span class="f-label" data-i18n="a_current"></span><strong id="m-current">—</strong></li>
+          <li><span class="f-ico" data-icon="plug"></span><span class="f-label" data-i18n="a_power"></span><strong id="m-power">—</strong></li>
+          <li><span class="f-ico" data-icon="thermo"></span><span class="f-label" data-i18n="a_temperature"></span><strong id="m-temp">—</strong></li>
+          <li class="wide"><span class="f-ico" data-icon="hourglass"></span><span class="f-label" data-i18n="a_runtime"></span><strong id="m-runtime">—</strong></li>
+        </ul>
+      </section>
 
-      <div class="card">
-        <div class="card-head"><h3>Test scenarios</h3><span class="muted small">for the demo</span></div>
-        <div class="label">Battery level</div>
-        <div class="btn-row">
-          <button class="btn small" data-battery="100" type="button">100%</button>
-          <button class="btn small warn" data-battery="24" type="button">24% low</button>
-          <button class="btn small danger" data-battery="14" type="button">14% critical</button>
+      <section class="side-panel" data-panel="events">
+        <header class="sec-head"><span class="sec-ico" data-icon="list"></span><h2 class="side-h" data-i18n="a_events"></h2></header>
+        <ul class="events" id="events" aria-live="polite"></ul>
+      </section>
+
+      <section class="side-panel" data-panel="tests">
+        <header class="sec-head"><span class="sec-ico" data-icon="flask"></span><h2 class="side-h" data-i18n="a_tests"></h2></header>
+        <p class="sec-hint" data-i18n="a_tests_hint"></p>
+        <h3 class="sub-h" data-i18n="a_battery_level"></h3>
+        <div class="seg">
+          <button class="btn small" data-battery="100" type="button">100 %</button>
+          <button class="btn small warn" data-battery="24" type="button">24 % <span data-i18n="a_low"></span></button>
+          <button class="btn small danger" data-battery="14" type="button">14 % <span data-i18n="a_critical"></span></button>
         </div>
-        <div class="label">Pedestrian (dynamic obstacle)</div>
-        <div class="btn-row">
-          <button class="btn small" data-obstacle="patrol" type="button">Patrol</button>
-          <button class="btn small" data-obstacle="cross" type="button">Cross</button>
-          <button class="btn small" data-obstacle="block" type="button">Block</button>
-          <button class="btn small" data-obstacle="clear" type="button">Clear</button>
+        <h3 class="sub-h" data-i18n="a_ped_obstacle"></h3>
+        <div class="seg">
+          <button class="btn small" data-obstacle="patrol" type="button" data-i18n="a_patrol"></button>
+          <button class="btn small" data-obstacle="cross" type="button" data-i18n="a_cross"></button>
+          <button class="btn small" data-obstacle="block" type="button" data-i18n="a_block"></button>
+          <button class="btn small" data-obstacle="clear" type="button" data-i18n="a_clear"></button>
         </div>
-      </div>
-    </section>
+      </section>
+    </aside>
   </main>
 
   <script src="/static/common.js"></script>
+  <script src="/static/i18n.js"></script>
   <script src="/static/map.js"></script>
+  <script src="/static/icons.js"></script>
   <script src="/static/admin.js"></script>
 </body>
 </html>

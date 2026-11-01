@@ -1,44 +1,112 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0f17">
+  <meta name="theme-color" content="#f3f7f2">
   <title>Order · TuniBot</title>
   <link rel="stylesheet" href="/static/common.css">
   <link rel="stylesheet" href="/static/client.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,700;12..96,75..100,800&display=swap">
+  <link rel="stylesheet" href="/static/theme-nabeul.css">
 </head>
-<body>
+<body class="theme-nabeul">
   <header class="topbar">
     <div class="brand">
-      <div class="brand-logo" aria-hidden="true">🤖</div>
+      <div class="brand-logo" aria-hidden="true" id="brand-logo"></div>
       <div>
         <div class="brand-title" id="venue-title">TuniBot</div>
         <div class="brand-sub" id="venue-sub">Order from your table</div>
       </div>
     </div>
-    <span class="pill" id="availability-pill"><span class="dot"></span><span id="availability-text">Connecting…</span></span>
+    <div class="top-actions">
+      <button class="btn small lang-btn" id="lang-btn" type="button" aria-label="Change language">EN</button>
+      <span class="pill" id="availability-pill"><span class="dot"></span><span id="availability-text">…</span></span>
+    </div>
   </header>
-  <div class="banner demo hidden" id="demo-banner">Demo mode: simulated robot (ROS 2 not connected)</div>
+  <div class="banner demo hidden" id="demo-banner" data-i18n="demo_banner"></div>
   <div class="banner offline hidden" id="offline-banner"></div>
 
   <main class="client">
     <!-- ORDER SCREEN -->
     <section id="order-screen">
+      <div class="hero">
+        <div class="hero-pattern" aria-hidden="true"></div>
+        <div class="hero-text">
+          <div class="hero-hello" data-i18n="hero_hello"></div>
+          <h1 class="hero-title" id="hero-title"></h1>
+          <p class="hero-sub" data-i18n="hero_sub"></p>
+        </div>
+        <div class="hero-robot" aria-hidden="true" id="hero-robot"></div>
+      </div>
       <div class="card step">
+        <div class="welcome" aria-hidden="true">
+          <div class="welcome-text"><span class="welcome-hello" data-i18n="hero_hello"></span><span class="welcome-sub" data-i18n="hero_sub"></span></div>
+          <svg class="waiter" viewBox="0 0 160 170" aria-hidden="true">
+          <g class="w-steam" fill="none" stroke="#a8603a" stroke-width="2.4" stroke-linecap="round">
+            <path d="M70 20c-5 6 5 9 0 15"/><path d="M82 14c-5 6 5 9 0 15"/><path d="M94 20c-5 6 5 9 0 15"/>
+          </g>
+          <g class="w-tray">
+            <ellipse cx="82" cy="52" rx="34" ry="9" fill="#f0b23a" stroke="#2b1d19" stroke-width="3"/>
+            <path d="M58 50c0-12 11-18 24-18s24 6 24 18" fill="#fcefd0" stroke="#2b1d19" stroke-width="3"/>
+            <path d="M64 44h36" stroke="#1d6b4f" stroke-width="2.4" stroke-dasharray="3 4" stroke-linecap="round"/>
+            <path d="M48 52h68" stroke="#2b1d19" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          <path d="M112 54l14 22-12 14" fill="none" stroke="#2b1d19" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M44 92l-12 6" fill="none" stroke="#2b1d19" stroke-width="5" stroke-linecap="round"/>
+          <rect x="44" y="64" width="72" height="66" rx="30" fill="#f0b23a" stroke="#2b1d19" stroke-width="3.5"/>
+          <rect x="56" y="76" width="48" height="26" rx="13" fill="#2b1d19"/>
+          <circle class="w-eye" cx="70" cy="89" r="4.5" fill="#fcefd0"/><circle class="w-eye" cx="90" cy="89" r="4.5" fill="#fcefd0"/>
+          <path d="M66 114c8 6 20 6 28 0" fill="none" stroke="#2b1d19" stroke-width="3" stroke-linecap="round"/>
+          <path d="M80 64V58" stroke="#2b1d19" stroke-width="3"/>
+          <rect x="52" y="128" width="56" height="14" rx="7" fill="#1d6b4f" stroke="#2b1d19" stroke-width="3"/>
+          <circle cx="62" cy="150" r="9" fill="#fcefd0" stroke="#2b1d19" stroke-width="3.5"/><circle cx="98" cy="150" r="9" fill="#fcefd0" stroke="#2b1d19" stroke-width="3.5"/>
+          <path class="w-floor" d="M18 162h124" stroke="#2b1d19" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2 9"/>
+        </svg>
+        </div>
         <div class="card-head">
-          <h2><span class="step-num">1</span> Your table</h2>
-          <button class="btn small hidden" id="change-table-btn" type="button">Change</button>
+          <h2><span class="step-num">1</span> <span data-i18n="your_table"></span></h2>
+          <button class="btn small hidden" id="change-table-btn" type="button" data-i18n="change"></button>
+        </div>
+        <div class="plan-wrap" id="plan-wrap">
+          <canvas id="plan" data-i18n-aria="plan_aria"></canvas>
+          <div class="plan-hint" id="plan-hint" data-i18n="plan_hint"></div>
         </div>
         <div id="table-selected" class="table-selected hidden"></div>
-        <div id="table-grid" class="table-grid" role="radiogroup" aria-label="Choose your table"></div>
+        <div class="grid-label muted small" id="grid-label" data-i18n="grid_label"></div>
+        <div id="table-grid" class="table-grid" role="radiogroup" data-i18n-aria="choose_table"></div>
       </div>
 
       <div class="card step">
-        <div class="card-head"><h2><span class="step-num">2</span> Choose your order</h2></div>
+        <div class="card-head">
+          <h2><span class="step-num">2</span> <span data-i18n="choose_order"></span></h2>
+          <button class="btn small voice-btn" id="voice-btn" type="button" aria-controls="voice-panel" aria-expanded="false"><span class="ico-slot" data-icon="mic"></span><span data-i18n="voice_btn"></span></button>
+        </div>
+        <div class="voice-panel hidden" id="voice-panel" aria-live="polite">
+          <div class="voice-status">
+            <span class="mic-dot" id="mic-dot" aria-hidden="true"></span>
+            <span id="voice-status"></span>
+          </div>
+          <div class="voice-langs" role="group" data-i18n-aria="voice_lang">
+            <span class="muted small" data-i18n="voice_lang"></span>
+            <button type="button" class="chip-btn" data-voice-lang="fr">Français</button>
+            <button type="button" class="chip-btn" data-voice-lang="en">English</button>
+            <button type="button" class="chip-btn" data-voice-lang="ar" lang="ar">Darija دارجة</button>
+          </div>
+          <div class="voice-heard hidden" id="voice-heard"></div>
+          <form class="voice-form" id="voice-form">
+            <input id="voice-input" class="note-input" type="text" maxlength="300" autocomplete="off" data-i18n-ph="voice_ph">
+            <button class="btn primary" type="submit" data-i18n="voice_go"></button>
+          </form>
+          <div class="voice-result hidden" id="voice-result"></div>
+          <div class="muted small voice-tip" data-i18n="voice_tip"></div>
+        </div>
+        <nav class="cat-tabs" id="cat-tabs" data-i18n-aria="categories"></nav>
         <div id="menu"></div>
-        <label class="note-label" for="note-input">Note for the kitchen (optional)</label>
-        <input id="note-input" class="note-input" type="text" maxlength="120" placeholder="e.g. no onions, extra sugar">
+        <label class="note-label" for="note-input" data-i18n="note_label"></label>
+        <input id="note-input" class="note-input" type="text" maxlength="120" data-i18n-ph="note_ph">
       </div>
       <div class="spacer"></div>
     </section>
@@ -46,34 +114,85 @@
     <!-- TRACKING SCREEN -->
     <section id="track-screen" class="hidden" aria-live="polite">
       <div class="card track-card">
-        <div class="track-emoji" id="track-emoji">🧾</div>
-        <h1 class="track-title" id="track-title">Order received</h1>
-        <p class="track-sub muted" id="track-sub">Sending your order to the robot…</p>
+        <div class="my-orders hidden" id="my-orders" role="tablist" data-i18n-aria="my_orders_aria"></div>
+        <div class="track-emoji" id="track-emoji"></div>
+        <svg class="waiter track-waiter" id="track-waiter" viewBox="0 0 160 170" aria-hidden="true">
+          <g class="w-steam" fill="none" stroke="#a8603a" stroke-width="2.4" stroke-linecap="round">
+            <path d="M70 20c-5 6 5 9 0 15"/><path d="M82 14c-5 6 5 9 0 15"/><path d="M94 20c-5 6 5 9 0 15"/>
+          </g>
+          <g class="w-tray">
+            <ellipse cx="82" cy="52" rx="34" ry="9" fill="#f0b23a" stroke="#2b1d19" stroke-width="3"/>
+            <path d="M58 50c0-12 11-18 24-18s24 6 24 18" fill="#fcefd0" stroke="#2b1d19" stroke-width="3"/>
+            <path d="M64 44h36" stroke="#1d6b4f" stroke-width="2.4" stroke-dasharray="3 4" stroke-linecap="round"/>
+            <path d="M48 52h68" stroke="#2b1d19" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          <path d="M112 54l14 22-12 14" fill="none" stroke="#2b1d19" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M44 92l-12 6" fill="none" stroke="#2b1d19" stroke-width="5" stroke-linecap="round"/>
+          <rect x="44" y="64" width="72" height="66" rx="30" fill="#f0b23a" stroke="#2b1d19" stroke-width="3.5"/>
+          <rect x="56" y="76" width="48" height="26" rx="13" fill="#2b1d19"/>
+          <circle class="w-eye" cx="70" cy="89" r="4.5" fill="#fcefd0"/><circle class="w-eye" cx="90" cy="89" r="4.5" fill="#fcefd0"/>
+          <path d="M66 114c8 6 20 6 28 0" fill="none" stroke="#2b1d19" stroke-width="3" stroke-linecap="round"/>
+          <path d="M80 64V58" stroke="#2b1d19" stroke-width="3"/>
+          <rect x="52" y="128" width="56" height="14" rx="7" fill="#1d6b4f" stroke="#2b1d19" stroke-width="3"/>
+          <circle cx="62" cy="150" r="9" fill="#fcefd0" stroke="#2b1d19" stroke-width="3.5"/><circle cx="98" cy="150" r="9" fill="#fcefd0" stroke="#2b1d19" stroke-width="3.5"/>
+          <path class="w-floor" d="M18 162h124" stroke="#2b1d19" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2 9"/>
+        </svg>
+        <h1 class="track-title" id="track-title"></h1>
+        <p class="track-sub muted" id="track-sub"></p>
+        <div class="eta hidden" id="eta"></div>
+        <div class="plan-wrap track-plan" id="track-plan-wrap"><canvas id="track-plan" data-i18n-aria="track_plan_aria"></canvas></div>
         <ol class="stepper" id="stepper">
-          <li data-step="received"><span class="bullet"></span>Order received</li>
-          <li data-step="queued"><span class="bullet"></span>Waiting for the robot</li>
-          <li data-step="en_route"><span class="bullet"></span>On the way</li>
-          <li data-step="arrived"><span class="bullet"></span>At your table</li>
+          <li data-step="received"><span class="bullet"></span><span data-i18n="step_received"></span></li>
+          <li data-step="queued"><span class="bullet"></span><span data-i18n="step_queued"></span></li>
+          <li data-step="en_route"><span class="bullet"></span><span data-i18n="step_en_route"></span></li>
+          <li data-step="arrived"><span class="bullet"></span><span data-i18n="step_arrived"></span></li>
         </ol>
         <div class="track-items" id="track-items"></div>
         <div class="track-actions">
-          <button class="btn danger block hidden" id="cancel-btn" type="button">Cancel order</button>
-          <button class="btn primary block big hidden" id="new-order-btn" type="button">New order</button>
+          <button class="btn danger block hidden" id="cancel-btn" type="button" data-i18n="cancel_order"></button>
+          <button class="btn primary block big hidden" id="new-order-btn" type="button" data-i18n="new_order"></button>
+          <button class="btn block another-btn" id="another-btn" type="button" data-i18n="another_order"></button>
         </div>
       </div>
     </section>
   </main>
 
+  <!-- Order review before sending -->
+  <div class="sheet-backdrop hidden" id="review-backdrop"></div>
+  <section class="sheet hidden" id="review-sheet" role="dialog" aria-modal="true" aria-labelledby="review-title">
+    <div class="sheet-grip" aria-hidden="true"></div>
+    <h2 id="review-title" data-i18n="review_title"></h2>
+    <div class="review-table" id="review-table"></div>
+    <ul class="review-items" id="review-items"></ul>
+    <div class="review-note hidden" id="review-note"></div>
+    <div class="review-eta muted small" id="review-eta"></div>
+    <div class="sheet-actions">
+      <button class="btn" id="review-back" type="button" data-i18n="review_back"></button>
+      <button class="btn primary big" id="review-confirm" type="button"></button>
+    </div>
+  </section>
+
+  <!-- Your other orders, one tap away -->
+  <button class="btn small my-orders-btn hidden" id="my-orders-btn" type="button"><span class="ico-slot" data-icon="receipt"></span><span></span></button>
+
   <!-- Sticky checkout bar -->
   <div class="checkout" id="checkout">
     <div class="checkout-info">
-      <div id="checkout-count">No items yet</div>
-      <div class="muted small" id="checkout-hint">Choose a table and at least one item</div>
+      <div id="checkout-count"></div>
+      <div class="muted small" id="checkout-hint"></div>
     </div>
-    <button class="btn primary big" id="order-btn" type="button" disabled>Order</button>
+    <div class="checkout-actions">
+      <!-- Voice order: always one tap away, next to the Order button -->
+      <button class="mic-fab" id="mic-fab" type="button" data-i18n-aria="voice_btn"><span class="ico-slot" data-icon="mic"></span></button>
+      <button class="btn primary big" id="order-btn" type="button" disabled></button>
+    </div>
   </div>
 
   <script src="/static/common.js"></script>
+  <script src="/static/i18n.js"></script>
+  <script src="/static/map.js"></script>
+  <script src="/static/icons.js"></script>
+  <script src="/static/dishes.js"></script>
   <script src="/static/client.js"></script>
 </body>
 </html>
