@@ -116,8 +116,32 @@ def test_language_switch_and_admin(server, browser):
     assert page.locator("#lang-btn").inner_text() == "FR"  # choice remembered
 
     page.goto(server + "/admin")
+    # Language choice is shared with the client page (English was picked above)
     page.wait_for_function("document.querySelector('#conn-text').textContent === 'Live'")
-    assert "Voice order understood" in page.inner_text("#events")
+    page.wait_for_function("document.querySelector('#events').innerText.includes('Voice order understood')", timeout=5000)
+    page.click("#lang-btn")
+    assert page.text_content("[data-i18n=a_queue]") == "File de livraisons"
+    assert "Commande vocale comprise" in page.inner_text("#events")
+    page.close()
+
+
+def test_admin_map_click_sends_robot(server, browser):
+    page = browser.new_page(locale="fr-FR", viewport={"width": 1440, "height": 900})
+    page.goto(server + "/admin")
+    page.wait_for_function("document.querySelector('#conn-text').textContent === 'En direct'")
+    page.wait_for_timeout(500)
+    # Click on Table 7 at its position on the canvas
+    pos = page.evaluate("""async () => {
+      const cfg = await (await fetch('/api/config')).json();
+      const wp = cfg.waypoints['Table 7'];
+      const c = document.getElementById('map'), r = c.getBoundingClientRect();
+      const m = window.__floorMap;
+      const p = m.px(wp.x, wp.y);
+      return {x: r.left + p.x, y: r.top + p.y};
+    }""")
+    page.once("dialog", lambda d: d.accept())
+    page.mouse.click(pos["x"], pos["y"])
+    page.wait_for_function("document.querySelector('#events').innerText.includes('Table 7')", timeout=5000)
     page.close()
 
 

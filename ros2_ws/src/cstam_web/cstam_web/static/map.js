@@ -8,7 +8,18 @@ class FloorMap {
     this.snap = null;
     this.trail = [];
     this.bounds = { minX: -10, maxX: 10, minY: -10, maxY: 10 };
+    this.onTableClick = null;
+    this.hoverTable = null;
     new ResizeObserver(() => this.resize()).observe(canvas.parentElement);
+    canvas.addEventListener('click', ev => {
+      const name = this.tableAt(ev);
+      if (name && this.onTableClick) this.onTableClick(name);
+    });
+    canvas.addEventListener('mousemove', ev => {
+      this.hoverTable = this.onTableClick ? this.tableAt(ev) : null;
+      canvas.style.cursor = this.hoverTable ? 'pointer' : 'default';
+    });
+    canvas.addEventListener('mouseleave', () => { this.hoverTable = null; });
     this.resize();
     const loop = () => { this.draw(); requestAnimationFrame(loop); };
     requestAnimationFrame(loop);
@@ -62,6 +73,27 @@ class FloorMap {
     this.oy = (h - (b.maxY - b.minY) * this.scale) / 2;
   }
 
+  /** Name of the table waypoint under the pointer (within ~0.8 m), or null. */
+  tableAt(ev) {
+    const r = this.canvas.getBoundingClientRect();
+    const mx = ev.clientX - r.left, my = ev.clientY - r.top;
+    const wx = this.bounds.minX + (mx - this.ox) / this.scale;
+    const wy = this.bounds.maxY - (my - this.oy) / this.scale;
+    let best = null, bestD = Math.max(0.8, 16 / this.scale);
+    for (const [name, wp] of Object.entries(this.waypoints)) {
+      if (!name.toLowerCase().startsWith('table')) continue;
+      const d = Math.hypot(wp.x - wx, wp.y - wy);
+      if (d < bestD) { best = name; bestD = d; }
+    }
+    if (best) return best;
+    // Also accept a click on the table furniture itself
+    for (const tb of this.layout.tables || []) {
+      const name = tb.label || (tb.model ? `Table ${tb.model.replace('table_', '')}` : '');
+      if (this.waypoints[name] && Math.hypot(tb.x - wx, tb.y - wy) < Math.max(0.7, 14 / this.scale)) return name;
+    }
+    return null;
+  }
+
   px(x, y) {
     return { x: this.ox + (x - this.bounds.minX) * this.scale, y: this.oy + (this.bounds.maxY - y) * this.scale };
   }
@@ -95,7 +127,7 @@ class FloorMap {
     for (const t of this.layout.tables || []) {
       const name = t.label || (t.model ? `Table ${t.model.replace('table_', '')}` : '');
       const p = this.px(t.x, t.y);
-      const active = name === target;
+      const active = name === target || name === this.hoverTable;
       c.fillStyle = active ? 'rgba(56,189,248,0.35)' : '#3a2e22';
       c.strokeStyle = active ? '#38bdf8' : '#8c6b3e';
       c.lineWidth = active ? 2 : 1;
@@ -122,7 +154,8 @@ class FloorMap {
       c.fillStyle = isDock ? '#6ee7b7' : '#93c5fd';
       c.font = '700 11px Inter, sans-serif';
       c.textAlign = 'center'; c.textBaseline = 'bottom';
-      c.fillText(isDock ? '⚡ Dock' : '🍳 Kitchen', p.x, p.y - r - 3);
+      const tr = (k, d) => (window.I18n ? I18n.t(k) : d);
+      c.fillText(isDock ? `⚡ ${tr('a_dock_name', 'Dock')}` : `🍳 ${tr('a_kitchen_name', 'Kitchen')}`, p.x, p.y - r - 3);
     }
 
     // Trail

@@ -158,6 +158,101 @@ const I18n = (() => {
     },
   };
 
+  // ---------------------------------------------------------------- admin page
+  Object.assign(STRINGS.fr, {
+    a_title: w => `${w} · supervision du robot`,
+    a_client_page: 'Page client',
+    a_demo_banner: 'Mode démo : robot simulé (ROS 2 non connecté). Lancez sans --mock pour utiliser le vrai robot.',
+    a_offline_banner: 'Aucune donnée du robot. Le système (cstam_system.launch.py) est-il lancé ?',
+    a_battery: 'Batterie', a_battery_level: 'Niveau de batterie', a_voltage: 'Tension', a_current: 'Courant',
+    a_power: 'Puissance', a_temperature: 'Température', a_runtime: 'Autonomie estimée',
+    a_spark_caption: '5 dernières minutes · pointillés : 25 % faible, 15 % critique',
+    a_robot: 'Robot', a_current_task: 'Tâche en cours', a_position: 'Position', a_delivered: 'Livraisons',
+    a_pedestrian: 'Piéton', a_health: 'État du système', a_map: 'Plan de salle en direct',
+    a_legend: '🔵 robot · 🟠 piéton · ⚡ dock · 🍳 cuisine · touchez une table pour y envoyer le robot',
+    a_events: 'Journal des événements', a_queue: 'File de livraisons',
+    a_lock_note: '🔒 Les commandes attendent que la batterie atteigne 80 %.',
+    a_controls: 'Commandes', a_dock: 'Retour au dock', a_undock: 'Annuler le retour', a_kitchen: 'Envoyer en cuisine',
+    a_send_to: 'Envoyer le robot vers', a_go: 'Go', a_tests: 'Scénarios de test', a_for_demo: 'pour la démo',
+    a_low: 'faible', a_critical: 'critique', a_ped_obstacle: 'Piéton (obstacle dynamique)',
+    a_patrol: 'Patrouille', a_cross: 'Traverse', a_block: 'Bloque', a_clear: 'Absent',
+    a_live: 'En direct', a_reconnecting: 'Reconnexion…', a_offline: 'Robot hors ligne',
+    a_none: 'Aucune', a_recharging: 'Recharge avant la prochaine commande', a_not_running: 'non lancé',
+    a_from_robot: d => `à ${d} m du robot`, a_close: '⚠️ proche',
+    a_charging: 'En charge', a_sim_time: 'temps simulé',
+    a_status: { charging: ['En charge', 'info'], critical: ['Critique', 'bad'], low: ['Faible', 'warn'], discharging_nav: ['En service', 'ok'], idle_standby: ['Veille', 'ok'] },
+    a_health_names: ['Simulateur batterie', 'Gestionnaire de tâches', 'Localisation', 'Piéton'],
+    a_queued: 'En attente', a_no_orders: 'Aucune commande', a_no_events: 'Aucun événement',
+    a_cancel_q: id => `Annuler ${id} ?`, a_cancelled: id => `${id} annulée`,
+    a_dock_ok: 'Retour au dock demandé', a_undock_ok: 'Retour annulé', a_kitchen_ok: 'Robot envoyé en cuisine',
+    a_sent_to: t => `Robot envoyé vers ${t}`, a_battery_ok: p => `Batterie réglée à ${p} %`, a_ped_ok: m => `Piéton : ${m}`,
+    a_send_confirm: t => `Envoyer le robot vers ${t} ?`,
+    a_kitchen_name: 'Cuisine', a_dock_name: 'Dock',
+    states: { idle: 'Libre · prêt', navigating: 'En livraison', at_table: 'À la table', recovering: 'Manœuvre de secours', docking: 'Retour au dock', docked: 'Au dock', unknown: 'Inconnu' },
+  });
+  Object.assign(STRINGS.en, {
+    a_title: w => `${w} · robot monitoring`,
+    a_client_page: 'Client page',
+    a_demo_banner: 'Demo mode: simulated robot (ROS 2 not connected). Start without --mock to use the real robot.',
+    a_offline_banner: 'No data from the robot. Is cstam_system.launch.py running?',
+    a_battery: 'Battery', a_battery_level: 'Battery level', a_voltage: 'Voltage', a_current: 'Current',
+    a_power: 'Power', a_temperature: 'Temperature', a_runtime: 'Estimated runtime',
+    a_spark_caption: 'Last 5 minutes · dashed lines: 25% low, 15% critical',
+    a_robot: 'Robot', a_current_task: 'Current task', a_position: 'Position', a_delivered: 'Delivered',
+    a_pedestrian: 'Pedestrian', a_health: 'System health', a_map: 'Live floor map',
+    a_legend: '🔵 robot · 🟠 person · ⚡ dock · 🍳 kitchen · tap a table to send the robot',
+    a_events: 'Event log', a_queue: 'Delivery queue',
+    a_lock_note: '🔒 Orders are held until the battery reaches 80%.',
+    a_controls: 'Controls', a_dock: 'Return to dock', a_undock: 'Cancel docking', a_kitchen: 'Send to kitchen',
+    a_send_to: 'Send robot to', a_go: 'Go', a_tests: 'Test scenarios', a_for_demo: 'for the demo',
+    a_low: 'low', a_critical: 'critical', a_ped_obstacle: 'Pedestrian (dynamic obstacle)',
+    a_patrol: 'Patrol', a_cross: 'Cross', a_block: 'Block', a_clear: 'Clear',
+    a_live: 'Live', a_reconnecting: 'Reconnecting…', a_offline: 'Robot offline',
+    a_none: 'None', a_recharging: 'Recharging before next order', a_not_running: 'not running',
+    a_from_robot: d => `${d} m from robot`, a_close: '⚠️ close',
+    a_charging: 'Charging', a_sim_time: 'sim time',
+    a_status: { charging: ['Charging', 'info'], critical: ['Critical', 'bad'], low: ['Low', 'warn'], discharging_nav: ['In use', 'ok'], idle_standby: ['Standby', 'ok'] },
+    a_health_names: ['Battery sim', 'Task manager', 'Localization', 'Pedestrian'],
+    a_queued: 'Queued', a_no_orders: 'No orders', a_no_events: 'No events yet',
+    a_cancel_q: id => `Cancel ${id}?`, a_cancelled: id => `${id} cancelled`,
+    a_dock_ok: 'Return to dock requested', a_undock_ok: 'Docking cancelled', a_kitchen_ok: 'Robot sent to the kitchen',
+    a_sent_to: t => `Robot sent to ${t}`, a_battery_ok: p => `Battery set to ${p}%`, a_ped_ok: m => `Pedestrian: ${m}`,
+    a_send_confirm: t => `Send the robot to ${t}?`,
+    a_kitchen_name: 'Kitchen', a_dock_name: 'Dock',
+    states: { idle: 'Idle · ready', navigating: 'Delivering', at_table: 'At the table', recovering: 'Recovering', docking: 'Returning to dock', docked: 'Docked', unknown: 'Unknown' },
+  });
+
+  // Server events are logged in English; shown in French on a French page.
+  const EVENT_FR = [
+    [/^Robot idle, ready for orders\.$/, () => 'Robot libre, prêt pour les commandes.'],
+    [/^Robot on its way\.$/, () => 'Robot en route.'],
+    [/^Robot arrived at the table\.$/, () => 'Robot arrivé à la table.'],
+    [/^Navigation problem: running recovery maneuver\.$/, () => 'Problème de navigation : manœuvre de secours.'],
+    [/^Robot returning to the dock\.$/, () => 'Robot en retour vers le dock.'],
+    [/^Robot docked and charging\.$/, () => 'Robot au dock, en charge.'],
+    [/^Robot state: (.*)\.$/, m => `État du robot : ${m[1]}.`],
+    [/^World changed to '(.*)'\.$/, m => `Monde changé : « ${m[1]} ».`],
+    [/^Battery lock engaged: .*$/, () => 'Verrou batterie : les nouvelles commandes attendent la recharge.'],
+    [/^Battery recharged: .*$/, () => 'Batterie rechargée : envoi des commandes débloqué.'],
+    [/^Battery critical \((.*)%\): .*$/, m => `Batterie critique (${m[1]} %) : retour d'urgence au dock.`],
+    [/^Battery low \((.*)%\): .*$/, m => `Batterie faible (${m[1]} %) : le robot va rentrer au dock.`],
+    [/^Person close to the robot: .*$/, () => 'Piéton proche du robot : le robot ralentit et l\'évite.'],
+    [/^New order for (.*?): (.*)$/, m => `Nouvelle commande pour ${m[1]} : ${m[2]}`],
+    [/^Voice order understood: (.*?)(?: for (Table .*))?$/, m => `Commande vocale comprise : ${m[1]}${m[2] ? ` pour ${m[2]}` : ''}`],
+    [/^Order for (.*) cancelled by the customer\.$/, m => `Commande pour ${m[1]} annulée par le client.`],
+    [/^Admin cancelled (.*)\.$/, m => `L'admin a annulé ${m[1]}.`],
+    [/^Admin sent the robot to (.*)\.$/, m => `L'admin a envoyé le robot vers ${m[1]}.`],
+    [/^Admin requested return to dock\.$/, () => 'L\'admin a demandé le retour au dock.'],
+    [/^Admin cancelled docking\.$/, () => 'L\'admin a annulé le retour au dock.'],
+    [/^Test: battery set to (.*)%\.$/, m => `Test : batterie réglée à ${m[1]} %.`],
+    [/^Test: pedestrian mode '(.*)'\.$/, m => `Test : mode piéton « ${m[1]} ».`],
+  ];
+  function event(msg) {
+    if (lang !== 'fr') return msg;
+    for (const [re, fn] of EVENT_FR) { const m = re.exec(msg); if (m) return fn(m); }
+    return msg;
+  }
+
   const KEY = 'tunibot_lang';
   let lang = localStorage.getItem(KEY) || ((navigator.language || 'fr').toLowerCase().startsWith('en') ? 'en' : 'fr');
   if (!STRINGS[lang]) lang = 'fr';
@@ -186,5 +281,5 @@ const I18n = (() => {
   /** Menu fields: name_fr / desc_fr when the page is in French. */
   function field(obj, name) { return (lang === 'fr' && obj[`${name}_fr`]) || obj[name] || ''; }
 
-  return { t, tIn, apply, set, get, field };
+  return { t, tIn, apply, set, get, field, event };
 })();

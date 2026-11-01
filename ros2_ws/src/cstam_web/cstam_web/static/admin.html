@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,52 +13,53 @@
       <div class="brand-logo" aria-hidden="true">🛠️</div>
       <div>
         <div class="brand-title">TuniBot · Admin</div>
-        <div class="brand-sub" id="world-title">Robot monitoring</div>
+        <div class="brand-sub" id="world-title"></div>
       </div>
     </div>
     <div class="top-pills">
       <span class="pill" id="state-pill"><span class="dot"></span><span id="state-text">—</span></span>
       <span class="pill" id="battery-pill"><span aria-hidden="true">🔋</span><span id="battery-pill-text">—</span></span>
-      <span class="pill" id="conn-pill"><span class="dot"></span><span id="conn-text">Connecting…</span></span>
-      <a class="btn small" href="/" target="_blank" rel="noopener">Client page ↗</a>
+      <span class="pill" id="conn-pill"><span class="dot"></span><span id="conn-text">…</span></span>
+      <button class="btn small lang-btn" id="lang-btn" type="button">EN</button>
+      <a class="btn small" href="/" target="_blank" rel="noopener"><span data-i18n="a_client_page"></span> ↗</a>
     </div>
   </header>
-  <div class="banner demo hidden" id="demo-banner">Demo mode: simulated robot (ROS 2 not connected). Start without <code>--mock</code> to use the real robot.</div>
-  <div class="banner offline hidden" id="offline-banner">No data from the robot. Is <code>cstam_system.launch.py</code> running?</div>
+  <div class="banner demo hidden" id="demo-banner" data-i18n="a_demo_banner"></div>
+  <div class="banner offline hidden" id="offline-banner" data-i18n="a_offline_banner"></div>
 
   <main class="admin-grid">
     <!-- LEFT: robot & battery -->
     <section class="col">
       <div class="card">
-        <div class="card-head"><h3>Battery</h3><span class="chip" id="battery-status-chip">—</span></div>
+        <div class="card-head"><h3 data-i18n="a_battery"></h3><span class="chip" id="battery-status-chip">—</span></div>
         <div class="battery-big">
-          <div class="gauge" role="meter" aria-label="Battery level" aria-valuemin="0" aria-valuemax="100" id="battery-meter">
+          <div class="gauge" role="meter" data-i18n-aria="a_battery_level" aria-valuemin="0" aria-valuemax="100" id="battery-meter">
             <div class="gauge-fill" id="gauge-fill"></div>
-            <div class="gauge-mark low" title="Low battery: return to dock"></div>
-            <div class="gauge-mark critical" title="Critical battery: emergency dock"></div>
+            <div class="gauge-mark low"></div>
+            <div class="gauge-mark critical"></div>
           </div>
           <div class="battery-pct mono" id="battery-pct">—</div>
         </div>
         <div class="metrics">
-          <div><span class="label">Voltage</span><span class="mono" id="m-voltage">—</span></div>
-          <div><span class="label">Current</span><span class="mono" id="m-current">—</span></div>
-          <div><span class="label">Power</span><span class="mono" id="m-power">—</span></div>
-          <div><span class="label">Temperature</span><span class="mono" id="m-temp">—</span></div>
-          <div class="wide"><span class="label">Estimated runtime</span><span class="mono" id="m-runtime">—</span></div>
+          <div><span class="label" data-i18n="a_voltage"></span><span class="mono" id="m-voltage">—</span></div>
+          <div><span class="label" data-i18n="a_current"></span><span class="mono" id="m-current">—</span></div>
+          <div><span class="label" data-i18n="a_power"></span><span class="mono" id="m-power">—</span></div>
+          <div><span class="label" data-i18n="a_temperature"></span><span class="mono" id="m-temp">—</span></div>
+          <div class="wide"><span class="label" data-i18n="a_runtime"></span><span class="mono" id="m-runtime">—</span></div>
         </div>
-        <canvas id="battery-chart" class="spark" height="70" aria-label="Battery history, last 5 minutes"></canvas>
-        <div class="spark-caption muted">Last 5 minutes · dashed lines: 25% low, 15% critical</div>
+        <canvas id="battery-chart" class="spark" height="70" data-i18n-aria="a_spark_caption"></canvas>
+        <div class="spark-caption muted" data-i18n="a_spark_caption"></div>
       </div>
 
       <div class="card">
-        <div class="card-head"><h3>Robot</h3></div>
+        <div class="card-head"><h3 data-i18n="a_robot"></h3></div>
         <div class="metrics">
-          <div class="wide"><span class="label">Current task</span><span id="r-task">—</span></div>
-          <div><span class="label">Position</span><span class="mono" id="r-pos">—</span></div>
-          <div><span class="label">Delivered</span><span class="mono" id="r-done">0</span></div>
-          <div class="wide"><span class="label">Pedestrian</span><span id="r-obstacle">—</span></div>
+          <div class="wide"><span class="label" data-i18n="a_current_task"></span><span id="r-task">—</span></div>
+          <div><span class="label" data-i18n="a_position"></span><span class="mono" id="r-pos">—</span></div>
+          <div><span class="label" data-i18n="a_delivered"></span><span class="mono" id="r-done">0</span></div>
+          <div class="wide"><span class="label" data-i18n="a_pedestrian"></span><span id="r-obstacle">—</span></div>
         </div>
-        <h3 class="sub-h">System health</h3>
+        <h3 class="sub-h" data-i18n="a_health"></h3>
         <ul class="health" id="health"></ul>
       </div>
     </section>
@@ -66,11 +67,11 @@
     <!-- CENTER: map -->
     <section class="col center">
       <div class="card map-card">
-        <div class="card-head"><h3>Live floor map</h3><span class="muted small" id="map-legend">🔵 robot · 🟠 person · ⚡ dock · 🍳 kitchen</span></div>
-        <div class="map-wrap"><canvas id="map" aria-label="Floor map with robot position"></canvas></div>
+        <div class="card-head"><h3 data-i18n="a_map"></h3><span class="muted small" id="map-legend" data-i18n="a_legend"></span></div>
+        <div class="map-wrap"><canvas id="map" data-i18n-aria="a_map"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Event log</h3></div>
+        <div class="card-head"><h3 data-i18n="a_events"></h3></div>
         <ul class="events" id="events" aria-live="polite"></ul>
       </div>
     </section>
@@ -78,47 +79,48 @@
     <!-- RIGHT: queue & controls -->
     <section class="col">
       <div class="card">
-        <div class="card-head"><h3>Delivery queue</h3><span class="chip" id="queue-count">0</span></div>
+        <div class="card-head"><h3 data-i18n="a_queue"></h3><span class="chip" id="queue-count">0</span></div>
         <ul class="queue" id="queue"></ul>
-        <div class="lock-note hidden" id="lock-note">🔒 Orders are held until the battery reaches 80%.</div>
+        <div class="lock-note hidden" id="lock-note" data-i18n="a_lock_note"></div>
       </div>
 
       <div class="card">
-        <div class="card-head"><h3>Controls</h3></div>
+        <div class="card-head"><h3 data-i18n="a_controls"></h3></div>
         <div class="btn-grid">
-          <button class="btn warn" id="dock-btn" type="button">🔌 Return to dock</button>
-          <button class="btn" id="undock-btn" type="button">✋ Cancel docking</button>
-          <button class="btn" id="kitchen-btn" type="button">🍳 Send to kitchen</button>
+          <button class="btn warn" id="dock-btn" type="button">🔌 <span data-i18n="a_dock"></span></button>
+          <button class="btn" id="undock-btn" type="button">✋ <span data-i18n="a_undock"></span></button>
+          <button class="btn" id="kitchen-btn" type="button">🍳 <span data-i18n="a_kitchen"></span></button>
         </div>
         <div class="dispatch">
-          <label for="dispatch-target" class="label">Send robot to</label>
+          <label for="dispatch-target" class="label" data-i18n="a_send_to"></label>
           <div class="dispatch-row">
             <select id="dispatch-target"></select>
-            <button class="btn small" id="dispatch-btn" type="button">Go</button>
+            <button class="btn small" id="dispatch-btn" type="button" data-i18n="a_go"></button>
           </div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-head"><h3>Test scenarios</h3><span class="muted small">for the demo</span></div>
-        <div class="label">Battery level</div>
+        <div class="card-head"><h3 data-i18n="a_tests"></h3><span class="muted small" data-i18n="a_for_demo"></span></div>
+        <div class="label" data-i18n="a_battery_level"></div>
         <div class="btn-row">
           <button class="btn small" data-battery="100" type="button">100%</button>
-          <button class="btn small warn" data-battery="24" type="button">24% low</button>
-          <button class="btn small danger" data-battery="14" type="button">14% critical</button>
+          <button class="btn small warn" data-battery="24" type="button">24% <span data-i18n="a_low"></span></button>
+          <button class="btn small danger" data-battery="14" type="button">14% <span data-i18n="a_critical"></span></button>
         </div>
-        <div class="label">Pedestrian (dynamic obstacle)</div>
+        <div class="label" data-i18n="a_ped_obstacle"></div>
         <div class="btn-row">
-          <button class="btn small" data-obstacle="patrol" type="button">Patrol</button>
-          <button class="btn small" data-obstacle="cross" type="button">Cross</button>
-          <button class="btn small" data-obstacle="block" type="button">Block</button>
-          <button class="btn small" data-obstacle="clear" type="button">Clear</button>
+          <button class="btn small" data-obstacle="patrol" type="button" data-i18n="a_patrol"></button>
+          <button class="btn small" data-obstacle="cross" type="button" data-i18n="a_cross"></button>
+          <button class="btn small" data-obstacle="block" type="button" data-i18n="a_block"></button>
+          <button class="btn small" data-obstacle="clear" type="button" data-i18n="a_clear"></button>
         </div>
       </div>
     </section>
   </main>
 
   <script src="/static/common.js"></script>
+  <script src="/static/i18n.js"></script>
   <script src="/static/map.js"></script>
   <script src="/static/admin.js"></script>
 </body>

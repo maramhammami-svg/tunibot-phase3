@@ -166,7 +166,7 @@ def test_pages_served(api):
     page = client.get("/").text
     assert 'id="table-grid"' in page and 'id="voice-btn"' in page
     assert client.get("/static/i18n.js").status_code == 200
-    assert "Delivery queue" in client.get("/admin").text
+    assert 'id="queue"' in client.get("/admin").text
     assert client.get("/static/client.js").status_code == 200
 
 
