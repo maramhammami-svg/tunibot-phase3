@@ -74,12 +74,33 @@ def test_voice_order_delivered_end_to_end(server, browser):
     assert page.inner_text("#checkout-count") == "3 articles"
 
     page.click("#order-btn")
+    # Review sheet: the cart can still be changed before confirming
+    page.wait_for_selector("#review-sheet:not(.hidden)")
+    assert "Table 4" in page.inner_text("#review-table")
+    page.click("#review-items li[data-id=brik] .add")
+    assert page.inner_text("#review-confirm") == "Confirmer · 4 articles"
+    page.click("#review-confirm")
     page.wait_for_selector("#track-screen:not(.hidden)")
     page.wait_for_function("document.querySelector('#track-title').textContent === 'En route !'", timeout=30000)
     page.wait_for_selector("#eta:not(.hidden)", timeout=5000)
     assert "Arrivée dans" in page.inner_text("#eta")
     page.wait_for_function("document.querySelector('#track-title').textContent === 'Livrée'", timeout=90000)
     assert page.is_visible("#new-order-btn")
+    assert "2 × Brik" in page.inner_text("#track-items")
+    page.close()
+
+
+def test_category_tabs_and_floating_mic(server, browser):
+    page = browser.new_page(locale="fr-FR", viewport={"width": 390, "height": 844})
+    page.goto(server + "/")
+    page.wait_for_selector(".cat-tab")
+    assert [t.strip() for t in page.locator(".cat-tab").all_inner_texts()] == ["Boissons", "Plats", "Desserts"]
+    page.click(".cat-tab[data-cat='2']")
+    page.wait_for_function("document.querySelector(\".cat-tab[data-cat='2']\").classList.contains('active')", timeout=3000)
+    page.click(".menu-item[data-id=bambalouni] .add")
+    assert page.inner_text("#cat-count-2") == "1"
+    page.click("#mic-fab")
+    assert page.is_visible("#voice-panel")
     page.close()
 
 

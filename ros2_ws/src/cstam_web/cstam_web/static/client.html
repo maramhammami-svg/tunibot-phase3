@@ -60,6 +60,7 @@
           <div class="voice-result hidden" id="voice-result"></div>
           <div class="muted small voice-tip" data-i18n="voice_tip"></div>
         </div>
+        <nav class="cat-tabs" id="cat-tabs" data-i18n-aria="categories"></nav>
         <div id="menu"></div>
         <label class="note-label" for="note-input" data-i18n="note_label"></label>
         <input id="note-input" class="note-input" type="text" maxlength="120" data-i18n-ph="note_ph">
@@ -89,13 +90,32 @@
     </section>
   </main>
 
+  <!-- Order review before sending -->
+  <div class="sheet-backdrop hidden" id="review-backdrop"></div>
+  <section class="sheet hidden" id="review-sheet" role="dialog" aria-modal="true" aria-labelledby="review-title">
+    <div class="sheet-grip" aria-hidden="true"></div>
+    <h2 id="review-title" data-i18n="review_title"></h2>
+    <div class="review-table" id="review-table"></div>
+    <ul class="review-items" id="review-items"></ul>
+    <div class="review-note hidden" id="review-note"></div>
+    <div class="review-eta muted small" id="review-eta"></div>
+    <div class="sheet-actions">
+      <button class="btn" id="review-back" type="button" data-i18n="review_back"></button>
+      <button class="btn primary big" id="review-confirm" type="button"></button>
+    </div>
+  </section>
+
   <!-- Sticky checkout bar -->
   <div class="checkout" id="checkout">
     <div class="checkout-info">
       <div id="checkout-count"></div>
       <div class="muted small" id="checkout-hint"></div>
     </div>
-    <button class="btn primary big" id="order-btn" type="button" disabled></button>
+    <div class="checkout-actions">
+      <!-- Voice order: always one tap away, next to the Order button -->
+      <button class="mic-fab" id="mic-fab" type="button" data-i18n-aria="voice_btn"><span aria-hidden="true">🎤</span></button>
+      <button class="btn primary big" id="order-btn" type="button" disabled></button>
+    </div>
   </div>
 
   <script src="/static/common.js"></script>

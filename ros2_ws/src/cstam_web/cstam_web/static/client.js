@@ -43,6 +43,7 @@
     $('venue-sub').textContent = I18n.field(config.menu, 'subtitle') || t('order_from_table');
     renderTables();
     renderMenu();
+    renderCatTabs();
     updateCheckout();
     renderAvailability();
     if (lastOrder) renderOrder(lastOrder);
@@ -90,6 +91,7 @@
     for (const cat of config.menu.categories) {
       const sec = document.createElement('div');
       sec.className = 'menu-cat';
+      sec.id = `cat-${config.menu.categories.indexOf(cat)}`;
       sec.innerHTML = `<h3>${Tuni.escapeHtml(I18n.field(cat, 'name') || catNames[cat.name] || cat.name)}</h3>`;
       for (const it of cat.items) {
         menuIndex[it.id] = it;
@@ -116,6 +118,43 @@
     refreshQty();
   }
 
+  function renderCatTabs() {
+    const nav = $('cat-tabs');
+    const catNames = t('cat');
+    nav.innerHTML = config.menu.categories.map((cat, i) =>
+      `<button type="button" class="cat-tab" data-cat="${i}">${Tuni.escapeHtml(I18n.field(cat, 'name') || catNames[cat.name] || cat.name)}<span class="cat-count" id="cat-count-${i}"></span></button>`).join('');
+    nav.querySelectorAll('.cat-tab').forEach(b => {
+      b.onclick = () => {
+        const sec = $(`cat-${b.dataset.cat}`);
+        const y = sec.getBoundingClientRect().top + window.scrollY - nav.offsetHeight - 70;
+        pendingCat = Number(b.dataset.cat);
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        highlightCat();
+        clearTimeout(b._t);
+        b._t = setTimeout(() => { pendingCat = null; }, 1200);
+      };
+    });
+    highlightCat();
+  }
+
+  let pendingCat = null;  // tab just tapped, kept while the page scrolls to it
+  function highlightCat() {
+    const nav = $('cat-tabs');
+    if (!config || !nav.children.length) return;
+    let active = 0;
+    config.menu.categories.forEach((_, i) => {
+      const sec = $(`cat-${i}`);
+      if (sec && sec.getBoundingClientRect().top - nav.offsetHeight - 90 <= 0) active = i;
+    });
+    // At the bottom of the page the last sections can never reach the top
+    if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) {
+      active = config.menu.categories.length - 1;
+    }
+    if (pendingCat !== null) active = pendingCat;
+    nav.querySelectorAll('.cat-tab').forEach(b => b.classList.toggle('active', Number(b.dataset.cat) === active));
+  }
+  window.addEventListener('scroll', highlightCat, { passive: true });
+
   function changeQty(id, delta) {
     cart[id] = Math.max(0, Math.min(9, (cart[id] || 0) + delta));
     if (!cart[id]) delete cart[id];
@@ -124,6 +163,13 @@
   }
 
   function refreshQty() {
+    if (config) {
+      config.menu.categories.forEach((cat, i) => {
+        const n = cat.items.reduce((a, it) => a + (cart[it.id] || 0), 0);
+        const el = $(`cat-count-${i}`);
+        if (el) el.textContent = n ? String(n) : '';
+      });
+    }
     document.querySelectorAll('.menu-item').forEach(row => {
       const q = cart[row.dataset.id] || 0;
       row.querySelector('.qty span').textContent = q;
@@ -187,6 +233,7 @@
                   nothing: 'voice_nothing', nomic: 'voice_nomic', network: 'voice_network' }[state];
     $('voice-status').textContent = t(msg || 'voice_idle');
     $('mic-dot').classList.toggle('on', state === 'listening');
+    $('mic-fab').classList.toggle('listening', state === 'listening');
   }
 
   const SILENCE_MS = 2500;   // stop listening after this much silence once something was heard
@@ -303,6 +350,10 @@
     if (opening) setVoiceStatus('idle');
     startListening();
   };
+  $('mic-fab').onclick = () => {
+    $('voice-btn').click();
+    $('voice-panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
   $('voice-form').onsubmit = ev => {
     ev.preventDefault();
     const text = $('voice-input').value.trim();
@@ -311,9 +362,54 @@
     understand(text);
   };
 
+  // ------------------------------------------------------------ review sheet
+  function openReview() {
+    renderReview();
+    $('review-backdrop').classList.remove('hidden');
+    $('review-sheet').classList.remove('hidden');
+    $('review-confirm').focus();
+  }
+  function closeReview() {
+    $('review-backdrop').classList.add('hidden');
+    $('review-sheet').classList.add('hidden');
+  }
+  function renderReview() {
+    const ids = Object.keys(cart);
+    if (!ids.length) { closeReview(); return; }
+    $('review-table').innerHTML = `🍽️ <strong>${Tuni.escapeHtml(table)}</strong>`;
+    $('review-items').innerHTML = ids.map(id => {
+      const it = menuIndex[id];
+      return `<li data-id="${Tuni.escapeHtml(id)}">
+        <span class="menu-emoji small" aria-hidden="true">${it.emoji || '🍽️'}</span>
+        <span class="review-name">${Tuni.escapeHtml(it.name)}</span>
+        <span class="qty">
+          <button type="button" class="minus" aria-label="${Tuni.escapeHtml(t('remove_one', it.name))}">−</button>
+          <span>${cart[id]}</span>
+          <button type="button" class="add" aria-label="${Tuni.escapeHtml(t('add_one', it.name))}">+</button>
+        </span></li>`;
+    }).join('');
+    $('review-items').querySelectorAll('li').forEach(li => {
+      li.querySelector('.add').onclick = () => { changeQty(li.dataset.id, +1); renderReview(); };
+      li.querySelector('.minus').onclick = () => { changeQty(li.dataset.id, -1); renderReview(); };
+    });
+    const note = $('note-input').value.trim();
+    $('review-note').classList.toggle('hidden', !note);
+    $('review-note').textContent = note ? `📝 ${note}` : '';
+    const ahead = availability ? availability.orders_ahead : 0;
+    $('review-eta').textContent = availability && availability.level === 'charging' ? availabilityMessage()
+      : (ahead > 0 ? t('hint_ahead', ahead) : t('review_ready'));
+    const count = Object.values(cart).reduce((a, b) => a + b, 0);
+    $('review-confirm').textContent = t('review_confirm', count);
+    $('review-confirm').disabled = availability && !availability.accepting;
+  }
+  $('review-back').onclick = closeReview;
+  $('review-backdrop').onclick = closeReview;
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeReview(); });
+
   // ------------------------------------------------------------ ordering
-  $('order-btn').onclick = async () => {
-    const btn = $('order-btn');
+  $('order-btn').onclick = openReview;
+  $('review-confirm').onclick = async () => {
+    const btn = $('review-confirm');
     btn.disabled = true;
     btn.textContent = t('sending');
     const items = Object.entries(cart).map(([id, qty]) => ({ id, name: menuIndex[id].name, qty }));
@@ -329,9 +425,11 @@
       $('voice-result').classList.add('hidden');
       showHeard('');
       refreshQty();
+      closeReview();
       showTracking(res.order);
     } catch (e) {
       Tuni.toast(e.message, 'error');
+      renderReview();
     } finally {
       updateCheckout();
     }
