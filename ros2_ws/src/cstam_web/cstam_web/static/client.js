@@ -14,11 +14,12 @@
   let lastStatus = null;
   let lastOrder = null;
   // Floor plans: pick a table, then watch the robot drive to it
-  const plan = new FloorMap($('plan'));
+  const lightPlan = document.body.classList.contains('theme-chaux') ? FLOOR_MAP_CHAUX : null;
+  const plan = new FloorMap($('plan'), lightPlan);
   plan.maxHeight = 360;
   plan.minTablePx = 15;
   window.__plan = plan;  // used by the browser tests
-  const trackPlan = new FloorMap($('track-plan'));
+  const trackPlan = new FloorMap($('track-plan'), lightPlan);
   trackPlan.maxHeight = 320;
   trackPlan.minTablePx = 12;
   plan.onTableClick = name => {
@@ -27,6 +28,11 @@
   };
 
   // ------------------------------------------------------------ setup
+  // Line icons in place of emoji
+  document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = Icons.svg(el.dataset.icon); });
+  $('brand-logo').innerHTML = Icons.svg('robot');
+  $('hero-robot').innerHTML = Icons.svg('robot', 'ico hero-ico');
+
   async function init() {
     I18n.apply();
     renderLangButton();
@@ -120,7 +126,7 @@
         row.className = 'menu-item';
         row.dataset.id = it.id;
         row.innerHTML = `
-          <div class="menu-emoji" aria-hidden="true">${it.emoji || '🍽️'}</div>
+          <div class="menu-emoji" aria-hidden="true">${Icons.svg(it.id)}</div>
           <div class="menu-text">
             <div class="menu-name">${Tuni.escapeHtml(it.name)}</div>
             <div class="menu-desc">${Tuni.escapeHtml(I18n.field(it, 'desc'))}</div>
@@ -193,7 +199,11 @@
     }
     document.querySelectorAll('.menu-item').forEach(row => {
       const q = cart[row.dataset.id] || 0;
-      row.querySelector('.qty span').textContent = q;
+      const qEl = row.querySelector('.qty span');
+      if (qEl.textContent !== String(q)) {
+        qEl.textContent = q;
+        qEl.classList.remove('bump'); void qEl.offsetWidth; qEl.classList.add('bump');
+      }
       row.querySelector('.minus').disabled = q === 0;
       row.classList.toggle('selected', q > 0);
     });
@@ -397,11 +407,11 @@
   function renderReview() {
     const ids = Object.keys(cart);
     if (!ids.length) { closeReview(); return; }
-    $('review-table').innerHTML = `🍽️ <strong>${Tuni.escapeHtml(table)}</strong>`;
+    $('review-table').innerHTML = `${Icons.svg('plate', 'ico inline')} <strong>${Tuni.escapeHtml(table)}</strong>`;
     $('review-items').innerHTML = ids.map(id => {
       const it = menuIndex[id];
       return `<li data-id="${Tuni.escapeHtml(id)}">
-        <span class="menu-emoji small" aria-hidden="true">${it.emoji || '🍽️'}</span>
+        <span class="menu-emoji small" aria-hidden="true">${Icons.svg(it.id)}</span>
         <span class="review-name">${Tuni.escapeHtml(it.name)}</span>
         <span class="qty">
           <button type="button" class="minus" aria-label="${Tuni.escapeHtml(t('remove_one', it.name))}">−</button>
@@ -415,7 +425,7 @@
     });
     const note = $('note-input').value.trim();
     $('review-note').classList.toggle('hidden', !note);
-    $('review-note').textContent = note ? `📝 ${note}` : '';
+    $('review-note').textContent = note ? `« ${note} »` : '';
     const ahead = availability ? availability.orders_ahead : 0;
     $('review-eta').textContent = availability && availability.level === 'charging' ? availabilityMessage()
       : (ahead > 0 ? t('hint_ahead', ahead) : t('review_ready'));
@@ -458,14 +468,14 @@
 
   // ------------------------------------------------------------ tracking
   const VIEW = {
-    submitted: { emoji: '🧾', step: 'received' },
-    queued: { emoji: '⏳', step: 'queued' },
-    en_route: { emoji: '🤖', step: 'en_route', bounce: true },
-    arrived: { emoji: '🛎️', step: 'arrived', bounce: true },
-    delivered: { emoji: '✅', step: 'done' },
-    cancelled: { emoji: '🚫', step: null },
-    failed: { emoji: '⚠️', step: null },
-    rejected: { emoji: '⚠️', step: null },
+    submitted: { icon: 'receipt', step: 'received' },
+    queued: { icon: 'hourglass', step: 'queued' },
+    en_route: { icon: 'robot', step: 'en_route', bounce: true },
+    arrived: { icon: 'tray', step: 'arrived', bounce: true },
+    delivered: { icon: 'check', step: 'done' },
+    cancelled: { icon: 'cross', step: null },
+    failed: { icon: 'alert', step: null },
+    rejected: { icon: 'alert', step: null },
   };
   const STEPS = ['received', 'queued', 'en_route', 'arrived'];
 
@@ -497,7 +507,8 @@
     const status = VIEW[o.status] ? o.status : 'submitted';
     const v = VIEW[status];
     const [title, defaultSub] = t(`st_${status}`);
-    $('track-emoji').textContent = v.emoji;
+    $('track-emoji').innerHTML = Icons.svg(v.icon, 'ico big');
+    $('track-emoji').dataset.status = status;
     $('track-emoji').classList.toggle('bounce', !!v.bounce);
     $('track-title').textContent = title;
     let sub = defaultSub;
@@ -508,7 +519,7 @@
     $('track-sub').textContent = sub;
     const showEta = status === 'en_route' && typeof o.eta_s === 'number';
     $('eta').classList.toggle('hidden', !showEta);
-    if (showEta) $('eta').textContent = `⏱ ${t('eta', o.eta_s)}`;
+    if (showEta) $('eta').innerHTML = `${Icons.svg('hourglass', 'ico inline')} ${Tuni.escapeHtml(t('eta', o.eta_s))}`;
 
     const idx = v.step === 'done' ? STEPS.length : STEPS.indexOf(v.step);
     document.querySelectorAll('#stepper li').forEach((li, i) => {

@@ -2,7 +2,8 @@
 (() => {
   const $ = id => document.getElementById(id);
   const t = I18n.t;
-  const map = new FloorMap($('map'));
+  document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = Icons.svg(el.dataset.icon); });
+  const map = new FloorMap($('map'), FLOOR_MAP_NUIT);
   window.__floorMap = map;  // used by the browser tests
   let config = null;
   let world = null;
@@ -64,7 +65,7 @@
       fill.style.background = b.is_critical ? 'var(--red)' : (b.is_low ? 'var(--amber)' : 'var(--green)');
       $('battery-meter').setAttribute('aria-valuenow', String(pct));
       $('battery-pct').textContent = `${pct.toFixed(1)}%`;
-      $('battery-pill-text').textContent = `${pct.toFixed(0)}%${b.is_docked ? ' ⚡' : ''}`;
+      $('battery-pill-text').textContent = `${pct.toFixed(0)}%${b.is_docked ? ' · dock' : ''}`;
       $('battery-pill').className = `pill ${b.is_critical ? 'offline' : (b.is_low ? 'charging' : '')}`;
       $('m-voltage').textContent = `${(b.voltage ?? 0).toFixed(2)} V`;
       $('m-current').textContent = `${(b.current_amps ?? 0).toFixed(2)} A ${b.is_docked ? '(in)' : '(out)'}`;

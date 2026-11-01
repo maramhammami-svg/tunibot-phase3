@@ -6,11 +6,15 @@
   <title>Admin · TuniBot</title>
   <link rel="stylesheet" href="/static/common.css">
   <link rel="stylesheet" href="/static/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Reem+Kufi:wght@500;600&display=swap">
+  <link rel="stylesheet" href="/static/theme-nuit.css">
 </head>
-<body>
+<body class="theme-nuit">
   <header class="topbar">
     <div class="brand">
-      <div class="brand-logo" aria-hidden="true">🛠️</div>
+      <div class="brand-logo" aria-hidden="true" data-icon="robot"></div>
       <div>
         <div class="brand-title">TuniBot · Admin</div>
         <div class="brand-sub" id="world-title"></div>
@@ -18,7 +22,7 @@
     </div>
     <div class="top-pills">
       <span class="pill" id="state-pill"><span class="dot"></span><span id="state-text">—</span></span>
-      <span class="pill" id="battery-pill"><span aria-hidden="true">🔋</span><span id="battery-pill-text">—</span></span>
+      <span class="pill" id="battery-pill"><span class="ico-slot" aria-hidden="true" data-icon="battery"></span><span id="battery-pill-text">—</span></span>
       <span class="pill" id="conn-pill"><span class="dot"></span><span id="conn-text">…</span></span>
       <button class="btn small lang-btn" id="lang-btn" type="button">EN</button>
       <a class="btn small" href="/" target="_blank" rel="noopener"><span data-i18n="a_client_page"></span> ↗</a>
@@ -67,7 +71,7 @@
     <!-- CENTER: map -->
     <section class="col center">
       <div class="card map-card">
-        <div class="card-head"><h3 data-i18n="a_map"></h3><span class="muted small" id="map-legend" data-i18n="a_legend"></span></div>
+        <div class="card-head"><h3 data-i18n="a_map"></h3><span class="map-legend muted small" id="map-legend"><span class="lg"><i class="sw robot"></i><span data-i18n="a_lg_robot"></span></span><span class="lg"><i class="sw person"></i><span data-i18n="a_lg_person"></span></span><span class="lg"><i class="sw dock"></i><span data-i18n="a_lg_dock"></span></span><span class="lg"><i class="sw kitchen"></i><span data-i18n="a_lg_kitchen"></span></span><span class="lg-tip" data-i18n="a_legend"></span></span></div>
         <div class="map-wrap"><canvas id="map" data-i18n-aria="a_map"></canvas></div>
       </div>
       <div class="card">
@@ -87,9 +91,9 @@
       <div class="card">
         <div class="card-head"><h3 data-i18n="a_controls"></h3></div>
         <div class="btn-grid">
-          <button class="btn warn" id="dock-btn" type="button">🔌 <span data-i18n="a_dock"></span></button>
-          <button class="btn" id="undock-btn" type="button">✋ <span data-i18n="a_undock"></span></button>
-          <button class="btn" id="kitchen-btn" type="button">🍳 <span data-i18n="a_kitchen"></span></button>
+          <button class="btn warn" id="dock-btn" type="button"><span class="ico-slot" data-icon="plug"></span><span data-i18n="a_dock"></span></button>
+          <button class="btn" id="undock-btn" type="button"><span class="ico-slot" data-icon="undock"></span><span data-i18n="a_undock"></span></button>
+          <button class="btn" id="kitchen-btn" type="button"><span class="ico-slot" data-icon="pot"></span><span data-i18n="a_kitchen"></span></button>
         </div>
         <div class="dispatch">
           <label for="dispatch-target" class="label" data-i18n="a_send_to"></label>
@@ -122,6 +126,7 @@
   <script src="/static/common.js"></script>
   <script src="/static/i18n.js"></script>
   <script src="/static/map.js"></script>
+  <script src="/static/icons.js"></script>
   <script src="/static/admin.js"></script>
 </body>
 </html>

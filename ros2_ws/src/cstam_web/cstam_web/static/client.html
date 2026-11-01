@@ -3,15 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0f17">
+  <meta name="theme-color" content="#1b4fae">
   <title>Order · TuniBot</title>
   <link rel="stylesheet" href="/static/common.css">
   <link rel="stylesheet" href="/static/client.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Reem+Kufi:wght@500;600&display=swap">
+  <link rel="stylesheet" href="/static/theme-chaux.css">
 </head>
-<body class="theme-dar">
+<body class="theme-chaux">
   <header class="topbar">
     <div class="brand">
-      <div class="brand-logo" aria-hidden="true">🤖</div>
+      <div class="brand-logo" aria-hidden="true" id="brand-logo"></div>
       <div>
         <div class="brand-title" id="venue-title">TuniBot</div>
         <div class="brand-sub" id="venue-sub">Order from your table</div>
@@ -35,7 +39,7 @@
           <h1 class="hero-title" id="hero-title"></h1>
           <p class="hero-sub" data-i18n="hero_sub"></p>
         </div>
-        <div class="hero-robot" aria-hidden="true">🤖</div>
+        <div class="hero-robot" aria-hidden="true" id="hero-robot"></div>
       </div>
       <div class="card step">
         <div class="card-head">
@@ -54,7 +58,7 @@
       <div class="card step">
         <div class="card-head">
           <h2><span class="step-num">2</span> <span data-i18n="choose_order"></span></h2>
-          <button class="btn small voice-btn" id="voice-btn" type="button" aria-controls="voice-panel" aria-expanded="false">🎤 <span data-i18n="voice_btn"></span></button>
+          <button class="btn small voice-btn" id="voice-btn" type="button" aria-controls="voice-panel" aria-expanded="false"><span class="ico-slot" data-icon="mic"></span><span data-i18n="voice_btn"></span></button>
         </div>
         <div class="voice-panel hidden" id="voice-panel" aria-live="polite">
           <div class="voice-status">
@@ -63,8 +67,8 @@
           </div>
           <div class="voice-langs" role="group" data-i18n-aria="voice_lang">
             <span class="muted small" data-i18n="voice_lang"></span>
-            <button type="button" class="chip-btn" data-voice-lang="fr">🇫🇷 Français</button>
-            <button type="button" class="chip-btn" data-voice-lang="en">🇬🇧 English</button>
+            <button type="button" class="chip-btn" data-voice-lang="fr">Français</button>
+            <button type="button" class="chip-btn" data-voice-lang="en">English</button>
           </div>
           <div class="voice-heard hidden" id="voice-heard"></div>
           <form class="voice-form" id="voice-form">
@@ -85,7 +89,7 @@
     <!-- TRACKING SCREEN -->
     <section id="track-screen" class="hidden" aria-live="polite">
       <div class="card track-card">
-        <div class="track-emoji" id="track-emoji">🧾</div>
+        <div class="track-emoji" id="track-emoji"></div>
         <h1 class="track-title" id="track-title"></h1>
         <p class="track-sub muted" id="track-sub"></p>
         <div class="eta hidden" id="eta"></div>
@@ -128,7 +132,7 @@
     </div>
     <div class="checkout-actions">
       <!-- Voice order: always one tap away, next to the Order button -->
-      <button class="mic-fab" id="mic-fab" type="button" data-i18n-aria="voice_btn"><span aria-hidden="true">🎤</span></button>
+      <button class="mic-fab" id="mic-fab" type="button" data-i18n-aria="voice_btn"><span class="ico-slot" data-icon="mic"></span></button>
       <button class="btn primary big" id="order-btn" type="button" disabled></button>
     </div>
   </div>
@@ -136,6 +140,7 @@
   <script src="/static/common.js"></script>
   <script src="/static/i18n.js"></script>
   <script src="/static/map.js"></script>
+  <script src="/static/icons.js"></script>
   <script src="/static/client.js"></script>
 </body>
 </html>

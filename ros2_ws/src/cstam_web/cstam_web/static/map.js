@@ -8,6 +8,26 @@ const FLOOR_MAP_DARK = {
   dock: '#10b981', kitchen: '#60a5fa', font: 'Inter, sans-serif',
 };
 
+// Light "chaux et cobalt" palette used by the client page
+const FLOOR_MAP_CHAUX = {
+  bg: '#fbfaf6', wall: '#b9b1a0',
+  table: '#efe7d6', tableEdge: '#c9b48a', tableText: '#5d4a26',
+  active: 'rgba(27,79,174,0.16)', activeEdge: '#1b4fae', activeText: '#123a85',
+  selected: '#1b4fae', selectedEdge: '#123a85', selectedText: '#ffffff',
+  robot: '#1b4fae', robotBody: '#ffffff', path: 'rgba(27,79,174,0.85)', trail: '27,79,174',
+  dock: '#4f7a3a', kitchen: '#b2472f', font: "'IBM Plex Sans', 'Segoe UI', sans-serif",
+};
+
+// Night palette for the admin control room (same identity, dark)
+const FLOOR_MAP_NUIT = {
+  bg: '#0c1526', wall: '#33415e',
+  table: '#1a2740', tableEdge: '#4a5d85', tableText: '#c9d4ec',
+  active: 'rgba(91,140,255,0.28)', activeEdge: '#5b8cff', activeText: '#ffffff',
+  selected: 'rgba(227,162,26,0.4)', selectedEdge: '#e3a21a', selectedText: '#fff7e6',
+  robot: '#7aa2ff', robotBody: '#0c1526', path: 'rgba(91,140,255,0.9)', trail: '91,140,255',
+  dock: '#7fb069', kitchen: '#e07a5f', font: "'IBM Plex Sans', 'Segoe UI', sans-serif",
+};
+
 class FloorMap {
   constructor(canvas, palette) {
     this.canvas = canvas;
@@ -171,7 +191,7 @@ class FloorMap {
       c.font = `700 11px ${P.font}`;
       c.textAlign = 'center'; c.textBaseline = 'bottom';
       const tr = (k, d) => (typeof I18n !== 'undefined' ? I18n.t(k) : d);
-      c.fillText(isDock ? `⚡ ${tr('a_dock_name', 'Dock')}` : `🍳 ${tr('a_kitchen_name', 'Kitchen')}`, p.x, p.y - r - 3);
+      c.fillText(isDock ? tr('a_dock_name', 'Dock') : tr('a_kitchen_name', 'Kitchen'), p.x, p.y - r - 3);
     }
 
     // Trail
