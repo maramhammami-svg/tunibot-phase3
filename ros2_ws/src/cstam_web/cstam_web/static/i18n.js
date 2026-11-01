@@ -51,6 +51,7 @@ const I18n = (() => {
       new_order: 'Nouvelle commande',
       // voice
       voice_btn: 'Commande vocale',
+      voice_lang: 'Je parle en :',
       voice_listening: 'Je vous écoute… parlez normalement, puis faites une pause (ou touchez 🎤 pour terminer).',
       voice_idle: 'Appuyez sur 🎤 pour parler, ou écrivez votre commande.',
       voice_unsupported: "La reconnaissance vocale n'est pas disponible sur ce navigateur (utilisez Chrome ou Edge). Vous pouvez écrire votre commande.",
@@ -61,7 +62,7 @@ const I18n = (() => {
       voice_heard: t => `« ${t} »`,
       voice_ph: 'ex. deux thés à la menthe et un brik, table 4',
       voice_go: 'OK',
-      voice_tip: 'Astuce : dites les plats, les quantités et le numéro de table. Vous pouvez parler en français, en anglais ou en derja (« zouz kahwa, tawla 3 »).',
+      voice_tip: 'Astuce : choisissez la langue que vous parlez, puis dites les plats, les quantités et le numéro de table. La derja passe en mode Français (« zouz kahwa, tawla 3 »).',
       voice_added: 'Ajouté à votre commande :',
       voice_table: t => `Table : ${t}`,
       voice_unknown: w => `Pas compris : ${w}`,
@@ -118,6 +119,7 @@ const I18n = (() => {
       cancel_confirm: 'Cancel this order?',
       new_order: 'New order',
       voice_btn: 'Voice order',
+      voice_lang: 'I speak:',
       voice_listening: 'Listening… speak normally, then pause (or tap 🎤 to finish).',
       voice_idle: 'Tap 🎤 to speak, or type your order.',
       voice_unsupported: 'Speech recognition is not available in this browser (use Chrome or Edge). You can type your order.',
@@ -128,7 +130,7 @@ const I18n = (() => {
       voice_heard: t => `"${t}"`,
       voice_ph: 'e.g. two mint teas and a brik, table 4',
       voice_go: 'OK',
-      voice_tip: 'Tip: say the dishes, the quantities and your table number. French, English and Tunisian derja ("zouz kahwa, tawla 3") all work.',
+      voice_tip: 'Tip: pick the language you speak, then say the dishes, the quantities and your table number. Tunisian derja works in Français mode ("zouz kahwa, tawla 3").',
       voice_added: 'Added to your order:',
       voice_table: t => `Table: ${t}`,
       voice_unknown: w => `Not understood: ${w}`,
@@ -157,10 +159,16 @@ const I18n = (() => {
     root.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
   }
 
+  /** Translation in a given language, whatever the page language. */
+  function tIn(l, key, ...args) {
+    const v = (STRINGS[l] || STRINGS.fr)[key] ?? STRINGS.en[key];
+    return typeof v === 'function' ? v(...args) : (v ?? key);
+  }
+
   function set(l) { lang = STRINGS[l] ? l : 'fr'; localStorage.setItem(KEY, lang); apply(); }
   function get() { return lang; }
   /** Menu fields: name_fr / desc_fr when the page is in French. */
   function field(obj, name) { return (lang === 'fr' && obj[`${name}_fr`]) || obj[name] || ''; }
 
-  return { t, apply, set, get, field };
+  return { t, tIn, apply, set, get, field };
 })();

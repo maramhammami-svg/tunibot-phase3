@@ -57,7 +57,6 @@
   $('lang-btn').onclick = () => {
     I18n.set(I18n.get() === 'fr' ? 'en' : 'fr');
     renderLangButton();
-    if (recognition) recognition.lang = t('speech_lang');
     renderAll();
   };
 
@@ -162,6 +161,25 @@
   let recognition = null;
   let recognizing = false;
   let voiceState = 'idle';
+  // The language you SPEAK is chosen separately from the page language
+  // (French by default): an English page with French speech gave nonsense.
+  const SPEECH_LANGS = { fr: 'fr-FR', en: 'en-US' };
+  let voiceLang = localStorage.getItem('tunibot_voice_lang') || 'fr';
+  if (!SPEECH_LANGS[voiceLang]) voiceLang = 'fr';
+  function renderVoiceLang() {
+    document.querySelectorAll('[data-voice-lang]').forEach(b => {
+      b.setAttribute('aria-pressed', String(b.dataset.voiceLang === voiceLang));
+    });
+  }
+  document.querySelectorAll('[data-voice-lang]').forEach(b => {
+    b.onclick = () => {
+      voiceLang = b.dataset.voiceLang;
+      localStorage.setItem('tunibot_voice_lang', voiceLang);
+      renderVoiceLang();
+      if (recognizing) recognition.abort();
+    };
+  });
+  renderVoiceLang();
 
   function setVoiceStatus(state) {
     voiceState = state;
@@ -178,7 +196,7 @@
     if (!SR) { setVoiceStatus('idle'); $('voice-input').focus(); return; }
     if (recognizing) { recognition.stop(); return; }
     recognition = new SR();
-    recognition.lang = t('speech_lang');
+    recognition.lang = SPEECH_LANGS[voiceLang];
     recognition.continuous = true;      // do not cut the sentence at the first short pause
     recognition.interimResults = true;
     recognition.maxAlternatives = 5;    // the server keeps the guess that best fits the menu
@@ -234,7 +252,7 @@
   async function understand(text, alternatives = []) {
     showHeard(text);
     try {
-      const res = await Tuni.api('/api/voice/parse', { method: 'POST', body: { text, alternatives, lang: I18n.get() } });
+      const res = await Tuni.api('/api/voice/parse', { method: 'POST', body: { text, alternatives, lang: voiceLang } });
       if (res.text && res.text !== text) showHeard(res.text);
       applyVoiceResult(res);
     } catch (e) {
@@ -270,8 +288,8 @@
 
     if (res.items.length && 'speechSynthesis' in window) {
       const list = res.items.map(i => `${i.qty} ${i.name}`).join(', ');
-      const u = new SpeechSynthesisUtterance(t('voice_say_ok', list, res.table));
-      u.lang = t('speech_lang');
+      const u = new SpeechSynthesisUtterance(I18n.tIn(voiceLang, 'voice_say_ok', list, res.table));
+      u.lang = SPEECH_LANGS[voiceLang];
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(u);
     }

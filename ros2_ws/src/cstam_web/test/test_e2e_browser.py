@@ -105,6 +105,7 @@ def test_language_switch_and_admin(server, browser):
 FAKE_SPEECH = """
 class FakeRecognition {
   start() {
+    window.__speechLang = this.lang;
     setTimeout(() => this.onstart && this.onstart(), 10);
     setTimeout(() => {
       const alt = (t) => ({ transcript: t, confidence: 0.8 });
@@ -114,6 +115,7 @@ class FakeRecognition {
     }, 50);
   }
   stop() { setTimeout(() => this.onend && this.onend(), 10); }
+  abort() { this.stop(); }
 }
 window.webkitSpeechRecognition = FakeRecognition;
 window.SpeechRecognition = FakeRecognition;
@@ -132,4 +134,16 @@ def test_microphone_flow_with_alternatives(server, browser):
     text = page.inner_text("#voice-result")
     assert "2 × Brik à l'oeuf" in text and "1 × Thé à la menthe" in text
     assert page.inner_text("#table-selected") == "Table 6"
+    assert page.evaluate("window.__speechLang") == "fr-FR"
+
+    # English page: speech stays French unless "English" is picked in the voice panel
+    page.click("#lang-btn")
+    page.click("#voice-btn")
+    page.wait_for_timeout(300)
+    assert page.evaluate("window.__speechLang") == "fr-FR"
+    page.click("[data-voice-lang=en]")
+    page.wait_for_timeout(100)
+    page.click("#voice-btn")
+    page.wait_for_timeout(300)
+    assert page.evaluate("window.__speechLang") == "en-US"
     ctx.close()

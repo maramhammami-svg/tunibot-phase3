@@ -79,3 +79,6 @@
 @media (max-width: 360px) {
   .voice-btn [data-i18n] { display: none; }
 }
+.voice-langs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.chip-btn { padding: 5px 10px; border-radius: 999px; border: 1px solid var(--border-2); background: var(--card-2); font-size: 12px; font-weight: 600; }
+.chip-btn[aria-pressed="true"] { background: var(--blue-soft); border-color: var(--blue); color: #7dd3fc; }
