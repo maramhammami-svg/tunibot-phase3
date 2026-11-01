@@ -1,0 +1,587 @@
+% =====================================================================
+%  TuniBot -- CSTAM 3.0 Challenge, Phase 3 Technical Report
+%  Compile: pdflatex main.tex (twice), or upload the folder to Overleaf.
+%  The figures/ folder must sit next to this file.
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Colours (taken from the web interface) ----------
+\definecolor{copper}{HTML}{1D6B4F}
+\definecolor{ochre}{HTML}{F0B23A}
+\definecolor{manganese}{HTML}{2B1D19}
+\definecolor{chili}{HTML}{C2412D}
+\definecolor{slip}{HTML}{F3F7F2}
+
+\hypersetup{colorlinks=true,linkcolor=copper,urlcolor=copper,citecolor=copper}
+\titleformat{\section}{\Large\bfseries\color{manganese}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{copper}}{\thesubsection}{0.6em}{}
+\setlist{itemsep=2pt,topsep=4pt}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small TuniBot -- Technical Report}
+\rhead{\small CSTAM 3.0, Phase 3}
+\cfoot{\thepage}
+
+% Placeholder marker for information the team must fill in
+\newcommand{\fillin}[1]{\textcolor{chili}{\textbf{[#1]}}}
+
+\begin{document}
+
+% =====================================================================
+\begin{titlepage}
+  \centering
+  \vspace*{2cm}
+  {\large CSTAM 3.0 -- TuniBot Challenge\par}
+  \vspace{0.6cm}
+  {\color{copper}\rule{\linewidth}{1.2pt}\par}
+  \vspace{0.5cm}
+  {\Huge\bfseries\color{manganese} TuniBot\par}
+  \vspace{0.3cm}
+  {\LARGE Autonomous Service Robot for Indoor Delivery\par}
+  \vspace{0.3cm}
+  {\Large Technical Report -- Phase 3: UI/UX and Documentation\par}
+  {\color{copper}\rule{\linewidth}{1.2pt}\par}
+  \vspace{1.5cm}
+  {\Large\bfseries Team ConnectENIT\par}
+  \vspace{0.2cm}
+  {\large Wassim Toukebri \quad Maram Hammami \quad Ridha Charrad\par}
+  \vspace{0.2cm}
+  {\normalsize IEEE ENIT Computer Society Student Branch Chapter\par}
+  \vspace{1.5cm}
+  \includegraphics[width=0.78\linewidth]{figures/admin_desktop.png}\par
+  \vfill
+  {\large \today\par}
+  \vspace{0.3cm}
+  {\small Repository: \url{https://github.com/maramhammami-svg/tunibot-phase3}\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+
+We built a complete ROS~2 software stack that runs an autonomous waiter
+robot in a simulated restaurant, from the guest's order to the robot's
+return to its charger, with no human in the loop. The stack runs on
+ROS~2 Jazzy, Gazebo Harmonic and Nav2. It covers mapping and localization
+(SLAM, AMCL), autonomous navigation, a delivery task queue, auto-docking,
+dynamic obstacle avoidance, recovery in narrow aisles and a physical
+battery model with a return-to-dock policy.
+
+Phase~3 adds the user layer. A web \emph{Client} page lets guests choose
+their table on the real floor plan, order from an illustrated menu book by
+tapping or by voice (French, English and Tunisian Darija), place several
+orders at once and follow each delivery live with an arrival estimate. An
+\emph{Admin} control room shows the robot on a live floor map with its
+mission, battery, order queue, system health and event log, and lets staff
+send, recall or cancel. The interface is a separate ROS~2 package,
+\texttt{cstam\_web}, that only uses the topics the robot already publishes,
+so no Phase~1 or Phase~2 code was changed. A web order was delivered end to
+end in Gazebo, and 51 automated tests (unit, API and browser end-to-end)
+pass on the interface.
+
+% =====================================================================
+\section{Team Overview and Contributions}
+
+We are \textbf{ConnectENIT}, a team of three students from the IEEE ENIT
+Computer Society Student Branch Chapter. All three of us worked on every
+phase of the challenge: we designed, coded, tested and reviewed together.
+To move fast, each member led one area in each phase while the others
+reviewed and tested it, as summarised in Table~\ref{tab:team}.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\linewidth}{l L L L}
+\toprule
+\textbf{Member} & \textbf{Phase 1: Foundations} & \textbf{Phase 2: Integration} & \textbf{Phase 3: UI/UX \& docs} \\
+\midrule
+Wassim Toukebri & Nav2 navigation set-up, waypoints to tables & Dynamic obstacle avoidance, costmap tuning for narrow doorways, recovery behaviours & FastAPI server and ROS~2 bridge, order tracking, Gazebo validation \\
+\addlinespace
+Maram Hammami & Delivery task queue manager and auto-docking & Battery model and return-to-dock policy, Dar Tunibot world & Client page UX and visual design, voice ordering (French, English, Darija), technical report \\
+\addlinespace
+Ridha Charrad & Gazebo world and robot model, SLAM mapping, AMCL localization & Integration tests, pedestrian scenarios & Admin control room, automated tests, demo video \\
+\bottomrule
+\end{tabularx}
+\caption{Each member's lead area per phase. All members contributed to all three phases.}
+\label{tab:team}
+\end{table}
+
+% =====================================================================
+\section{Problem Statement and Industrial Context}
+
+Restaurant service still depends on staff walking every plate and drink
+from the kitchen to the table. That repetitive work takes time away from
+guests, and it scales badly at peak hours.
+
+The CSTAM~3.0 challenge, set with our industrial partner TuniBot, a
+Tunisian robotics and automation company, asks for a software-only answer.
+The robot must:
+\begin{itemize}
+  \item understand and navigate an indoor environment it has mapped itself;
+  \item receive food and beverage requests from users;
+  \item drive to predefined tables to deliver them, safely around people and furniture;
+  \item return to its dock to charge when idle or low on battery;
+  \item give guests and staff an interface to order and to supervise the robot (Phase~3).
+\end{itemize}
+
+Two constraints shaped the design. Everything runs in simulation with
+industry-standard open-source tools (ROS~2, Gazebo, Nav2), so the stack can
+move to a real base later. And the result must work in a realistic venue:
+we tested in a large lounge (24 tables) and in \emph{Dar Tunibot}, a
+traditional Tunisian restaurant with 1.20\,m arched doorways and narrow
+aisles.
+
+For Phase~3 specifically, the problem is trust and ease of use. A guest who
+orders from a robot needs to know the order was received, where the robot
+is and when it will arrive. Staff need to see at a glance whether the robot
+is healthy, how much battery it has left and what is waiting, and to take
+over when something goes wrong.
+
+% =====================================================================
+\section{Proposed Solution}
+
+Our solution is a layered ROS~2 system: a simulated restaurant and robot at
+the bottom, the robot's core logic in the middle and a web interface on top.
+Each layer talks to the next only through ROS~2 topics, so each can be
+tested and replaced on its own.
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{l L c}
+\toprule
+\textbf{Layer} & \textbf{What it does} & \textbf{Phase} \\
+\midrule
+Simulation & Gazebo Harmonic worlds (Restaurant Lounge, 24 tables; Dar Tunibot, 10 tables), BellaBot differential-drive model with 2D LiDAR and wheel odometry, a walking pedestrian & 1, 2 \\
+Mapping and localization & SLAM to build the map, AMCL to localize, auto-initialized at the dock & 1 \\
+Navigation & Nav2 planner, controller, behaviour tree and recoveries; costmaps tuned for 1.20\,m doorways (robot radius 0.28\,m, inflation 0.42\,m) & 1, 2 \\
+Delivery task manager & Queue of delivery requests, dispatch to tables, completion, cancel, recovery that keeps the order in the queue & 1 \\
+Auto-docking & Return to dock when the queue is empty, docking sequence, rest & 1 \\
+Dynamic obstacles & Pedestrian controller (patrol, cross, block); 10\,Hz local costmap so Nav2 re-plans around people & 2 \\
+Battery & 24\,V 20\,Ah Li-ion model with voltage sag and temperature; return to dock at 25\,\%, emergency dock at 15\,\%, recharge to 80\,\% & 2 \\
+Web interface & Client ordering page with voice orders, Admin control room, FastAPI bridge to ROS~2 & 3 \\
+\bottomrule
+\end{tabularx}
+\caption{Layers of the TuniBot software stack.}
+\end{table}
+
+\subsection{Phase 3 requirements coverage}
+
+The specification asks for an intuitive interface (web or mobile) to
+request deliveries, and an Admin view to monitor the robot's status and
+battery. Table~\ref{tab:coverage} maps each requirement to what we built.
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{l L}
+\toprule
+\textbf{Requirement} & \textbf{Delivered} \\
+\midrule
+Easy delivery requests & Client page: tap your table on the floor plan (or open \texttt{/?table=5} from a table QR code), add dishes from the menu book, one Order button; or say the order out loud \\
+Web and mobile & Responsive page served on the restaurant Wi-Fi: one column on phones, two columns on wide screens; phones open \texttt{http://<PC-IP>:8000/} \\
+Customer feedback & Live tracking per order: received, waiting, on the way (with arrival estimate), at your table, delivered; cancel while still queued \\
+Several orders & A guest can place a new order while earlier ones are still on their way and switch between them \\
+Admin: robot status & Mission card, robot position on a live floor map with the Nav2 path, system health, event log \\
+Admin: battery & Percentage ring and gauge, voltage, current, power, temperature, runtime, 5-minute history with the 25\,\% and 15\,\% thresholds \\
+Admin: control & Cancel any order, send the robot to a table or the kitchen, return to dock, demo buttons for battery level and pedestrian \\
+Bonus: voice orders & Microphone button, French / English / Tunisian Darija, cart filled and read back for confirmation \\
+\bottomrule
+\end{tabularx}
+\caption{Phase 3 requirements and how they are met.}
+\label{tab:coverage}
+\end{table}
+
+% =====================================================================
+\section{System Design}
+
+\subsection{Architecture}
+
+The web interface sits on top of the robot stack and reaches it only
+through the ROS~2 topics the Phase~1 and Phase~2 nodes already use
+(Figure~\ref{fig:arch}). The robot keeps working if the web server stops,
+and the web server never runs its own copy of the queue or the battery.
+
+\begin{figure}[tbp]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw=manganese,rounded corners=3pt,align=center,
+              minimum height=1.0cm,font=\small,inner sep=4pt},
+  web/.style={box,fill=ochre!25},
+  ros/.style={box,fill=copper!12,minimum width=3.2cm},
+  sim/.style={box,fill=slip},
+  arr/.style={-{Stealth[length=2mm]},thick,manganese},
+  lab/.style={font=\scriptsize\ttfamily,fill=white,inner sep=1.5pt}
+]
+% Phase 3
+\node[web,minimum width=3.6cm] (client) at (-2.6,0) {Client page\\(phone / tablet)};
+\node[web,minimum width=3.6cm] (admin)  at ( 2.6,0) {Admin control room\\(staff PC)};
+\node[web,minimum width=8.8cm] (server) at (0,-2.0) {\textbf{cstam\_web}: FastAPI server, REST API + WebSocket\\(2 snapshots per second), voice parser \texttt{voice.py}};
+\node[web,minimum width=8.8cm] (bridge) at (0,-3.6) {\texttt{ros\_bridge.py}: one ROS~2 node + thread-safe telemetry store};
+% Phases 1-2
+\node[ros] (tm)   at (-3.5,-5.9) {Delivery task\\manager};
+\node[ros] (dock) at ( 0,  -5.9) {Auto-docking};
+\node[ros] (bat)  at ( 3.5,-5.9) {Battery\\simulator};
+\node[ros] (nav)  at (-3.5,-7.6) {Nav2 + AMCL};
+\node[ros] (ped)  at ( 0,  -7.6) {Pedestrian\\controller};
+\node[sim,minimum width=10.2cm] (gz) at (0,-9.3) {Gazebo Harmonic: BellaBot with 2D LiDAR and odometry, restaurant world};
+
+\draw[arr,<->] (client.south) -- node[lab,left=2pt]{HTTP / WebSocket} (client.south |- server.north);
+\draw[arr,<->] (admin.south)  -- node[lab,right=2pt]{HTTP / WebSocket} (admin.south |- server.north);
+\draw[arr,<->] (server) -- (bridge);
+\draw[arr,<->] (bridge.south -| tm) -- node[lab,left=2pt]{ROS 2 topics} (tm.north);
+\draw[arr] (bat.north) -- (bridge.south -| bat);
+\draw[arr] (dock) -- (tm);
+\draw[arr,<->] (tm) -- (nav);
+\draw[arr] (nav) -- (nav |- gz.north);
+\draw[arr] (ped) -- (ped |- gz.north);
+\draw[arr] (bat.south) |- ++(0,-0.6) -| ([xshift=10mm]dock.south);
+
+\begin{scope}[on background layer]
+  \node[draw=ochre!80!black,dashed,rounded corners,fit=(client)(admin)(server)(bridge),inner sep=9pt] (p3) {};
+  \node[anchor=south east,font=\scriptsize\bfseries,text=ochre!70!black] at (p3.north east) {Phase 3 (new)};
+  \node[draw=copper,dashed,rounded corners,fit=(tm)(bat)(nav)(gz),inner sep=9pt] (p12) {};
+  \node[anchor=north east,font=\scriptsize\bfseries,text=copper] at (p12.south east) {Phases 1--2 (unchanged)};
+\end{scope}
+\end{tikzpicture}
+\caption{System architecture. The Phase~3 package only talks to the robot through existing ROS~2 topics.}
+\label{fig:arch}
+\end{figure}
+
+\subsection{The \texttt{cstam\_web} package}
+
+\begin{itemize}
+  \item \texttt{ros\_bridge.py}: one ROS~2 node that subscribes to the robot topics and publishes the web commands.
+  \item \texttt{store.py}: a thread-safe telemetry store that mirrors what the robot publishes and derives each web order's status.
+  \item \texttt{server.py}: FastAPI REST endpoints, plus a WebSocket that pushes a full snapshot twice a second.
+  \item \texttt{voice.py}: the voice-order parser (plain Python, no ROS).
+  \item \texttt{static/}: Client and Admin pages in plain HTML, CSS and JavaScript, with no build step. Dish illustrations and icons are drawn as inline SVG (\texttt{dishes.js}, \texttt{icons.js}), and the floor map is drawn on an HTML canvas from the world file (\texttt{map.js}).
+  \item \texttt{mock.py}: a simulated robot that reuses the real task queue and battery classes, for demos without Gazebo (\texttt{-{}-mock}).
+\end{itemize}
+
+\subsection{ROS 2 interface}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\linewidth}{l l L}
+\toprule
+\textbf{Topic} & \textbf{Direction} & \textbf{Content} \\
+\midrule
+\texttt{/delivery\_request} & web $\rightarrow$ robot & \texttt{\{"target": "Table 4", "item": "2x Thé à la menthe"\}} \\
+\texttt{/delivery\_task\_action} & web $\rightarrow$ robot & cancel a task by id \\
+\texttt{/dock\_command} & web $\rightarrow$ robot & \texttt{DOCK\_NOW:ADMIN} or \texttt{STOP} \\
+\texttt{/delivery\_queue\_status} & robot $\rightarrow$ web & current task, pending tasks, completed count, battery lock (JSON) \\
+\texttt{/robot\_system\_state} & robot $\rightarrow$ web & idle, navigating, at\_table, recovering, docking, docked \\
+\texttt{/battery\_status} & robot $\rightarrow$ web & percentage, voltage, current, power, temperature, flags (JSON, 1\,Hz) \\
+\texttt{/amcl\_pose}, \texttt{/plan} & robot $\rightarrow$ web & robot pose and Nav2 global path for the map \\
+\texttt{/dynamic\_obstacle/status} & robot $\rightarrow$ web & pedestrian position and mode \\
+\texttt{/delivery\_waypoints} & robot $\rightarrow$ web & world name and table coordinates (latched) \\
+\bottomrule
+\end{tabularx}
+\caption{ROS 2 topics used by the web interface.}
+\end{table}
+
+\subsection{Order tracking without changing the task manager}
+
+The Phase~1 task manager knows nothing about web orders. The bridge links
+an order to its task by watching the queue status: the first new task id
+for the same table with the same item text is that order. From then on its
+status follows the task: queued, en route, at the table. When it leaves the
+queue, a rise in the completed count means delivered; otherwise it is
+reported as failed or cancelled. An order the task manager does not pick
+up within 8\,s is shown as not accepted. Because each order is tracked on
+its own, a guest can follow several orders at once; they are kept in the
+browser's local storage so tracking resumes after a reload.
+
+\subsection{Voice ordering pipeline (bonus feature)}
+
+A guest taps the microphone and says the order in one sentence, for
+example \emph{``deux thés à la menthe et un brik pour la table 4''} or, in
+Darija, \emph{``zouz kahwa w brik, tawla tletha''}. Nothing is sent to the
+robot without the guest's confirmation tap.
+
+\begin{enumerate}
+  \item The browser turns speech into text (Web Speech API) in the language chosen in the voice panel: French (default), English or Darija (\texttt{ar-TN}). Listening stops after 2.5\,s of silence.
+  \item Up to five recognition guesses are sent to \texttt{POST /api/voice/parse}.
+  \item The parser reads each guess against the current world's menu and tables and keeps the best fit: most dishes recognised, a table found, fewest unknown words.
+  \item The page fills the cart, selects the table, opens the menu page of the first dish and reads the order back aloud.
+\end{enumerate}
+
+The parser understands quantities in French, English and Darija
+(``deux'', ``three'', ``zouz'', ``tletha''), table phrases (``table numéro
+10'', ``tawla tletha''), dish aliases (``kahwa'', ``atay'', ``kousksi'')
+and the misspellings speech-to-text produces for Tunisian words
+(``brique'' for brik, ``bamba louni'' for bambalouni). Chrome returns
+Darija in Arabic script, so known words are mapped directly and the rest is
+transliterated to Latin letters before matching. The parser uses accent
+folding, plural removal, a phonetic key and fuzzy matching. A dish that is
+not on the menu is reported, never guessed.
+
+% =====================================================================
+\section{Mockups}
+
+The screens below are the working interface, captured from the running
+system in the Dar Tunibot world. They are the final UI, not drawings.
+
+\subsection{Design direction}
+
+We wanted the interface to feel like it belongs in a Tunisian restaurant
+rather than a generic dashboard. The visual identity borrows from Nabeul
+pottery: copper green, ochre and manganese brown on a pale slip background.
+Headings use Bricolage Grotesque; body text uses Atkinson Hyperlegible, a
+typeface designed for readability. Each dish has its own flat illustration
+(Figure~\ref{fig:dishes}), and the menu behaves like a real menu book with
+page turns. Motion is used only where it carries meaning (a dish flying to
+the tray, the robot driving on the map) and is turned off for users who
+ask their system for reduced motion.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\linewidth]{figures/dishes.png}
+\caption{Dish illustrations drawn for the Tunisian menu.}
+\label{fig:dishes}
+\end{figure}
+
+\subsection{Client page}
+
+The guest orders in three taps: table, dishes, Order. Everything else on
+the page answers the guest's next question: is the robot free, where is my
+order, when will it arrive.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.24\linewidth}
+  \includegraphics[width=\linewidth]{figures/client_table.png}
+  \caption{Pick the table on the real floor plan.}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.24\linewidth}
+  \includegraphics[width=\linewidth]{figures/client_menu.png}
+  \caption{Menu book, one page per category.}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.24\linewidth}
+  \includegraphics[width=\linewidth]{figures/client_voice.png}
+  \caption{Voice order in Darija.}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.24\linewidth}
+  \includegraphics[width=\linewidth]{figures/client_orders.png}
+  \caption{Several orders tracked at once.}
+\end{subfigure}
+\caption{Client page on a phone.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/client_desktop.png}
+\caption{Client page on a wide screen: the floor plan stays visible beside the order and the live tracking.}
+\end{figure}
+
+\paragraph{Edge cases handled.}
+\begin{itemize}
+  \item Robot offline (no battery heartbeat for 3\,s): red banner, ordering disabled.
+  \item Battery lock (robot recharging to 80\,\%): order accepted; the guest is told it leaves after charging.
+  \item Order not picked up by the task manager within 8\,s: shown as ``not accepted, please ask the staff''.
+  \item Navigation failure: ``a waiter will bring your order'' instead of a silent stop.
+  \item Page reloaded or phone locked: orders are kept and tracking resumes.
+  \item Lost Wi-Fi: the live connection reconnects on its own.
+\end{itemize}
+
+\paragraph{Language.} French by default, English with one tap. The choice is
+remembered, and dish descriptions and categories are translated. Voice
+recognition has its own language choice, because recognition must follow
+the language the guest speaks, not the page language.
+
+\subsection{Admin control room}
+
+The Admin view at \texttt{/admin} shows, on one screen, everything staff
+need to trust the robot: where it is, what it is doing, how much battery it
+has left and what is waiting. The live floor map takes most of the screen.
+A mission card floats over it, and the side column keeps every panel open
+(orders, robot, battery, log, demo mode) so nothing is hidden behind tabs.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.70\linewidth}
+  \includegraphics[width=\linewidth]{figures/admin_desktop.png}
+  \caption{Live map with the Nav2 path, mission card and order tickets.}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.25\linewidth}
+  \includegraphics[width=\linewidth]{figures/admin_battery.png}
+  \caption{Robot and battery panels.}
+\end{subfigure}
+\caption{Admin control room.}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{l L L}
+\toprule
+\textbf{Panel} & \textbf{Shows} & \textbf{Actions} \\
+\midrule
+Floor map & Walls, tables, dock and kitchen from the world file; robot pose from AMCL, its trail, the Nav2 path, the pedestrian, pending orders per table & Tap a table to send the robot there \\
+Mission card & Current mission, state, battery ring, deliveries completed & -- \\
+Orders & Current and pending orders as kitchen tickets & Cancel any order \\
+Robot & Current task, position, deliveries, pedestrian, health of each module & Return to dock, cancel the return, send to kitchen or a table \\
+Battery & Percentage, gauge, voltage, current, power, temperature, runtime, 5-minute history & -- \\
+Log & Last events: orders, state changes, battery warnings, voice orders & -- \\
+Demo mode & -- & Set battery to 100\,\%, 24\,\% or 14\,\%; pedestrian patrol, cross, block or absent \\
+\bottomrule
+\end{tabularx}
+\caption{Admin panels.}
+\end{table}
+
+% =====================================================================
+\section{Technologies, Frameworks and Tools}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{l l L}
+\toprule
+\textbf{Area} & \textbf{Technology} & \textbf{Use} \\
+\midrule
+Middleware & ROS~2 Jazzy & Nodes, topics, launch files, colcon build \\
+Simulation & Gazebo Harmonic & Restaurant worlds, BellaBot model, LiDAR, pedestrian \\
+Navigation & Nav2, AMCL, SLAM Toolbox & Path planning, control, recoveries, localization, mapping \\
+Visualisation & RViz~2 & Map, costmaps and markers during development \\
+Robot logic & Python 3.12 (rclpy) & Task manager, docking, battery, obstacle controller \\
+Web server & FastAPI, Uvicorn, Pydantic & REST API, WebSocket, request validation \\
+Front end & HTML5, CSS3, JavaScript & Client and Admin pages (no framework), canvas floor map, SVG illustrations \\
+Speech & Web Speech API & Speech recognition and read-back in the browser \\
+Testing & pytest, Playwright (Chromium) & Unit, API and browser end-to-end tests \\
+Tools & Git, GitHub, VS Code & Version control, pull requests, development on Ubuntu 24.04 \\
+Design & Google Fonts & Typography: Bricolage Grotesque, Atkinson Hyperlegible \\
+\bottomrule
+\end{tabularx}
+\caption{Technologies used.}
+\end{table}
+
+% =====================================================================
+\section{Development Milestones}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{l L}
+\toprule
+\textbf{Milestone} & \textbf{Delivered} \\
+\midrule
+Phase 1 -- Foundations & Gazebo restaurant world and BellaBot model; SLAM map; AMCL localization; Nav2 navigation to tables; delivery task queue manager; auto-docking; Mission Control simulator UI \\
+Phase 2 -- Integration and testing & Dynamic pedestrian (patrol, cross, block) with a 10\,Hz local costmap; Dar Tunibot world with 1.20\,m doorways and tuned inflation; multi-stage recovery that keeps the order queued; physical battery model with 25\,\% / 15\,\% / 80\,\% return-to-dock policy \\
+Phase 3, step 1 -- Web interface & New \texttt{cstam\_web} package: Client ordering page, Admin monitoring page, ROS~2 bridge, mock mode; web order delivered end to end in Gazebo \\
+Phase 3, step 2 -- UX and voice & Voice orders (French, English, Darija), arrival estimate, order review, French/English pages, edge cases, automated tests \\
+Phase 3, step 3 -- Design & Nabeul pottery identity, dish illustrations, menu book, table picked on the floor plan, wide-screen layout, several orders at once, Admin control room \\
+Phase 3, step 4 -- Documentation & This report and the demonstration video \\
+\bottomrule
+\end{tabularx}
+\caption{Development milestones.}
+\end{table}
+
+% =====================================================================
+\section{Testing Results}
+
+\subsection{Automated tests}
+
+The \texttt{cstam\_web} package has 51 automated tests, all passing. They
+run without Gazebo, against the mock robot that reuses the real task queue
+and battery classes.
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{l c L}
+\toprule
+\textbf{Suite} & \textbf{Tests} & \textbf{What it checks} \\
+\midrule
+Store and API (\texttt{test\_web.py}) & 16 & Order lifecycle follows the task manager; order matched by table and item; cancelled, rejected and failed orders; offline until battery heartbeat; battery lock; validation; admin commands; WebSocket snapshot \\
+Voice parser (\texttt{test\_voice.py}) & 28 & French, English, Darija (Latin and Arabic script) sentences; sound-alike spellings; unknown dish reported; table must exist; quantity cap; best alternative kept \\
+Browser end-to-end (\texttt{test\_e2e\_browser.py}) & 7 & Voice order delivered end to end; microphone flow; table picked on the floor plan; menu book; language switch; admin map click sends the robot; several orders at once \\
+\midrule
+\textbf{Total} & \textbf{51} & \\
+\bottomrule
+\end{tabularx}
+\caption{Automated test suites (parametrised cases counted individually).}
+\end{table}
+
+Run them with:
+\begin{verbatim}
+cd ros2_ws/src/cstam_web
+PYTHONPATH=.:../cstam_core python3 -m pytest -q test
+\end{verbatim}
+
+\subsection{Validation in Gazebo}
+
+With the full stack running (Gazebo, Nav2, task manager, battery), we
+ordered from the Client page and watched the robot deliver: the web order
+became task \texttt{TASK-0003} for Table~4, the robot drove there along the
+Nav2 path shown on the Admin map, the Client page moved through
+\emph{on the way}, \emph{at your table} and \emph{delivered}, and the robot
+returned to its dock. We also used the Admin demo buttons to check that a
+24\,\% battery sends the robot home after its queue, that 14\,\% triggers an
+emergency return and that the pedestrian modes make Nav2 re-plan around the
+person.
+
+\subsection{Usability checks}
+
+\begin{itemize}
+  \item Phone (390\,px), tablet and wide-screen (1440\,px) layouts checked with screenshots after each change.
+  \item Voice tested with real speech: this showed that the recognition language must be chosen separately from the page language.
+  \item Text contrast follows the palette's dark-on-light and light-on-dark pairs; motion is disabled when the system asks for reduced motion.
+\end{itemize}
+
+% =====================================================================
+\section{Future Improvements}
+
+\begin{itemize}
+  \item \textbf{Real robot:} run the same stack on a physical base; the web layer needs no change since it only uses ROS~2 topics.
+  \item \textbf{Fleet:} several robots on one Admin map, with the task manager assigning orders to the nearest free robot.
+  \item \textbf{Kitchen screen:} a third page for the kitchen to mark an order ready before the robot leaves.
+  \item \textbf{Payment and accounts:} pay at the table and keep order history for loyalty.
+  \item \textbf{Offline speech:} an on-device speech model (e.g.\ Whisper) so voice ordering works without Chrome's cloud service and with better Darija accuracy.
+  \item \textbf{Security:} HTTPS and staff login for the Admin page before use in a real venue.
+  \item \textbf{Analytics:} delivery times, battery cycles and busiest tables over a day.
+\end{itemize}
+
+% =====================================================================
+\section*{References}
+\addcontentsline{toc}{section}{References}
+
+\begin{enumerate}[label={[\arabic*]}]
+  \item S.~Macenski, T.~Foote, B.~Gerkey, C.~Lalancette, W.~Woodall, ``Robot Operating System 2: Design, architecture, and uses in the wild,'' \emph{Science Robotics}, vol.~7, no.~66, 2022.
+  \item S.~Macenski, F.~Martín, R.~White, J.~Ginés Clavero, ``The Marathon 2: A Navigation System,'' \emph{IEEE/RSJ IROS}, 2020.
+  \item S.~Macenski, I.~Jambrecic, ``SLAM Toolbox: SLAM for the dynamic world,'' \emph{Journal of Open Source Software}, vol.~6, no.~61, 2021.
+  \item S.~Thrun, W.~Burgard, D.~Fox, \emph{Probabilistic Robotics}. MIT Press, 2005.
+  \item Open Robotics, ``ROS~2 Jazzy documentation,'' \url{https://docs.ros.org/en/jazzy/}.
+  \item Open Robotics, ``Gazebo Harmonic documentation,'' \url{https://gazebosim.org/docs/harmonic}.
+  \item Nav2 project, ``Nav2 documentation,'' \url{https://docs.nav2.org/}.
+  \item S.~Ramírez, ``FastAPI,'' \url{https://fastapi.tiangolo.com/}.
+  \item W3C Community Group, ``Web Speech API,'' \url{https://webaudio.github.io/web-speech-api/}.
+  \item Microsoft, ``Playwright for Python,'' \url{https://playwright.dev/python/}.
+  \item W3C, ``Web Content Accessibility Guidelines (WCAG) 2.1,'' 2018.
+  \item Braille Institute, ``Atkinson Hyperlegible typeface,'' \url{https://www.brailleinstitute.org/freefont/}.
+\end{enumerate}
+
+\end{document}
