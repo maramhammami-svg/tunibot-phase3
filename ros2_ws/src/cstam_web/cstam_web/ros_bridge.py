@@ -83,6 +83,10 @@ class WebBridgeNode(Node):
             self.store.update_queue_status(data)
 
     def _state_cb(self, msg: String):
+        state = (msg.data or "").strip()
+        if state and state != getattr(self, "_last_state", None):
+            self.get_logger().info(f"Robot state: {state}")
+            self._last_state = state
         self.store.update_robot_state(msg.data)
 
     def _battery_cb(self, msg: String):
@@ -124,10 +128,13 @@ class WebBridgeNode(Node):
         data = self._json(msg)
         if isinstance(data, dict) and data.get("world"):
             world = normalize_world(data["world"])
+            self.get_logger().info(f"World detected from task manager: {world}")
             self.store.set_world(world, load_waypoints(world))
 
     # ---------------------------------------------------------- commands
     def _pub(self, pub, data: str):
+        # One line per web command so the terminal shows what the UI sent
+        self.get_logger().info(f"Web -> {pub.topic_name}: {data}")
         msg = String()
         msg.data = data
         pub.publish(msg)
