@@ -136,7 +136,7 @@
             <span aria-live="polite">0</span>
             <button type="button" class="add" aria-label="${Tuni.escapeHtml(t('add_one', it.name))}">+</button>
           </div>`;
-        row.querySelector('.add').onclick = () => changeQty(it.id, +1);
+        row.querySelector('.add').onclick = () => { flyToTray(row.querySelector('.menu-emoji')); changeQty(it.id, +1); };
         row.querySelector('.minus').onclick = () => changeQty(it.id, -1);
         sec.appendChild(row);
       }
@@ -187,6 +187,26 @@
     if (!cart[id]) delete cart[id];
     refreshQty();
     updateCheckout();
+  }
+
+  // A copy of the dish plate slides down to the order tray when you add it
+  function flyToTray(from) {
+    const to = $('checkout-count');
+    if (!from || !to || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
+    const ghost = from.cloneNode(true);
+    ghost.classList.add('fly-ghost');
+    Object.assign(ghost.style, { left: `${a.left}px`, top: `${a.top}px`, width: `${a.width}px`, height: `${a.height}px` });
+    document.body.appendChild(ghost);
+    const dx = b.left + 10 - a.left, dy = b.top - a.top - 6;
+    ghost.animate([
+      { transform: 'translate(0,0) scale(1) rotate(0)', opacity: 1 },
+      { transform: `translate(${dx * 0.5}px, ${dy * 0.35}px) scale(.8) rotate(-20deg)`, opacity: 1, offset: 0.45 },
+      { transform: `translate(${dx}px, ${dy}px) scale(.35) rotate(-40deg)`, opacity: 0.2 },
+    ], { duration: 560, easing: 'cubic-bezier(.5,0,.3,1)' }).onfinish = () => {
+      ghost.remove();
+      $('checkout').classList.remove('tray-bump'); void $('checkout').offsetWidth; $('checkout').classList.add('tray-bump');
+    };
   }
 
   function refreshQty() {
@@ -509,6 +529,7 @@
     const [title, defaultSub] = t(`st_${status}`);
     $('track-emoji').innerHTML = Icons.svg(v.icon, 'ico big');
     $('track-emoji').dataset.status = status;
+    $('track-waiter').dataset.status = status;
     $('track-emoji').classList.toggle('bounce', !!v.bounce);
     $('track-title').textContent = title;
     let sub = defaultSub;

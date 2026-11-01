@@ -42,6 +42,30 @@
         <div class="hero-robot" aria-hidden="true" id="hero-robot"></div>
       </div>
       <div class="card step">
+        <div class="welcome" aria-hidden="true">
+          <div class="welcome-text"><span class="welcome-hello" data-i18n="hero_hello"></span><span class="welcome-sub" data-i18n="hero_sub"></span></div>
+          <svg class="waiter" viewBox="0 0 160 170" aria-hidden="true">
+          <g class="w-steam" fill="none" stroke="#a8603a" stroke-width="2.4" stroke-linecap="round">
+            <path d="M70 20c-5 6 5 9 0 15"/><path d="M82 14c-5 6 5 9 0 15"/><path d="M94 20c-5 6 5 9 0 15"/>
+          </g>
+          <g class="w-tray">
+            <ellipse cx="82" cy="52" rx="34" ry="9" fill="#f0b23a" stroke="#2b1d19" stroke-width="3"/>
+            <path d="M58 50c0-12 11-18 24-18s24 6 24 18" fill="#fcefd0" stroke="#2b1d19" stroke-width="3"/>
+            <path d="M64 44h36" stroke="#1d6b4f" stroke-width="2.4" stroke-dasharray="3 4" stroke-linecap="round"/>
+            <path d="M48 52h68" stroke="#2b1d19" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          <path d="M112 54l14 22-12 14" fill="none" stroke="#2b1d19" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M44 92l-12 6" fill="none" stroke="#2b1d19" stroke-width="5" stroke-linecap="round"/>
+          <rect x="44" y="64" width="72" height="66" rx="30" fill="#f0b23a" stroke="#2b1d19" stroke-width="3.5"/>
+          <rect x="56" y="76" width="48" height="26" rx="13" fill="#2b1d19"/>
+          <circle class="w-eye" cx="70" cy="89" r="4.5" fill="#fcefd0"/><circle class="w-eye" cx="90" cy="89" r="4.5" fill="#fcefd0"/>
+          <path d="M66 114c8 6 20 6 28 0" fill="none" stroke="#2b1d19" stroke-width="3" stroke-linecap="round"/>
+          <path d="M80 64V58" stroke="#2b1d19" stroke-width="3"/>
+          <rect x="52" y="128" width="56" height="14" rx="7" fill="#1d6b4f" stroke="#2b1d19" stroke-width="3"/>
+          <circle cx="62" cy="150" r="9" fill="#fcefd0" stroke="#2b1d19" stroke-width="3.5"/><circle cx="98" cy="150" r="9" fill="#fcefd0" stroke="#2b1d19" stroke-width="3.5"/>
+          <path class="w-floor" d="M18 162h124" stroke="#2b1d19" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2 9"/>
+        </svg>
+        </div>
         <div class="card-head">
           <h2><span class="step-num">1</span> <span data-i18n="your_table"></span></h2>
           <button class="btn small hidden" id="change-table-btn" type="button" data-i18n="change"></button>
@@ -90,6 +114,27 @@
     <section id="track-screen" class="hidden" aria-live="polite">
       <div class="card track-card">
         <div class="track-emoji" id="track-emoji"></div>
+        <svg class="waiter track-waiter" id="track-waiter" viewBox="0 0 160 170" aria-hidden="true">
+          <g class="w-steam" fill="none" stroke="#a8603a" stroke-width="2.4" stroke-linecap="round">
+            <path d="M70 20c-5 6 5 9 0 15"/><path d="M82 14c-5 6 5 9 0 15"/><path d="M94 20c-5 6 5 9 0 15"/>
+          </g>
+          <g class="w-tray">
+            <ellipse cx="82" cy="52" rx="34" ry="9" fill="#f0b23a" stroke="#2b1d19" stroke-width="3"/>
+            <path d="M58 50c0-12 11-18 24-18s24 6 24 18" fill="#fcefd0" stroke="#2b1d19" stroke-width="3"/>
+            <path d="M64 44h36" stroke="#1d6b4f" stroke-width="2.4" stroke-dasharray="3 4" stroke-linecap="round"/>
+            <path d="M48 52h68" stroke="#2b1d19" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          <path d="M112 54l14 22-12 14" fill="none" stroke="#2b1d19" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M44 92l-12 6" fill="none" stroke="#2b1d19" stroke-width="5" stroke-linecap="round"/>
+          <rect x="44" y="64" width="72" height="66" rx="30" fill="#f0b23a" stroke="#2b1d19" stroke-width="3.5"/>
+          <rect x="56" y="76" width="48" height="26" rx="13" fill="#2b1d19"/>
+          <circle class="w-eye" cx="70" cy="89" r="4.5" fill="#fcefd0"/><circle class="w-eye" cx="90" cy="89" r="4.5" fill="#fcefd0"/>
+          <path d="M66 114c8 6 20 6 28 0" fill="none" stroke="#2b1d19" stroke-width="3" stroke-linecap="round"/>
+          <path d="M80 64V58" stroke="#2b1d19" stroke-width="3"/>
+          <rect x="52" y="128" width="56" height="14" rx="7" fill="#1d6b4f" stroke="#2b1d19" stroke-width="3"/>
+          <circle cx="62" cy="150" r="9" fill="#fcefd0" stroke="#2b1d19" stroke-width="3.5"/><circle cx="98" cy="150" r="9" fill="#fcefd0" stroke="#2b1d19" stroke-width="3.5"/>
+          <path class="w-floor" d="M18 162h124" stroke="#2b1d19" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2 9"/>
+        </svg>
         <h1 class="track-title" id="track-title"></h1>
         <p class="track-sub muted" id="track-sub"></p>
         <div class="eta hidden" id="eta"></div>

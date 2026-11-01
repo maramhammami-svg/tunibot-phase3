@@ -168,8 +168,8 @@ const I18n = (() => {
 
   // ---------------------------------------------------------------- admin page
   Object.assign(STRINGS.fr, {
-    a_title: w => `${w} · supervision du robot`,
-    a_client_page: 'Page client',
+    a_title: w => `${w}, supervision du robot`,
+    a_client_page: 'Page client', a_m_going: x => `En route vers ${x}`, a_m_at: x => `Arrivé à ${x}`, a_m_idle_sub: 'Prêt pour la prochaine commande', a_m_battery: 'batterie', a_m_delivered: 'livrées', a_m_more: n => `+ ${n} en attente`, a_cancel_ticket: id => `Annuler ${id}`,
     a_demo_banner: 'Mode démo : robot simulé (ROS 2 non connecté). Lancez sans --mock pour utiliser le vrai robot.',
     a_offline_banner: 'Aucune donnée du robot. Le système (cstam_system.launch.py) est-il lancé ?',
     a_battery: 'Batterie', a_battery_level: 'Niveau de batterie', a_voltage: 'Tension', a_current: 'Courant',
@@ -199,8 +199,8 @@ const I18n = (() => {
     states: { idle: 'Libre · prêt', navigating: 'En livraison', at_table: 'À la table', recovering: 'Manœuvre de secours', docking: 'Retour au dock', docked: 'Au dock', unknown: 'Inconnu' },
   });
   Object.assign(STRINGS.en, {
-    a_title: w => `${w} · robot monitoring`,
-    a_client_page: 'Client page',
+    a_title: w => `${w}, robot monitoring`,
+    a_client_page: 'Client page', a_m_going: x => `Heading to ${x}`, a_m_at: x => `At ${x}`, a_m_idle_sub: 'Ready for the next order', a_m_battery: 'battery', a_m_delivered: 'delivered', a_m_more: n => `+ ${n} waiting`, a_cancel_ticket: id => `Cancel ${id}`,
     a_demo_banner: 'Demo mode: simulated robot (ROS 2 not connected). Start without --mock to use the real robot.',
     a_offline_banner: 'No data from the robot. Is cstam_system.launch.py running?',
     a_battery: 'Battery', a_battery_level: 'Battery level', a_voltage: 'Voltage', a_current: 'Current',

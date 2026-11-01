@@ -4,6 +4,7 @@
   const t = I18n.t;
   document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = Icons.svg(el.dataset.icon); });
   const map = new FloorMap($('map'), FLOOR_MAP_NUIT);
+  map.maxHeight = 620;
   window.__floorMap = map;  // used by the browser tests
   let config = null;
   let world = null;
@@ -41,6 +42,14 @@
     }
   };
 
+  // Only touch the DOM when a list really changed (keeps entry animations and hover states)
+  const htmlCache = {};
+  function setHtml(id, html) {
+    if (htmlCache[id] === html) return;
+    htmlCache[id] = html;
+    $(id).innerHTML = html;
+  }
+
   // ---------------------------------------------------------------- render
   function render(s) {
     lastSnap = s;
@@ -65,8 +74,11 @@
       fill.style.background = b.is_critical ? 'var(--red)' : (b.is_low ? 'var(--amber)' : 'var(--green)');
       $('battery-meter').setAttribute('aria-valuenow', String(pct));
       $('battery-pct').textContent = `${pct.toFixed(1)}%`;
-      $('battery-pill-text').textContent = `${pct.toFixed(0)}%${b.is_docked ? ' · dock' : ''}`;
-      $('battery-pill').className = `pill ${b.is_critical ? 'offline' : (b.is_low ? 'charging' : '')}`;
+      $('battery-pill-text').textContent = `${pct.toFixed(0)}%`;
+      $('battery-pill').dataset.level = b.is_critical ? 'critical' : (b.is_low ? 'low' : 'ok');
+      $('battery-pill').classList.toggle('charging', !!b.is_docked);
+      const C = 2 * Math.PI * 27;
+      $('ring-fill').style.strokeDasharray = `${(pct / 100) * C} ${C}`;
       $('m-voltage').textContent = `${(b.voltage ?? 0).toFixed(2)} V`;
       $('m-current').textContent = `${(b.current_amps ?? 0).toFixed(2)} A ${b.is_docked ? '(in)' : '(out)'}`;
       $('m-power').textContent = `${(b.power_watts ?? 0).toFixed(0)} W`;
@@ -83,7 +95,17 @@
 
     // Robot
     const task = s.current_task;
-    $('r-task').textContent = task ? `${task.id} → ${task.target} · ${task.item}` : (s.battery_docking_lock ? t('a_recharging') : t('a_none'));
+    // Mission strip: one sentence about what the robot is doing
+    let title = robotOnline ? stateLabel(st) : t('a_offline');
+    if (robotOnline && task && (st === 'navigating' || st === 'recovering')) title = t('a_m_going', task.target);
+    if (robotOnline && task && st === 'at_table') title = t('a_m_at', task.target);
+    $('mission-title').textContent = title;
+    const waiting = (s.pending_tasks || []).length;
+    $('mission-sub').textContent = task ? `${task.id}, ${task.item}${waiting ? `  (${t('a_m_more', waiting)})` : ''}`
+      : (s.battery_docking_lock ? t('a_recharging') : t('a_m_idle_sub'));
+    $('m-avatar').dataset.state = robotOnline ? (st || 'unknown') : 'offline';
+    $('mission-done').textContent = s.completed_count ?? 0;
+    $('r-task').textContent = task ? `${task.id}: ${task.target}, ${task.item}` : (s.battery_docking_lock ? t('a_recharging') : t('a_none'));
     $('r-pos').textContent = s.pose ? `${s.pose.x.toFixed(2)}, ${s.pose.y.toFixed(2)}` : '—';
     $('r-done').textContent = s.completed_count ?? 0;
     const ob = s.obstacle || {};
@@ -103,15 +125,14 @@
     if (task) items.push({ ...task, active: true });
     for (const p of s.pending_tasks || []) items.push(p);
     $('queue-count').textContent = String(items.length);
-    $('queue').innerHTML = items.length ? items.map(q => `
-      <li class="${q.active ? 'active' : ''}">
-        <div class="q-main">
-          <div><span class="q-id">${Tuni.escapeHtml(q.id)}</span> <span class="q-target">${Tuni.escapeHtml(q.target)}</span></div>
-          <div class="q-item" title="${Tuni.escapeHtml(q.item)}">${Tuni.escapeHtml(q.item)}</div>
-        </div>
-        <span class="chip ${q.active ? 'info' : ''}">${q.active ? stateLabel(st) : t('a_queued')}</span>
-        <button class="btn small danger" data-cancel="${Tuni.escapeHtml(q.id)}" type="button" aria-label="Cancel ${Tuni.escapeHtml(q.id)}">✕</button>
-      </li>`).join('') : `<li class="empty">${t('a_no_orders')}</li>`;
+    setHtml('queue', items.length ? items.map(q => `
+      <li class="ticket ${q.active ? 'active' : ''}">
+        <div class="t-top"><span class="q-id">${Tuni.escapeHtml(q.id)}</span>
+          <button class="t-cancel" data-cancel="${Tuni.escapeHtml(q.id)}" type="button" aria-label="${Tuni.escapeHtml(t('a_cancel_ticket', q.id))}">${Icons.svg('cross')}</button></div>
+        <div class="q-target">${Tuni.escapeHtml(q.target)}</div>
+        <div class="q-item">${Tuni.escapeHtml(q.item).split(/,\s*/).join('<br>')}</div>
+        <span class="stamp">${q.active ? stateLabel(st) : t('a_queued')}</span>
+      </li>`).join('') : `<li class="empty">${t('a_no_orders')}</li>`);
     $('lock-note').classList.toggle('hidden', !s.battery_docking_lock);
 
     // Buttons that make no sense in the current state
@@ -120,9 +141,9 @@
 
     // Events
     const ev = (s.events || []).slice().reverse();
-    $('events').innerHTML = ev.length ? ev.map(e => `
-      <li class="${e.level}"><time>${new Date(e.t * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</time>
-      <span>${Tuni.escapeHtml(I18n.event(e.message))}</span></li>`).join('') : `<li class="empty">${t('a_no_events')}</li>`;
+    setHtml('events', ev.length ? ev.map(e => `
+      <li class="${e.level}"><i class="ev-dot" aria-hidden="true"></i><time>${new Date(e.t * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</time>
+      <span>${Tuni.escapeHtml(I18n.event(e.message))}</span></li>`).join('') : `<li class="empty">${t('a_no_events')}</li>`);
   }
 
   function drawSpark(hist) {
@@ -134,13 +155,13 @@
     ctx.clearRect(0, 0, w, h);
     const y = p => h - 4 - (p / 100) * (h - 8);
     ctx.setLineDash([3, 4]);
-    for (const [lvl, col] of [[25, 'rgba(245,158,11,.5)'], [15, 'rgba(244,63,94,.5)']]) {
+    for (const [lvl, col] of [[25, 'rgba(240,178,58,.5)'], [15, 'rgba(224,85,63,.6)']]) {
       ctx.strokeStyle = col; ctx.beginPath(); ctx.moveTo(0, y(lvl)); ctx.lineTo(w, y(lvl)); ctx.stroke();
     }
     ctx.setLineDash([]);
     if (hist.length < 2) return;
     const t0 = hist[0].t, t1 = hist[hist.length - 1].t, span = Math.max(1, t1 - t0);
-    ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2;
+    ctx.strokeStyle = '#3fa37a'; ctx.lineWidth = 2;
     ctx.beginPath();
     hist.forEach((pt, i) => { const x = ((pt.t - t0) / span) * w; i ? ctx.lineTo(x, y(pt.pct)) : ctx.moveTo(x, y(pt.pct)); });
     ctx.stroke();

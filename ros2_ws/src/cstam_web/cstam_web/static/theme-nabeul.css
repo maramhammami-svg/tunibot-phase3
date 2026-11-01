@@ -41,7 +41,7 @@ body.theme-nabeul :focus-visible { outline: 3px solid var(--ochre); outline-offs
 body.theme-nabeul .topbar { background: rgba(243, 247, 242, .92); border-bottom: 1px solid var(--border); }
 body.theme-nabeul .brand-logo { background: var(--ochre); color: var(--manganese); border-radius: 50%; box-shadow: 0 0 0 2px var(--slip), 0 0 0 3.5px var(--manganese); }
 body.theme-nabeul .brand-logo .ico { width: 22px; height: 22px; }
-body.theme-nabeul .brand-title { font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: -.2px; white-space: nowrap; }
+body.theme-nabeul .brand-title { font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: -.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 body.theme-nabeul .brand-sub { color: var(--muted); font-size: 13px; }
 body.theme-nabeul .btn { border-radius: 999px; background: var(--glaze); border: 1.5px solid var(--border-2); color: var(--manganese); font-weight: 700; }
 body.theme-nabeul .btn:hover:not(:disabled) { border-color: var(--manganese); }
@@ -177,3 +177,43 @@ body.theme-nabeul .track-items { background: var(--glaze); border-radius: 18px; 
 @media (prefers-reduced-motion: reduce) {
   body.theme-nabeul *, body.theme-nabeul *::before, body.theme-nabeul *::after { animation: none !important; transition: none !important; }
 }
+
+/* Welcome: the robot waiter, the one illustrated moment of the page */
+body.theme-nabeul .welcome { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 4px 0 10px; }
+body.theme-nabeul .welcome-text { display: flex; flex-direction: column; gap: 6px; padding-bottom: 14px; max-width: 26ch; }
+body.theme-nabeul .welcome-hello { font-family: var(--display); font-weight: 800; font-size: 20px; color: var(--copper); }
+body.theme-nabeul .welcome-sub { color: var(--muted); font-size: 15px; line-height: 1.4; }
+body.theme-nabeul .waiter { width: 132px; height: auto; flex-shrink: 0; overflow: visible; }
+body.theme-nabeul .welcome .waiter { animation: w-arrive 1.1s cubic-bezier(.2,.8,.2,1) both; }
+body.theme-nabeul .welcome .waiter .w-floor { animation: w-floor 1.1s linear both; }
+@keyframes w-arrive { from { transform: translateX(120%) rotate(6deg); } 70% { transform: translateX(-4%) rotate(-3deg); } to { transform: none; } }
+@keyframes w-floor { from { stroke-dashoffset: 60; } to { stroke-dashoffset: 0; } }
+body.theme-nabeul .waiter .w-steam path { animation: w-steam 2.6s ease-in-out infinite; transform-box: fill-box; }
+body.theme-nabeul .waiter .w-steam path:nth-child(2) { animation-delay: .4s; }
+body.theme-nabeul .waiter .w-steam path:nth-child(3) { animation-delay: .8s; }
+@keyframes w-steam { 0% { opacity: 0; transform: translateY(6px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
+body.theme-nabeul .waiter .w-eye { animation: w-blink 5s infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes w-blink { 0%, 94%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+/* Tracking: the waiter replaces the status badge while the order is alive */
+body.theme-nabeul .track-waiter { display: none; width: 150px; }
+body.theme-nabeul .track-waiter[data-status="queued"], body.theme-nabeul .track-waiter[data-status="submitted"],
+body.theme-nabeul .track-waiter[data-status="en_route"], body.theme-nabeul .track-waiter[data-status="arrived"] { display: block; }
+body.theme-nabeul .track-waiter:not([data-status="delivered"]):not([data-status="failed"]):not([data-status="rejected"]):not([data-status="cancelled"]):not([data-status]) { display: none; }
+body.theme-nabeul .track-card:has(.track-waiter[data-status="queued"]) .track-emoji,
+body.theme-nabeul .track-card:has(.track-waiter[data-status="submitted"]) .track-emoji,
+body.theme-nabeul .track-card:has(.track-waiter[data-status="en_route"]) .track-emoji,
+body.theme-nabeul .track-card:has(.track-waiter[data-status="arrived"]) .track-emoji { display: none; }
+body.theme-nabeul .track-waiter[data-status="en_route"] { animation: w-drive 1.2s ease-in-out infinite; }
+body.theme-nabeul .track-waiter[data-status="queued"] .w-tray, body.theme-nabeul .track-waiter[data-status="submitted"] .w-tray { opacity: .25; }
+body.theme-nabeul .track-waiter[data-status="arrived"] { animation: w-hop .9s ease-in-out infinite; }
+@keyframes w-drive { 0%, 100% { transform: translateX(-6px) rotate(-2deg); } 50% { transform: translateX(6px) rotate(2deg); } }
+@keyframes w-hop { 50% { transform: translateY(-6px); } }
+
+/* Add-to-tray motion */
+.fly-ghost { position: fixed; z-index: 60; margin: 0; pointer-events: none; display: grid; place-items: center; }
+body.theme-nabeul .checkout.tray-bump { animation: tray-bump .35s ease-out; }
+@keyframes tray-bump { 40% { transform: translateY(-5px); } }
+@media (min-width: 700px) { body.theme-nabeul .checkout.tray-bump { animation: tray-bump-d .35s ease-out; } }
+@keyframes tray-bump-d { 0%, 100% { transform: translateX(-50%); } 40% { transform: translate(-50%, -5px); } }
+@media (max-width: 380px) { body.theme-nabeul .waiter { width: 104px; } }
