@@ -1,4 +1,5 @@
 """Unit tests for the web interface (no ROS 2 needed)."""
+import math
 import os
 import sys
 
@@ -242,3 +243,29 @@ def test_websocket_sends_snapshot(api):
         snap = ws.receive_json()
     assert snap["battery"]["percentage"] == 90.0
     assert snap["online"]["robot"] is True
+
+
+def test_mock_robot_goes_around_pedestrian_without_stopping():
+    from cstam_web.mock import MockRobot
+    store = TelemetryStore(world="resto_arbi", waypoints=load_waypoints("resto_arbi"))
+    robot = MockRobot(store)
+    robot.send_delivery("Table 3", "1x Brik", "ref1")
+    for _ in range(5):
+        robot.step()
+    robot.set_obstacle_mode("block")
+    ped = tuple(robot.ped)
+    min_gap, detoured, steps = 99.0, False, 0
+    while robot.mgr.robot_state == "navigating" and steps < 600:
+        x0, y0 = robot.x, robot.y
+        robot.step()
+        steps += 1
+        assert (robot.x, robot.y) != (x0, y0) or robot.mgr.robot_state != "navigating"  # never stops
+        detoured = detoured or robot.detour is not None
+        min_gap = min(min_gap, math.hypot(robot.x - ped[0], robot.y - ped[1]))
+    assert robot.mgr.robot_state == "at_table"
+    assert detoured and min_gap > 1.0
+    assert any("new path around them" in e["message"] for e in store.events)
+    assert store.obstacle.get("mode") == "block"
+    robot.set_obstacle_mode("clear")
+    robot.step()
+    assert robot.ped is None and store.obstacle == {}

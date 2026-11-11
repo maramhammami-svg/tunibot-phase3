@@ -141,7 +141,7 @@ class TelemetryStore:
             self.obstacle = dict(obstacle or {})
             self._touch("obstacle")
             if self.obstacle.get("is_blocking") and not prev_blocking:
-                self.add_event("warn", "Person close to the robot: slowing down / yielding.")
+                self.add_event("warn", "Person close to the robot: slowing down and going around them.")
 
     # ------------------------------------------------------------------ events
     def add_event(self, level: str, message: str):

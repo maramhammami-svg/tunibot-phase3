@@ -245,6 +245,8 @@ const I18n = (() => {
     [/^Battery critical \((.*)%\): .*$/, m => `Batterie critique (${m[1]} %) : retour d'urgence au dock.`],
     [/^Battery low \((.*)%\): .*$/, m => `Batterie faible (${m[1]} %) : le robot va rentrer au dock.`],
     [/^Person close to the robot: .*$/, () => 'Piéton proche du robot : le robot ralentit et l\'évite.'],
+    [/^Person on the route: .*$/, () => 'Piéton sur le trajet : nouveau chemin pour le contourner, sans s\'arrêter.'],
+    [/^Person passed: .*$/, () => 'Piéton dépassé : retour sur le trajet direct.'],
     [/^New order for (.*?): (.*)$/, m => `Nouvelle commande pour ${m[1]} : ${m[2]}`],
     [/^Voice order understood: (.*?)(?: for (Table .*))?$/, m => `Commande vocale comprise : ${m[1]}${m[2] ? ` pour ${m[2]}` : ''}`],
     [/^Order for (.*) cancelled by the customer\.$/, m => `Commande pour ${m[1]} annulée par le client.`],

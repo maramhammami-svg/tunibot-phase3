@@ -16,7 +16,7 @@ Client ordering page (`/`) and admin monitoring page (`/admin`) for the CSTAM de
 | `store.py` | Thread-safe mirror of what the robot publishes; derives each web order's status from `/delivery_queue_status` (via `order_ref`) |
 | `ros_bridge.py` | rclpy node: subscribes to `/delivery_queue_status`, `/robot_system_state`, `/battery_status`, `/amcl_pose` + TF, `/plan`, `/dynamic_obstacle/status`, `/delivery_waypoints`; publishes `/delivery_request`, `/delivery_task_action`, `/dock_command`, `/battery_set_percentage`, `/dynamic_obstacle/control` |
 | `server.py` | REST API + `/ws/telemetry` (2 Hz snapshot) + static pages |
-| `mock.py` | `--mock` demo mode: real `TaskQueueManager` + `BatterySimulator`, straight-line motion, no ROS needed |
+| `mock.py` | `--mock` demo mode: real `TaskQueueManager` + `BatterySimulator`, straight-line motion, simulated pedestrian that the robot goes around (admin Pedestrian buttons), no ROS needed |
 | `world.py` | Waypoints (from `cstam_navigation/config`), floor layouts and menus |
 | `static/` | `client.*`, `admin.*`, `map.js` (floor map), `common.*`, `layouts/`, `menu.json` |
 
